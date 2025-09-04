@@ -1,35 +1,55 @@
-FROM python:3.11-slim
+# Use a Python image with uv pre-installed
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
-ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PYTHONPATH=/app
-
-# System deps
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential \
+# Install system dependencies for psycopg2 and Python
+# TODO: we dont need this shit, can just use psycopg2-binary
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    libpq-dev \
+    netcat-openbsd \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Install the project into `/app`
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt ./requirements.txt
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+# Enable bytecode compilation
+ENV UV_COMPILE_BYTECODE=1
 
-# Copy application source
-COPY app ./app
-COPY alembic ./alembic
-COPY alembic.ini ./alembic.ini
-COPY entrypoint.sh ./entrypoint.sh
+# Copy from the cache instead of linking since it's a mounted volume
+ENV UV_LINK_MODE=copy
 
+# Place project environment outside /app to avoid bind-mount clobbering
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV PYTHONPATH=/app
+
+# Install the project's dependencies using the lockfile and settings
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    sh -c 'uv venv "$VIRTUAL_ENV" && uv sync --frozen --no-install-project --no-dev'
+
+# Then, add the rest of the project source code and install it
+# Installing separately from its dependencies allows optimal layer caching
+ADD . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    sh -c 'uv venv "$VIRTUAL_ENV" && uv sync --frozen --no-dev'
+
+# Place executables in the environment at the front of the path
+ENV PATH="/opt/venv/bin:/app/.venv/bin:$PATH"
+
+# Reset the entrypoint, don't invoke `uv`
+ENTRYPOINT []
+
+# service startup script
 RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
-EXPOSE 8000
+# Run the FastAPI application by default
+# Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
+# Uses `--host 0.0.0.0` to allow access from outside the container
+CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8080"]
 
-# Defaults (overridden in docker-compose)
-ENV DATABASE_URL=sqlite+aiosqlite:///./dev.db
-
-CMD ["./entrypoint.sh"]
-
-
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 CMD curl -f http://localhost:8000/health || exit 1

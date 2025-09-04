@@ -1,30 +1,28 @@
-version: "3.9"
-
 services:
   db:
-    image: postgres:16-alpine
-    container_name: aihr-postgres
+    container_name: postgres
+    image: postgres:17.6-alpine
     environment:
-      - POSTGRES_USER=aihr
-      - POSTGRES_PASSWORD=aihr
-      - POSTGRES_DB=aihr
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
     ports:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aihr"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   backend:
+    container_name: backend
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: aihr-backend
     environment:
-      - DATABASE_URL=postgresql+asyncpg://aihr:aihr@db:5432/aihr
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/postgres
     ports:
       - "8000:8000"
     depends_on:

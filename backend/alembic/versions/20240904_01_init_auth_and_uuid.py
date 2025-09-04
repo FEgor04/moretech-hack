@@ -25,36 +25,94 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa_inspect(bind)
 
-    # Ensure password_hash column exists
-    user_columns = {col["name"]: col for col in inspector.get_columns("user")}
-    if "password_hash" not in user_columns:
-        op.add_column(
-            "user", sa.Column("password_hash", sa.String(length=255), nullable=True)
+    # Bootstrap schema for fresh databases: create tables if they don't exist
+    if not inspector.has_table("user"):
+        op.create_table(
+            "user",
+            sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+            sa.Column("email", sa.String(length=255), nullable=False),
+            sa.Column("name", sa.String(length=255), nullable=False),
+            sa.Column("role", sa.String(length=50), nullable=False),
+            sa.Column("password_hash", sa.String(length=255), nullable=True),
+            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.UniqueConstraint("email", name="uq_user_email"),
         )
+        op.create_index("ix_user_email", "user", ["email"], unique=False)
+
+    if not inspector.has_table("vacancy"):
+        op.create_table(
+            "vacancy",
+            sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+            sa.Column("title", sa.String(length=255), nullable=False),
+            sa.Column("description", sa.Text(), nullable=True),
+            sa.Column("status", sa.String(length=64), server_default="open", nullable=False),
+            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+        )
+        op.create_index("ix_vacancy_title", "vacancy", ["title"], unique=False)
+
+    if not inspector.has_table("candidate"):
+        op.create_table(
+            "candidate",
+            sa.Column("id", sa.String(length=36), primary_key=True),
+            sa.Column("user_id", sa.Integer, sa.ForeignKey("user.id"), nullable=True),
+            sa.Column("name", sa.String(length=255), nullable=False),
+            sa.Column("email", sa.String(length=255), nullable=False),
+            sa.Column("resume_url", sa.String(length=1024), nullable=True),
+            sa.Column("notes", sa.Text(), nullable=True),
+            sa.Column("status", sa.String(length=64), server_default="ждем ответа", nullable=False),
+            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+        )
+        op.create_index("ix_candidate_email", "candidate", ["email"], unique=False)
+
+    if not inspector.has_table("interview"):
+        op.create_table(
+            "interview",
+            sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
+            sa.Column("candidate_id", sa.String(length=36), sa.ForeignKey("candidate.id"), nullable=False),
+            sa.Column("vacancy_id", sa.Integer, sa.ForeignKey("vacancy.id"), nullable=True),
+            sa.Column("transcript", sa.Text(), nullable=True),
+            sa.Column("recording_url", sa.String(length=1024), nullable=True),
+            sa.Column("status", sa.String(length=64), server_default="на собеседовании", nullable=False),
+            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+        )
+
+    # Ensure password_hash column exists
+    if inspector.has_table("user"):
+        user_columns = {col["name"]: col for col in inspector.get_columns("user")}
+        if "password_hash" not in user_columns:
+            op.add_column(
+                "user", sa.Column("password_hash", sa.String(length=255), nullable=True)
+            )
 
     # Convert candidate.id to VARCHAR(36) if currently integer
-    candidate_columns = {col["name"]: col for col in inspector.get_columns("candidate")}
-    cand_id_type = candidate_columns.get("id", {}).get("type")
-    if cand_id_type is not None and isinstance(cand_id_type, sa.Integer):
-        op.alter_column(
-            "candidate",
-            "id",
-            existing_type=sa.Integer(),
-            type_=sa.String(length=36),
-            postgresql_using="id::text",
-        )
+    if inspector.has_table("candidate"):
+        candidate_columns = {col["name"]: col for col in inspector.get_columns("candidate")}
+        cand_id_type = candidate_columns.get("id", {}).get("type")
+        if cand_id_type is not None and isinstance(cand_id_type, sa.Integer):
+            op.alter_column(
+                "candidate",
+                "id",
+                existing_type=sa.Integer(),
+                type_=sa.String(length=36),
+                postgresql_using="id::text",
+            )
 
     # Convert interview.candidate_id to VARCHAR(36) if currently integer
-    interview_columns = {col["name"]: col for col in inspector.get_columns("interview")}
-    int_cand_type = interview_columns.get("candidate_id", {}).get("type")
-    if int_cand_type is not None and isinstance(int_cand_type, sa.Integer):
-        op.alter_column(
-            "interview",
-            "candidate_id",
-            existing_type=sa.Integer(),
-            type_=sa.String(length=36),
-            postgresql_using="candidate_id::text",
-        )
+    if inspector.has_table("interview"):
+        interview_columns = {col["name"]: col for col in inspector.get_columns("interview")}
+        int_cand_type = interview_columns.get("candidate_id", {}).get("type")
+        if int_cand_type is not None and isinstance(int_cand_type, sa.Integer):
+            op.alter_column(
+                "interview",
+                "candidate_id",
+                existing_type=sa.Integer(),
+                type_=sa.String(length=36),
+                postgresql_using="candidate_id::text",
+            )
 
     # Create default user if not exists
     email = os.environ.get("DEFAULT_USER_EMAIL", "admin@example.com")
