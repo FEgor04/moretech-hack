@@ -16,6 +16,13 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+      }
+    }
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
