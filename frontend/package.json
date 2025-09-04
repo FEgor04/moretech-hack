@@ -10,7 +10,8 @@
     "test": "vitest run",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "generate:api": "openapi-ts -f openapi-ts.config.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.6.0",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@hey-api/openapi-ts": "0.82.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/react": "^19.0.8",
