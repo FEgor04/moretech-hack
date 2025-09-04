@@ -34,8 +34,18 @@ def upgrade() -> None:
             sa.Column("name", sa.String(length=255), nullable=False),
             sa.Column("role", sa.String(length=50), nullable=False),
             sa.Column("password_hash", sa.String(length=255), nullable=True),
-            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
-            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column(
+                "created_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
             sa.UniqueConstraint("email", name="uq_user_email"),
         )
         op.create_index("ix_user_email", "user", ["email"], unique=False)
@@ -46,9 +56,21 @@ def upgrade() -> None:
             sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
             sa.Column("title", sa.String(length=255), nullable=False),
             sa.Column("description", sa.Text(), nullable=True),
-            sa.Column("status", sa.String(length=64), server_default="open", nullable=False),
-            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
-            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column(
+                "status", sa.String(length=64), server_default="open", nullable=False
+            ),
+            sa.Column(
+                "created_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
         )
         op.create_index("ix_vacancy_title", "vacancy", ["title"], unique=False)
 
@@ -61,9 +83,24 @@ def upgrade() -> None:
             sa.Column("email", sa.String(length=255), nullable=False),
             sa.Column("resume_url", sa.String(length=1024), nullable=True),
             sa.Column("notes", sa.Text(), nullable=True),
-            sa.Column("status", sa.String(length=64), server_default="ждем ответа", nullable=False),
-            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
-            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column(
+                "status",
+                sa.String(length=64),
+                server_default="ждем ответа",
+                nullable=False,
+            ),
+            sa.Column(
+                "created_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
         )
         op.create_index("ix_candidate_email", "candidate", ["email"], unique=False)
 
@@ -71,13 +108,35 @@ def upgrade() -> None:
         op.create_table(
             "interview",
             sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
-            sa.Column("candidate_id", sa.String(length=36), sa.ForeignKey("candidate.id"), nullable=False),
-            sa.Column("vacancy_id", sa.Integer, sa.ForeignKey("vacancy.id"), nullable=True),
+            sa.Column(
+                "candidate_id",
+                sa.String(length=36),
+                sa.ForeignKey("candidate.id"),
+                nullable=False,
+            ),
+            sa.Column(
+                "vacancy_id", sa.Integer, sa.ForeignKey("vacancy.id"), nullable=True
+            ),
             sa.Column("transcript", sa.Text(), nullable=True),
             sa.Column("recording_url", sa.String(length=1024), nullable=True),
-            sa.Column("status", sa.String(length=64), server_default="на собеседовании", nullable=False),
-            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
-            sa.Column("updated_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
+            sa.Column(
+                "status",
+                sa.String(length=64),
+                server_default="на собеседовании",
+                nullable=False,
+            ),
+            sa.Column(
+                "created_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
+            sa.Column(
+                "updated_at",
+                sa.DateTime(),
+                server_default=sa.func.now(),
+                nullable=False,
+            ),
         )
 
     # Ensure password_hash column exists
@@ -90,7 +149,9 @@ def upgrade() -> None:
 
     # Convert candidate.id to VARCHAR(36) if currently integer
     if inspector.has_table("candidate"):
-        candidate_columns = {col["name"]: col for col in inspector.get_columns("candidate")}
+        candidate_columns = {
+            col["name"]: col for col in inspector.get_columns("candidate")
+        }
         cand_id_type = candidate_columns.get("id", {}).get("type")
         if cand_id_type is not None and isinstance(cand_id_type, sa.Integer):
             op.alter_column(
@@ -103,7 +164,9 @@ def upgrade() -> None:
 
     # Convert interview.candidate_id to VARCHAR(36) if currently integer
     if inspector.has_table("interview"):
-        interview_columns = {col["name"]: col for col in inspector.get_columns("interview")}
+        interview_columns = {
+            col["name"]: col for col in inspector.get_columns("interview")
+        }
         int_cand_type = interview_columns.get("candidate_id", {}).get("type")
         if int_cand_type is not None and isinstance(int_cand_type, sa.Integer):
             op.alter_column(
