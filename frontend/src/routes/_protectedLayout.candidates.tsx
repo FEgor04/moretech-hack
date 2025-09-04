@@ -1,10 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	createCandidateCandidatesPost,
-	deleteCandidateCandidatesCandidateIdDelete,
-	listCandidatesCandidatesGet,
-} from "../api/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCandidatesQuery } from "../api/queries/candidates";
+import { useCreateCandidate, useDeleteCandidate } from "../api/mutations/candidates";
 import { useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
@@ -20,40 +16,12 @@ export const Route = createFileRoute("/_protectedLayout/candidates")({
 });
 
 function CandidatesPage() {
-	const queryClient = useQueryClient();
-	const candidates = useQuery({
-		queryKey: ["candidates"],
-		queryFn: async () => {
-			const res = await listCandidatesCandidatesGet<true>({ throwOnError: true });
-			return res.data;
-		},
-	});
+	const candidates = useCandidatesQuery();
 
-	type CandidateCreateBody = {
-		name: string;
-		email: string;
-		status?: string | null;
-		resume_url?: string | null;
-		notes?: string | null;
-	};
 
-	const createMutation = useMutation({
-		mutationFn: async (body: CandidateCreateBody) => {
-			const res = await createCandidateCandidatesPost<true>({ body, throwOnError: true });
-			return res.data;
-		},
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["candidates"] }),
-	});
+	const createMutation = useCreateCandidate();
 
-	const deleteMutation = useMutation({
-		mutationFn: async (candidate_id: string) => {
-			await deleteCandidateCandidatesCandidateIdDelete<true>({
-				path: { candidate_id },
-				throwOnError: true,
-			});
-		},
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["candidates"] }),
-	});
+	const deleteMutation = useDeleteCandidate();
 
 	const columns = useMemo<ColumnDef<CandidateRead>[]>(
 		() => [

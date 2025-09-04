@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	getCandidateCandidatesCandidateIdGet,
-	updateCandidateCandidatesCandidateIdPatch,
-} from "../api/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCandidateQuery } from "../api/queries/candidates";
+import { useUpdateCandidate } from "../api/mutations/candidates";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId",
@@ -13,41 +10,9 @@ export const Route = createFileRoute(
 
 function CandidateDetail() {
 	const params = Route.useParams();
-	const queryClient = useQueryClient();
-	const candidate = useQuery({
-		queryKey: ["candidate", params.candidateId],
-		queryFn: async () => {
-			const res = await getCandidateCandidatesCandidateIdGet<true>({
-				path: { candidate_id: params.candidateId },
-				throwOnError: true,
-			});
-			return res.data;
-		},
-	});
+	const candidate = useCandidateQuery(params.candidateId);
 
-	type CandidateUpdateBody = {
-		name: string;
-		email: string;
-		status?: string | null;
-		resume_url?: string | null;
-		notes?: string | null;
-	};
-
-	const mutation = useMutation({
-		mutationFn: async (body: CandidateUpdateBody) => {
-			const res = await updateCandidateCandidatesCandidateIdPatch<true>({
-				path: { candidate_id: params.candidateId },
-				body,
-				throwOnError: true,
-			});
-			return res.data;
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["candidate", params.candidateId],
-			});
-		},
-	});
+	const mutation = useUpdateCandidate(params.candidateId);
 
 	if (candidate.isLoading) return <div className="p-4">Loading...</div>;
 	if (candidate.isError || !candidate.data)

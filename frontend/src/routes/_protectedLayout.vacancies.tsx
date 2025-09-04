@@ -1,10 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	createVacancyVacanciesPost,
-	deleteVacancyVacanciesVacancyIdDelete,
-	listVacanciesVacanciesGet,
-} from "../api/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useVacanciesQuery } from "../api/queries/vacancies";
+import { useCreateVacancy, useDeleteVacancy } from "../api/mutations/vacancies";
 import { useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
@@ -20,38 +16,11 @@ export const Route = createFileRoute("/_protectedLayout/vacancies")({
 });
 
 function VacanciesPage() {
-	const queryClient = useQueryClient();
-	const vacancies = useQuery({
-		queryKey: ["vacancies"],
-		queryFn: async () => {
-			const res = await listVacanciesVacanciesGet<true>({ throwOnError: true });
-			return res.data;
-		},
-	});
+	const vacancies = useVacanciesQuery();
 
-	type VacancyCreateBody = {
-		title: string;
-		description?: string | null;
-		status?: string | null;
-	};
+	const createMutation = useCreateVacancy();
 
-	const createMutation = useMutation({
-		mutationFn: async (body: VacancyCreateBody) => {
-			const res = await createVacancyVacanciesPost<true>({ body, throwOnError: true });
-			return res.data;
-		},
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vacancies"] }),
-	});
-
-	const deleteMutation = useMutation({
-		mutationFn: async (vacancy_id: number) => {
-			await deleteVacancyVacanciesVacancyIdDelete<true>({
-				path: { vacancy_id },
-				throwOnError: true,
-			});
-		},
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vacancies"] }),
-	});
+	const deleteMutation = useDeleteVacancy();
 
 	const columns = useMemo<ColumnDef<VacancyRead>[]>(
 		() => [
@@ -63,7 +32,7 @@ function VacanciesPage() {
 					<div className="flex gap-2">
 						<Link
 							to="/vacancies/$vacancyId"
-							params={{ vacancyId: row.original.id }}
+							params={{ vacancyId: String(row.original.id) }}
 							className="text-blue-600 hover:underline"
 						>
 							Open

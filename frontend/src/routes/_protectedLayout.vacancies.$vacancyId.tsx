@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	getVacancyVacanciesVacancyIdGet,
-	updateVacancyVacanciesVacancyIdPatch,
-} from "../api/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useVacancyQuery } from "../api/queries/vacancies";
+import { useUpdateVacancy } from "../api/mutations/vacancies";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/vacancies/$vacancyId",
@@ -14,37 +11,9 @@ export const Route = createFileRoute(
 function VacancyDetail() {
 	const params = Route.useParams();
 	const vacancyId = Number(params.vacancyId);
-	const queryClient = useQueryClient();
-	const vacancy = useQuery({
-		queryKey: ["vacancy", vacancyId],
-		queryFn: async () => {
-			const res = await getVacancyVacanciesVacancyIdGet<true>({
-				path: { vacancy_id: vacancyId },
-				throwOnError: true,
-			});
-			return res.data;
-		},
-	});
+	const vacancy = useVacancyQuery(vacancyId);
 
-	type VacancyUpdateBody = {
-		title: string;
-		status?: string | null;
-		description?: string | null;
-	};
-
-	const mutation = useMutation({
-		mutationFn: async (body: VacancyUpdateBody) => {
-			const res = await updateVacancyVacanciesVacancyIdPatch<true>({
-				path: { vacancy_id: vacancyId },
-				body,
-				throwOnError: true,
-			});
-			return res.data;
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["vacancy", vacancyId] });
-		},
-	});
+	const mutation = useUpdateVacancy(vacancyId);
 
 	if (vacancy.isLoading) return <div className="p-4">Loading...</div>;
 	if (vacancy.isError || !vacancy.data) return <div className="p-4">Error loading</div>;

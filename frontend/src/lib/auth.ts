@@ -27,6 +27,7 @@ export function isAuthenticated(): boolean {
 // Initialize client auth on app startup
 export function initializeClientAuth(): void {
 	client.setConfig({
+		baseURL: "/",
 		auth: () => getAccessToken(),
 	});
 }

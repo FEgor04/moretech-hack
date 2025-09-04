@@ -4,8 +4,7 @@ import {
 	createFileRoute,
 	redirect,
 } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { meAuthMeGet } from "../api/client";
+import { useMeQuery } from "../api/queries/auth";
 import { isAuthenticated, clearAccessToken } from "../lib/auth";
 
 export const Route = createFileRoute("/_protectedLayout")({
@@ -18,14 +17,7 @@ export const Route = createFileRoute("/_protectedLayout")({
 });
 
 function RouteComponent() {
-	const me = useQuery({
-		queryKey: ["me"],
-		queryFn: async () => {
-			const res = await meAuthMeGet<true>({ throwOnError: true });
-			return res.data;
-		},
-		retry: false,
-	});
+	const me = useMeQuery();
 
 	if (me.isError) {
 		clearAccessToken();
