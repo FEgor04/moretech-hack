@@ -9,11 +9,18 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { meQueryOptions } from "@/api/queries/auth";
 
 export const Route = createFileRoute("/_protectedLayout")({
-	beforeLoad: async () => {
+	beforeLoad: async ({ context }) => {
 		if (!isAuthenticated()) {
 			throw redirect({ to: "/sign-in" });
 		}
-		// TODO: add query client to context, get data here with queryClient.fetchQuery
+
+		try {
+			await context.queryClient.fetchQuery(meQueryOptions());
+		}
+		catch (error) {
+			clearAccessToken();
+			throw redirect({ to: "/sign-in" });
+		}
 	},
 	component: RouteComponent,
 });
