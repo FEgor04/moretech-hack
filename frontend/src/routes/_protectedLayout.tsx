@@ -7,6 +7,8 @@ import {
 import { isAuthenticated, clearAccessToken } from "../lib/auth";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { meQueryOptions } from "@/api/queries/auth";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
 
 export const Route = createFileRoute("/_protectedLayout")({
 	beforeLoad: async ({ context }) => {
@@ -34,25 +36,16 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="p-4">
-			<div className="mb-4 flex items-center justify-between">
-				<nav className="flex gap-3 text-sm">
-					<Link to="/">Home</Link>
-					<Link to="/candidates">Candidates</Link>
-					<Link to="/vacancies">Vacancies</Link>
-				</nav>
-				<button
-					type="button"
-					onClick={() => {
-						clearAccessToken();
-						window.location.href = "/sign-in";
-					}}
-					className="rounded-md border px-3 py-1 text-sm"
-				>
-					Sign out
-				</button>
-			</div>
-			<Outlet />
-		</div>
+		<SidebarProvider>
+			<AppSidebar />
+			<main className="w-full">
+				<header className="h-12 border-b w-full bg-sidebar flex items-center px-4">
+					<SidebarTrigger />
+				</header>
+				<div className="p-4">
+					<Outlet />
+				</div>
+			</main>
+		</SidebarProvider>
 	);
 }
