@@ -1,10 +1,7 @@
 "use client";
 
 import {
-	type ColumnDef,
 	flexRender,
-	getCoreRowModel,
-	useReactTable,
 	type Table as ReactTable,
 } from "@tanstack/react-table";
 
