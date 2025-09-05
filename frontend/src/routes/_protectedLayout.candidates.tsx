@@ -1,102 +1,30 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCandidatesQuery } from "../api/queries/candidates";
-import { useCreateCandidate, useDeleteCandidate } from "../api/mutations/candidates";
-import { useMemo, useState } from "react";
-import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import {
-	flexRender,
-	getCoreRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
+import { createFileRoute } from "@tanstack/react-router";
+import { candidatesQueryOptions } from "../api/queries/candidates";
+import { useCreateCandidate } from "../api/mutations/candidates";
+import { flexRender } from "@tanstack/react-table";
 import type { CandidateRead } from "../api/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useCandidatesTable } from "../components/candidates/table";
+import { DataTable } from "@/components/ui/data-table";
 
 export const Route = createFileRoute("/_protectedLayout/candidates")({
 	component: CandidatesPage,
 });
 
 function CandidatesPage() {
-	const candidates = useCandidatesQuery();
+	const candidates = useSuspenseQuery(candidatesQueryOptions());
 
 
 	const createMutation = useCreateCandidate();
 
-	const deleteMutation = useDeleteCandidate();
-
-	const columns = useMemo<ColumnDef<CandidateRead>[]>(
-		() => [
-			{ accessorKey: "name", header: "Name" },
-			{ accessorKey: "email", header: "Email" },
-			{ accessorKey: "status", header: "Status" },
-			{
-				header: "Actions",
-				cell: ({ row }) => (
-					<div className="flex gap-2">
-						<Link
-							to="/candidates/$candidateId"
-							params={{ candidateId: row.original.id }}
-							className="text-blue-600 hover:underline"
-						>
-							Open
-						</Link>
-						<button
-							type="button"
-							onClick={() => deleteMutation.mutate(row.original.id)}
-							className="text-red-600"
-						>
-							Delete
-						</button>
-					</div>
-				),
-			},
-		],
-		[deleteMutation],
-	);
-
-	const [sorting, setSorting] = useState<SortingState>([]);
-
-	const table = useReactTable({
-		data: (candidates.data ?? []) as CandidateRead[],
-		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		state: { sorting },
-		onSortingChange: setSorting,
-	});
+	const table = useCandidatesTable((candidates.data ?? []) as CandidateRead[]);
 
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h1 className="text-xl font-semibold">Candidates</h1>
 			</div>
-			<div className="overflow-auto rounded-md border">
-				<table className="w-full text-sm">
-					<thead className="bg-gray-50 text-left">
-						{table.getHeaderGroups().map((hg) => (
-							<tr key={hg.id}>
-								{hg.headers.map((h) => (
-									<th key={h.id} className="px-3 py-2">
-										{h.isPlaceholder
-												? null
-												: flexRender(h.column.columnDef.header, h.getContext())}
-									</th>
-								))}
-							</tr>
-						))}
-					</thead>
-					<tbody>
-						{table.getRowModel().rows.map((row) => (
-							<tr key={row.id} className="border-t">
-								{row.getVisibleCells().map((cell) => (
-									<td key={cell.id} className="px-3 py-2">
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</td>
-								))}
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+			<DataTable table={table} />
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();

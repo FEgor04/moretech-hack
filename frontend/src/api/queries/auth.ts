@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { meAuthMeGet } from "../client";
 
 export const meQueryOptions = () =>
@@ -10,6 +10,3 @@ export const meQueryOptions = () =>
 		},
 		retry: false,
 	});
-
-export const useMeQuery = () => useQuery(meQueryOptions());
-

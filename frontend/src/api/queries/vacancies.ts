@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { getVacancyVacanciesVacancyIdGet, listVacanciesVacanciesGet } from "../client";
 
 export const vacanciesQueryOptions = () =>
@@ -10,7 +10,6 @@ export const vacanciesQueryOptions = () =>
 		},
 	});
 
-export const useVacanciesQuery = () => useQuery(vacanciesQueryOptions());
 
 export const vacancyQueryOptions = (vacancyId: number) =>
 	queryOptions({
@@ -22,8 +21,6 @@ export const vacancyQueryOptions = (vacancyId: number) =>
 			});
 			return res.data;
 		},
-		enabled: Number.isFinite(vacancyId),
 	});
 
-export const useVacancyQuery = (vacancyId: number) => useQuery(vacancyQueryOptions(vacancyId));
 

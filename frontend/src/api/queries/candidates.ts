@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { getCandidateCandidatesCandidateIdGet, listCandidatesCandidatesGet } from "../client";
 
 export const candidatesQueryOptions = () =>
@@ -10,7 +10,6 @@ export const candidatesQueryOptions = () =>
 		},
 	});
 
-export const useCandidatesQuery = () => useQuery(candidatesQueryOptions());
 
 export const candidateQueryOptions = (candidateId: string) =>
 	queryOptions({
@@ -25,5 +24,4 @@ export const candidateQueryOptions = (candidateId: string) =>
 		enabled: Boolean(candidateId),
 	});
 
-export const useCandidateQuery = (candidateId: string) => useQuery(candidateQueryOptions(candidateId));
 

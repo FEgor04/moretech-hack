@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCandidateQuery } from "../api/queries/candidates";
+import { candidateQueryOptions } from "../api/queries/candidates";
 import { useUpdateCandidate } from "../api/mutations/candidates";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId",
@@ -10,13 +11,9 @@ export const Route = createFileRoute(
 
 function CandidateDetail() {
 	const params = Route.useParams();
-	const candidate = useCandidateQuery(params.candidateId);
+	const candidate = useSuspenseQuery(candidateQueryOptions(params.candidateId));
 
 	const mutation = useUpdateCandidate(params.candidateId);
-
-	if (candidate.isLoading) return <div className="p-4">Loading...</div>;
-	if (candidate.isError || !candidate.data)
-		return <div className="p-4">Error loading</div>;
 
 	const c = candidate.data;
 
