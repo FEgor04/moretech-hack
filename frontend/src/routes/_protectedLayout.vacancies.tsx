@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useVacanciesQuery } from "../api/queries/vacancies";
 import { useCreateVacancy, useDeleteVacancy } from "../api/mutations/vacancies";
 import { useMemo, useState } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -10,13 +9,15 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import type { VacancyRead } from "../api/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { vacanciesQueryOptions } from "@/api/queries/vacancies";
 
 export const Route = createFileRoute("/_protectedLayout/vacancies")({
 	component: VacanciesPage,
 });
 
 function VacanciesPage() {
-	const vacancies = useVacanciesQuery();
+	const vacancies = useSuspenseQuery(vacanciesQueryOptions());
 
 	const createMutation = useCreateVacancy();
 

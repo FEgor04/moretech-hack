@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useVacancyQuery } from "../api/queries/vacancies";
+import { vacancyQueryOptions } from "../api/queries/vacancies";
 import { useUpdateVacancy } from "../api/mutations/vacancies";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/vacancies/$vacancyId",
@@ -11,7 +12,7 @@ export const Route = createFileRoute(
 function VacancyDetail() {
 	const params = Route.useParams();
 	const vacancyId = Number(params.vacancyId);
-	const vacancy = useVacancyQuery(vacancyId);
+	const vacancy = useSuspenseQuery(vacancyQueryOptions(vacancyId));
 
 	const mutation = useUpdateVacancy(vacancyId);
 

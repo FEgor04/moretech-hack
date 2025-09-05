@@ -4,20 +4,22 @@ import {
 	createFileRoute,
 	redirect,
 } from "@tanstack/react-router";
-import { useMeQuery } from "../api/queries/auth";
 import { isAuthenticated, clearAccessToken } from "../lib/auth";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { meQueryOptions } from "@/api/queries/auth";
 
 export const Route = createFileRoute("/_protectedLayout")({
 	beforeLoad: async () => {
 		if (!isAuthenticated()) {
 			throw redirect({ to: "/sign-in" });
 		}
+		// TODO: add query client to context, get data here with queryClient.fetchQuery
 	},
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	const me = useMeQuery();
+	const me = useSuspenseQuery(meQueryOptions());
 
 	if (me.isError) {
 		clearAccessToken();

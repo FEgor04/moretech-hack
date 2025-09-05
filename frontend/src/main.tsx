@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { initializeClientAuth } from "./lib/auth";
 
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 
@@ -10,9 +9,10 @@ import { routeTree } from "./routeTree.gen";
 
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
+import { initializeApiClientAuth } from "./lib/auth.ts";
 
 // Initialize API client auth from localStorage
-initializeClientAuth();
+initializeApiClientAuth();
 
 // Create a new router instance
 
