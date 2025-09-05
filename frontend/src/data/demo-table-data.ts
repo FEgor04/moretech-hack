@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 
 export type Person = {
-	id: number;
 	firstName: string;
 	lastName: string;
 	age: number;
@@ -19,29 +18,31 @@ const range = (len: number) => {
 	return arr;
 };
 
-const newPerson = (num: number): Person => {
+const newPerson = (): Person => {
+	const statuses: Person["status"][] = [
+		"relationship",
+		"complicated",
+		"single",
+	];
+	const shuffled = faker.helpers.shuffle<Person["status"]>(statuses);
+	const status = shuffled.length > 0 ? shuffled[0] : "single";
 	return {
-		id: num,
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
 		age: faker.number.int(40),
 		visits: faker.number.int(1000),
 		progress: faker.number.int(100),
-		status: faker.helpers.shuffle<Person["status"]>([
-			"relationship",
-			"complicated",
-			"single",
-		])[0]!,
+		status,
 	};
 };
 
 export function makeData(...lens: number[]) {
 	const makeDataLevel = (depth = 0): Person[] => {
-		const len = lens[depth]!;
-		return range(len).map((index): Person => {
+		const len = lens[depth] ?? 0;
+		return range(len).map((): Person => {
 			return {
-				...newPerson(index),
-				subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
+				...newPerson(),
+				subRows: lens.length > depth + 1 ? makeDataLevel(depth + 1) : undefined,
 			};
 		});
 	};

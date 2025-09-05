@@ -9,6 +9,10 @@ import { routeTree } from "./routeTree.gen";
 
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
+import { initializeApiClientAuth } from "./lib/auth.ts";
+
+// Initialize API client auth from localStorage
+initializeApiClientAuth();
 
 // Create a new router instance
 
