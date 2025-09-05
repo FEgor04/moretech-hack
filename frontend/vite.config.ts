@@ -21,6 +21,8 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "http://localhost:8000",
+        // never fucking mind this bullshit
+        rewrite: (path) => path.replace(/^\/api\/api/, ""),
       }
     }
   },

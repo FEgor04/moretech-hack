@@ -1,37 +1,25 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { signinAuthSigninPost } from "../api/client";
-import { setAccessToken } from "../lib/auth";
+import { useSignInMutation } from "@/api/mutations/auth";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/sign-in")({
 	component: RouteComponent,
 });
 
+// TODO: refactor with react hook form
 function RouteComponent() {
 	const navigate = useNavigate();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState<string | null>(null);
+	const [email, setEmail] = useState("admin@example.com");
+	const [password, setPassword] = useState("admin");
 
-	const mutation = useMutation({
-		mutationFn: async () => {
-			const res = await signinAuthSigninPost({
-				body: { email, password },
-			});
-			if ("error" in res && (res as unknown as { error?: unknown }).error) {
-				throw new Error("Invalid credentials");
-			}
-			return (res as unknown as { data: { access_token: string } }).data;
-		},
-		onSuccess: (data: { access_token: string }) => {
-			setAccessToken(data.access_token);
+	const {mutate, isPending, error} = useSignInMutation();
+
+	function handleSubmit({ email, password }: { email: string; password: string }) {
+		mutate({ email, password }, { onSuccess: () => {
 			navigate({ to: "/candidates" });
-		},
-		onError: (e: unknown) => {
-			setError(e instanceof Error ? e.message : "Sign in failed");
-		},
-	});
+		}});
+	}
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
@@ -40,7 +28,7 @@ function RouteComponent() {
 				<form
 					onSubmit={(e) => {
 						e.preventDefault();
-						mutation.mutate();
+						handleSubmit({ email, password });
 					}}
 					className="space-y-3"
 				>
@@ -70,14 +58,13 @@ function RouteComponent() {
 							required
 						/>
 					</div>
-					{error ? <p className="text-sm text-red-600">{error}</p> : null}
-					<button
+					{error ? <p className="text-sm text-red-600">{error.message}</p> : null}
+					<Button
 						type="submit"
-						disabled={mutation.isPending}
-						className="mt-2 w-full rounded-md bg-black px-3 py-2 text-sm text-white disabled:opacity-50"
+						disabled={isPending}
 					>
-						{mutation.isPending ? "Signing in..." : "Sign in"}
-					</button>
+						{isPending ? "Signing in..." : "Sign in"}
+					</Button>
 				</form>
 			</div>
 		</div>
