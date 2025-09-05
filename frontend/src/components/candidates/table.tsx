@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import {
+	getCoreRowModel,
+	getSortedRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import type { CandidateRead } from "../../api/client";
 import { useDeleteCandidate } from "../../api/mutations/candidates";
 
@@ -51,5 +55,3 @@ export function useCandidatesTable(data: CandidateRead[]) {
 
 	return table;
 }
-
-

@@ -42,8 +42,7 @@ export function makeData(...lens: number[]) {
 		return range(len).map((): Person => {
 			return {
 				...newPerson(),
-				subRows:
-					lens.length > depth + 1 ? makeDataLevel(depth + 1) : undefined,
+				subRows: lens.length > depth + 1 ? makeDataLevel(depth + 1) : undefined,
 			};
 		});
 	};

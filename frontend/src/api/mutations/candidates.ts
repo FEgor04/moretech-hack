@@ -57,4 +57,3 @@ export const useUpdateCandidate = (candidate_id: string) => {
 		},
 	});
 };
-

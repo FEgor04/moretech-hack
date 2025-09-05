@@ -3,7 +3,14 @@ import { useForm } from "react-hook-form";
 import { useSignInMutation } from "@/api/mutations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { setAccessToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/sign-in")({
@@ -27,7 +34,7 @@ function RouteComponent() {
 					setAccessToken(data.access_token);
 					navigate({ to: "/candidates" });
 				},
-			}
+			},
 		);
 	}
 
@@ -45,7 +52,11 @@ function RouteComponent() {
 								<FormItem>
 									<FormLabel>Email</FormLabel>
 									<FormControl>
-										<Input type="email" placeholder="you@example.com" {...field} />
+										<Input
+											type="email"
+											placeholder="you@example.com"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

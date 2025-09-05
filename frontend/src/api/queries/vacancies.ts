@@ -1,5 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getVacancyVacanciesVacancyIdGet, listVacanciesVacanciesGet } from "../client";
+import {
+	getVacancyVacanciesVacancyIdGet,
+	listVacanciesVacanciesGet,
+} from "../client";
 
 export const vacanciesQueryOptions = () =>
 	queryOptions({
@@ -9,7 +12,6 @@ export const vacanciesQueryOptions = () =>
 			return res.data;
 		},
 	});
-
 
 export const vacancyQueryOptions = (vacancyId: number) =>
 	queryOptions({
@@ -22,5 +24,3 @@ export const vacancyQueryOptions = (vacancyId: number) =>
 			return res.data;
 		},
 	});
-
-

@@ -6,7 +6,10 @@ export const meQueryOptions = () =>
 	queryOptions({
 		queryKey: ["me"],
 		queryFn: async () => {
-			const res = await meAuthMeGet<true>({ throwOnError: true, client: apiClient });
+			const res = await meAuthMeGet<true>({
+				throwOnError: true,
+				client: apiClient,
+			});
 			return res.data;
 		},
 		retry: false,

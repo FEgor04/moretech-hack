@@ -14,7 +14,6 @@ export const Route = createFileRoute("/_protectedLayout/candidates")({
 function CandidatesPage() {
 	const candidates = useSuspenseQuery(candidatesQueryOptions());
 
-
 	const createMutation = useCreateCandidate();
 
 	const table = useCandidatesTable((candidates.data ?? []) as CandidateRead[]);
@@ -41,11 +40,31 @@ function CandidatesPage() {
 			>
 				<h2 className="mb-2 font-medium">Quick add</h2>
 				<div className="grid grid-cols-2 gap-2">
-					<input name="name" placeholder="Name" className="rounded-md border px-2 py-1" />
-					<input name="email" placeholder="Email" className="rounded-md border px-2 py-1" />
-					<input name="status" placeholder="Status" className="rounded-md border px-2 py-1" />
-					<input name="resume_url" placeholder="Resume URL" className="rounded-md border px-2 py-1" />
-					<input name="notes" placeholder="Notes" className="col-span-2 rounded-md border px-2 py-1" />
+					<input
+						name="name"
+						placeholder="Name"
+						className="rounded-md border px-2 py-1"
+					/>
+					<input
+						name="email"
+						placeholder="Email"
+						className="rounded-md border px-2 py-1"
+					/>
+					<input
+						name="status"
+						placeholder="Status"
+						className="rounded-md border px-2 py-1"
+					/>
+					<input
+						name="resume_url"
+						placeholder="Resume URL"
+						className="rounded-md border px-2 py-1"
+					/>
+					<input
+						name="notes"
+						placeholder="Notes"
+						className="col-span-2 rounded-md border px-2 py-1"
+					/>
 				</div>
 				<button
 					type="submit"

@@ -76,8 +76,8 @@ function VacanciesPage() {
 								{hg.headers.map((h) => (
 									<th key={h.id} className="px-3 py-2">
 										{h.isPlaceholder
-												? null
-												: flexRender(h.column.columnDef.header, h.getContext())}
+											? null
+											: flexRender(h.column.columnDef.header, h.getContext())}
 									</th>
 								))}
 							</tr>
@@ -110,9 +110,21 @@ function VacanciesPage() {
 			>
 				<h2 className="mb-2 font-medium">Quick add</h2>
 				<div className="grid grid-cols-2 gap-2">
-					<input name="title" placeholder="Title" className="rounded-md border px-2 py-1" />
-					<input name="status" placeholder="Status" className="rounded-md border px-2 py-1" />
-					<input name="description" placeholder="Description" className="col-span-2 rounded-md border px-2 py-1" />
+					<input
+						name="title"
+						placeholder="Title"
+						className="rounded-md border px-2 py-1"
+					/>
+					<input
+						name="status"
+						placeholder="Status"
+						className="rounded-md border px-2 py-1"
+					/>
+					<input
+						name="description"
+						placeholder="Description"
+						className="col-span-2 rounded-md border px-2 py-1"
+					/>
 				</div>
 				<button
 					type="submit"

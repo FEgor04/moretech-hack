@@ -1,15 +1,19 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getCandidateCandidatesCandidateIdGet, listCandidatesCandidatesGet } from "../client";
+import {
+	getCandidateCandidatesCandidateIdGet,
+	listCandidatesCandidatesGet,
+} from "../client";
 
 export const candidatesQueryOptions = () =>
 	queryOptions({
 		queryKey: ["candidates"],
 		queryFn: async () => {
-			const res = await listCandidatesCandidatesGet<true>({ throwOnError: true });
+			const res = await listCandidatesCandidatesGet<true>({
+				throwOnError: true,
+			});
 			return res.data;
 		},
 	});
-
 
 export const candidateQueryOptions = (candidateId: string) =>
 	queryOptions({
@@ -23,5 +27,3 @@ export const candidateQueryOptions = (candidateId: string) =>
 		},
 		enabled: Boolean(candidateId),
 	});
-
-

@@ -55,4 +55,3 @@ export const useUpdateVacancy = (vacancy_id: number) => {
 		},
 	});
 };
-

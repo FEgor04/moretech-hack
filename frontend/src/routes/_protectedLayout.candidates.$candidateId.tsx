@@ -38,23 +38,48 @@ function CandidateDetail() {
 				<label htmlFor="name" className="col-span-2 text-sm font-medium">
 					Name
 				</label>
-				<input id="name" name="name" defaultValue={c.name} className="rounded-md border px-2 py-1" />
+				<input
+					id="name"
+					name="name"
+					defaultValue={c.name}
+					className="rounded-md border px-2 py-1"
+				/>
 				<label htmlFor="email" className="col-span-2 text-sm font-medium">
 					Email
 				</label>
-				<input id="email" name="email" defaultValue={c.email} className="rounded-md border px-2 py-1" />
+				<input
+					id="email"
+					name="email"
+					defaultValue={c.email}
+					className="rounded-md border px-2 py-1"
+				/>
 				<label htmlFor="status" className="col-span-2 text-sm font-medium">
 					Status
 				</label>
-				<input id="status" name="status" defaultValue={c.status ?? ""} className="rounded-md border px-2 py-1" />
+				<input
+					id="status"
+					name="status"
+					defaultValue={c.status ?? ""}
+					className="rounded-md border px-2 py-1"
+				/>
 				<label htmlFor="resume_url" className="col-span-2 text-sm font-medium">
 					Resume URL
 				</label>
-				<input id="resume_url" name="resume_url" defaultValue={c.resume_url ?? ""} className="rounded-md border px-2 py-1" />
+				<input
+					id="resume_url"
+					name="resume_url"
+					defaultValue={c.resume_url ?? ""}
+					className="rounded-md border px-2 py-1"
+				/>
 				<label htmlFor="notes" className="col-span-2 text-sm font-medium">
 					Notes
 				</label>
-				<textarea id="notes" name="notes" defaultValue={c.notes ?? ""} className="col-span-2 min-h-24 rounded-md border px-2 py-1" />
+				<textarea
+					id="notes"
+					name="notes"
+					defaultValue={c.notes ?? ""}
+					className="col-span-2 min-h-24 rounded-md border px-2 py-1"
+				/>
 				<button
 					type="submit"
 					disabled={mutation.isPending}
