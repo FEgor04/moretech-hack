@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getVacancyVacanciesVacancyIdGet, listVacanciesVacanciesGet } from "../client";
 
-export const useVacanciesQuery = () =>
-	useQuery({
+export const vacanciesQueryOptions = () =>
+	queryOptions({
 		queryKey: ["vacancies"],
 		queryFn: async () => {
 			const res = await listVacanciesVacanciesGet<true>({ throwOnError: true });
@@ -10,8 +10,10 @@ export const useVacanciesQuery = () =>
 		},
 	});
 
-export const useVacancyQuery = (vacancyId: number) =>
-	useQuery({
+export const useVacanciesQuery = () => useQuery(vacanciesQueryOptions());
+
+export const vacancyQueryOptions = (vacancyId: number) =>
+	queryOptions({
 		queryKey: ["vacancy", vacancyId],
 		queryFn: async () => {
 			const res = await getVacancyVacanciesVacancyIdGet<true>({
@@ -22,4 +24,6 @@ export const useVacancyQuery = (vacancyId: number) =>
 		},
 		enabled: Number.isFinite(vacancyId),
 	});
+
+export const useVacancyQuery = (vacancyId: number) => useQuery(vacancyQueryOptions(vacancyId));
 

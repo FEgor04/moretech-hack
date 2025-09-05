@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { meAuthMeGet } from "../client";
 
-export const useMeQuery = () =>
-	useQuery({
+export const meQueryOptions = () =>
+	queryOptions({
 		queryKey: ["me"],
 		queryFn: async () => {
 			const res = await meAuthMeGet<true>({ throwOnError: true });
@@ -10,4 +10,6 @@ export const useMeQuery = () =>
 		},
 		retry: false,
 	});
+
+export const useMeQuery = () => useQuery(meQueryOptions());
 

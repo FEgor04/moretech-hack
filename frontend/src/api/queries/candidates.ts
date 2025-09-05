@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getCandidateCandidatesCandidateIdGet, listCandidatesCandidatesGet } from "../client";
 
-export const useCandidatesQuery = () =>
-	useQuery({
+export const candidatesQueryOptions = () =>
+	queryOptions({
 		queryKey: ["candidates"],
 		queryFn: async () => {
 			const res = await listCandidatesCandidatesGet<true>({ throwOnError: true });
@@ -10,8 +10,10 @@ export const useCandidatesQuery = () =>
 		},
 	});
 
-export const useCandidateQuery = (candidateId: string) =>
-	useQuery({
+export const useCandidatesQuery = () => useQuery(candidatesQueryOptions());
+
+export const candidateQueryOptions = (candidateId: string) =>
+	queryOptions({
 		queryKey: ["candidate", candidateId],
 		queryFn: async () => {
 			const res = await getCandidateCandidatesCandidateIdGet<true>({
@@ -22,4 +24,6 @@ export const useCandidateQuery = (candidateId: string) =>
 		},
 		enabled: Boolean(candidateId),
 	});
+
+export const useCandidateQuery = (candidateId: string) => useQuery(candidateQueryOptions(candidateId));
 
