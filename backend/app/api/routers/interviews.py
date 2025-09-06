@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from app.db.session import get_session
 from app.schemas.common import InterviewCreate, InterviewRead
@@ -13,7 +14,12 @@ router = APIRouter()
 async def create_interview(
     payload: InterviewCreate, session: AsyncSession = Depends(get_session)
 ):
-    return await interviews_service.create_interview(session, payload)
+    try:
+        return await interviews_service.create_interview(session, payload)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=400, detail="Invalid candidate_id or vacancy_id"
+        )
 
 
 @router.get("/", response_model=list[InterviewRead])
@@ -21,9 +27,16 @@ async def list_interviews(session: AsyncSession = Depends(get_session)):
     return await interviews_service.list_interviews(session)
 
 
+@router.get("/candidate/{candidate_id}", response_model=list[InterviewRead])
+async def get_interviews_by_candidate(
+    candidate_id: str, session: AsyncSession = Depends(get_session)
+):
+    return await interviews_service.get_interviews_by_candidate(session, candidate_id)
+
+
 @router.get("/{interview_id}", response_model=InterviewRead)
 async def get_interview(
-    interview_id: int, session: AsyncSession = Depends(get_session)
+    interview_id: str, session: AsyncSession = Depends(get_session)
 ):
     try:
         return await interviews_service.get_interview(session, interview_id)
@@ -33,7 +46,7 @@ async def get_interview(
 
 @router.patch("/{interview_id}", response_model=InterviewRead)
 async def update_interview(
-    interview_id: int,
+    interview_id: str,
     payload: InterviewCreate,
     session: AsyncSession = Depends(get_session),
 ):
@@ -41,11 +54,15 @@ async def update_interview(
         return await interviews_service.update_interview(session, interview_id, payload)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except IntegrityError:
+        raise HTTPException(
+            status_code=400, detail="Invalid candidate_id or vacancy_id"
+        )
 
 
 @router.delete("/{interview_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_interview(
-    interview_id: int, session: AsyncSession = Depends(get_session)
+    interview_id: str, session: AsyncSession = Depends(get_session)
 ):
     try:
         await interviews_service.delete_interview(session, interview_id)

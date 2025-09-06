@@ -26,7 +26,7 @@ export function RelativeTimeTooltip({
 						: dayjs(date).format("DD.MM.YYYY HH:mm")}
 				</span>
 			</TooltipTrigger>
-			<TooltipContent className="bg-card text-card-foreground [&_svg]:bg-card [&_svg]:fill-card">
+			<TooltipContent className="bg-card text-card-foreground [&_svg]:bg-card [&_svg]:fill-card border">
 				<RelativeTime time={date}>
 					<RelativeTimeZone zone={"Europe/London"}>
 						<RelativeTimeZoneLabel>UTC</RelativeTimeZoneLabel>
