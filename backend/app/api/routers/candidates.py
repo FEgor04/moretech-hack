@@ -23,30 +23,26 @@ async def test_gigachat_connection():
     try:
         logger.info("Testing GigaChat connection...")
         pdf_parser = get_pdf_parser_service()
-        
+
         # Test basic chat without file
-        result = pdf_parser.gigachat_client.chat({
-            "messages": [
-                {
-                    "role": "user",
-                    "content": "Привет! Это тест подключения."
-                }
-            ],
-            "temperature": 0.1
-        })
-        
+        result = pdf_parser.gigachat_client.chat(
+            {
+                "messages": [
+                    {"role": "user", "content": "Привет! Это тест подключения."}
+                ],
+                "temperature": 0.1,
+            }
+        )
+
         logger.info("GigaChat connection test successful")
         return {
             "status": "success",
             "message": "GigaChat connection is working",
-            "response": result.choices[0].message.content
+            "response": result.choices[0].message.content,
         }
     except Exception as e:
         logger.error(f"GigaChat connection test failed: {e}", exc_info=True)
-        return {
-            "status": "error",
-            "message": f"GigaChat connection failed: {str(e)}"
-        }
+        return {"status": "error", "message": f"GigaChat connection failed: {str(e)}"}
 
 
 @router.post("/", response_model=CandidateRead, status_code=status.HTTP_201_CREATED)
@@ -118,7 +114,7 @@ async def upload_cv(
     logger.info(f"Received CV upload request for file: {cv_file.filename}")
     logger.info(f"File content type: {cv_file.content_type}")
     logger.info(f"File size: {cv_file.size if hasattr(cv_file, 'size') else 'Unknown'}")
-    
+
     # Validate file type
     if not cv_file.content_type or not cv_file.content_type.startswith(
         "application/pdf"
@@ -131,7 +127,9 @@ async def upload_cv(
     try:
         logger.info("Starting CV parsing process...")
         # Parse the PDF to extract candidate information
-        candidate_data, file_id = await pdf_parser.parse_cv(cv_file.file, cv_file.filename or "resume.pdf")
+        candidate_data, file_id = await pdf_parser.parse_cv(
+            cv_file.file, cv_file.filename or "resume.pdf"
+        )
         logger.info(f"CV parsing completed successfully. File ID: {file_id}")
 
         logger.info("Creating candidate in database...")

@@ -20,15 +20,19 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Add gigachat_file_id column to candidates table
-    op.add_column('candidate', sa.Column('gigachat_file_id', sa.String(255), nullable=True))
-    
+    op.add_column(
+        "candidate", sa.Column("gigachat_file_id", sa.String(255), nullable=True)
+    )
+
     # Add gigachat_file_id column to vacancy table
-    op.add_column('vacancy', sa.Column('gigachat_file_id', sa.String(255), nullable=True))
+    op.add_column(
+        "vacancy", sa.Column("gigachat_file_id", sa.String(255), nullable=True)
+    )
 
 
 def downgrade() -> None:
     # Remove gigachat_file_id column from vacancy table
-    op.drop_column('vacancy', 'gigachat_file_id')
-    
+    op.drop_column("vacancy", "gigachat_file_id")
+
     # Remove gigachat_file_id column from candidates table
-    op.drop_column('candidate', 'gigachat_file_id')
+    op.drop_column("candidate", "gigachat_file_id")

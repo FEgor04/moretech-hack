@@ -5,6 +5,7 @@ Revises: c33ffcc92bf6
 Create Date: 2025-01-09 16:00:00.000000
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -19,14 +20,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Make candidate email column nullable
-    op.alter_column('candidate', 'email',
-                    existing_type=sa.String(255),
-                    nullable=True)
+    op.alter_column("candidate", "email", existing_type=sa.String(255), nullable=True)
 
 
 def downgrade() -> None:
     # Make candidate email column not nullable again
     # Note: This will fail if there are any NULL emails in the database
-    op.alter_column('candidate', 'email',
-                    existing_type=sa.String(255),
-                    nullable=False)
+    op.alter_column("candidate", "email", existing_type=sa.String(255), nullable=False)

@@ -22,7 +22,10 @@ async def test_upload_vacancy_pdf_success(client):
     vacancy_data = response.json()
     assert "id" in vacancy_data
     assert vacancy_data["title"] == "Senior Software Engineer"
-    assert vacancy_data["description"] == "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience in software development, strong problem-solving skills, and experience with modern web technologies."
+    assert (
+        vacancy_data["description"]
+        == "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience in software development, strong problem-solving skills, and experience with modern web technologies."
+    )
     assert vacancy_data["status"] == "open"
     assert "created_at" in vacancy_data
     assert "updated_at" in vacancy_data
@@ -96,12 +99,13 @@ async def test_upload_vacancy_pdf_creates_vacancy_in_db(client, db_session):
     vacancy_id = vacancy_data["id"]
 
     # Verify the vacancy was created in the database
-    result = await db_session.execute(
-        select(Vacancy).where(Vacancy.id == vacancy_id)
-    )
+    result = await db_session.execute(select(Vacancy).where(Vacancy.id == vacancy_id))
     vacancy = result.scalar_one_or_none()
 
     assert vacancy is not None
     assert vacancy.title == "Senior Software Engineer"
-    assert vacancy.description == "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience in software development, strong problem-solving skills, and experience with modern web technologies."
+    assert (
+        vacancy.description
+        == "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience in software development, strong problem-solving skills, and experience with modern web technologies."
+    )
     assert vacancy.status == "open"

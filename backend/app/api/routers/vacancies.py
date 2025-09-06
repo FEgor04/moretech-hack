@@ -86,7 +86,9 @@ async def upload_vacancy_pdf(
 
     try:
         # Parse the PDF to extract vacancy information
-        vacancy_data, file_id = await pdf_parser.parse_vacancy(pdf_file.file, pdf_file.filename or "vacancy.pdf")
+        vacancy_data, file_id = await pdf_parser.parse_vacancy(
+            pdf_file.file, pdf_file.filename or "vacancy.pdf"
+        )
 
         # Create the vacancy using the existing service
         vacancy = await vacancies_service.create_vacancy(session, vacancy_data)
