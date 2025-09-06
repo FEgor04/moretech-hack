@@ -117,12 +117,12 @@ export function ScheduleInterviewDialog({
                   <FormLabel>Вакансия</FormLabel>
                   <FormControl>
                     <Suspense fallback={<Skeleton className="w-full h-10" />}>
-                      <SelectVacancy
-                        value={field.value}
-                        onValueChange={(v) => field.onChange(v)}
-                        placeholder="Выберите вакансию"
-                        className="w-full"
-                      />
+                    <SelectVacancy
+                      value={field.value}
+                      onValueChange={(v) => field.onChange(v)}
+                      placeholder="Выберите вакансию"
+                      className="w-full"
+                    />
                     </Suspense>
                   </FormControl>
                   <FormMessage />
