@@ -49,7 +49,7 @@ export function CreateFromPDFButton() {
 	return (
 		<Dialog onOpenChange={(open) => !open && resetForm()}>
 			<DialogTrigger asChild>
-				<Button variant="outline" disabled>
+				<Button variant="outline">
 					<UploadIcon className="w-4 h-4 mr-2" />
 					Загрузить PDF вакансии
 				</Button>
