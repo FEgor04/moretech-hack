@@ -1,7 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
-import { useCreateCandidate } from "@/api/mutations/candidates";
-import type { CandidateRead } from "@/api/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useCandidatesTable } from "@/components/candidates/table";
 import { DataTable } from "@/components/ui/data-table";
@@ -28,9 +26,12 @@ function CandidatesPage() {
 				</p>
 			</div>
 			<div className="flex flex-row gap-2">
-				<Button variant="outline">
-					<PlusIcon />
-					Создать
+				<Button variant="outline" asChild>
+					<Link to="/candidates/new">
+						<PlusIcon />
+						Создать
+
+					</Link>
 				</Button>
 				<Button variant="outline">
 					<UploadIcon />
