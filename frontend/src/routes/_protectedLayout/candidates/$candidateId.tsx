@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { candidateQueryOptions } from "../api/queries/candidates";
-import { useUpdateCandidate } from "../api/mutations/candidates";
+import { candidateQueryOptions } from "@/api/queries/candidates";
+import { useUpdateCandidate } from "@/api/mutations/candidates";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { CandidateStatus } from "@/api/client";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId",
@@ -24,14 +25,14 @@ function CandidateDetail() {
 				onSubmit={(e) => {
 					e.preventDefault();
 					const fd = new FormData(e.currentTarget as HTMLFormElement);
+					const statusValue = String(fd.get("status") || c.status || "");
 					mutation.mutate({
 						name: String(fd.get("name") || c.name),
 						email: String(fd.get("email") || c.email),
-						status: String(fd.get("status") || c.status || "") || null,
-						resume_url:
-							String(fd.get("resume_url") || c.resume_url || "") || null,
-						notes: String(fd.get("notes") || c.notes || "") || null,
-					});
+						position: String(fd.get("position") || c.position),
+						experience: Number(fd.get("experience") ?? c.experience),
+						status: statusValue ? (statusValue as CandidateStatus) : undefined,
+					})
 				}}
 				className="grid max-w-xl grid-cols-2 gap-2 rounded-md border p-3"
 			>
@@ -53,6 +54,27 @@ function CandidateDetail() {
 					defaultValue={c.email}
 					className="rounded-md border px-2 py-1"
 				/>
+				<label htmlFor="position" className="col-span-2 text-sm font-medium">
+					Position
+				</label>
+				<input
+					id="position"
+					name="position"
+					defaultValue={c.position}
+					className="rounded-md border px-2 py-1"
+				/>
+				<label htmlFor="experience" className="col-span-2 text-sm font-medium">
+					Experience (years)
+				</label>
+				<input
+					id="experience"
+					name="experience"
+					type="number"
+					min={0}
+					step={1}
+					defaultValue={c.experience}
+					className="rounded-md border px-2 py-1"
+				/>
 				<label htmlFor="status" className="col-span-2 text-sm font-medium">
 					Status
 				</label>
@@ -62,24 +84,7 @@ function CandidateDetail() {
 					defaultValue={c.status ?? ""}
 					className="rounded-md border px-2 py-1"
 				/>
-				<label htmlFor="resume_url" className="col-span-2 text-sm font-medium">
-					Resume URL
-				</label>
-				<input
-					id="resume_url"
-					name="resume_url"
-					defaultValue={c.resume_url ?? ""}
-					className="rounded-md border px-2 py-1"
-				/>
-				<label htmlFor="notes" className="col-span-2 text-sm font-medium">
-					Notes
-				</label>
-				<textarea
-					id="notes"
-					name="notes"
-					defaultValue={c.notes ?? ""}
-					className="col-span-2 min-h-24 rounded-md border px-2 py-1"
-				/>
+				
 				<button
 					type="submit"
 					disabled={mutation.isPending}
@@ -89,5 +94,5 @@ function CandidateDetail() {
 				</button>
 			</form>
 		</div>
-	);
+	)
 }

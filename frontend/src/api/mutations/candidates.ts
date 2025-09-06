@@ -4,18 +4,13 @@ import {
 	deleteCandidateCandidatesCandidateIdDelete,
 	updateCandidateCandidatesCandidateIdPatch,
 } from "../client";
+import type { CandidateCreate, CandidateRead } from "../client";
 
-export type CandidateBody = {
-	name: string;
-	email: string;
-	status?: string | null;
-	resume_url?: string | null;
-	notes?: string | null;
-};
+export type CandidateBody = CandidateCreate;
 
 export const useCreateCandidate = () => {
 	const qc = useQueryClient();
-	return useMutation({
+	return useMutation<CandidateRead, unknown, CandidateBody>({
 		mutationFn: async (body: CandidateBody) => {
 			const res = await createCandidateCandidatesPost<true>({
 				body,
@@ -42,7 +37,7 @@ export const useDeleteCandidate = () => {
 
 export const useUpdateCandidate = (candidate_id: string) => {
 	const qc = useQueryClient();
-	return useMutation({
+	return useMutation<CandidateRead, unknown, CandidateBody>({
 		mutationFn: async (body: CandidateBody) => {
 			const res = await updateCandidateCandidatesCandidateIdPatch<true>({
 				path: { candidate_id },

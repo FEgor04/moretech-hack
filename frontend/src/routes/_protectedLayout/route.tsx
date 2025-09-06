@@ -4,7 +4,7 @@ import {
 	createFileRoute,
 	redirect,
 } from "@tanstack/react-router";
-import { isAuthenticated, clearAccessToken } from "../lib/auth";
+import { isAuthenticated, clearAccessToken } from "@/lib/auth";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { meQueryOptions } from "@/api/queries/auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -49,3 +49,4 @@ function RouteComponent() {
 		</SidebarProvider>
 	);
 }
+
