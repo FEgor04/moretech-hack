@@ -9,7 +9,9 @@ export const Route = createFileRoute(
 )({
 	component: CandidateDetail,
 	loader: async ({ params, context }) => {
-		const candidate = await context.queryClient.fetchQuery(candidateQueryOptions(params.candidateId));
+		const candidate = await context.queryClient.fetchQuery(
+			candidateQueryOptions(params.candidateId),
+		);
 		return { candidate };
 	},
 });

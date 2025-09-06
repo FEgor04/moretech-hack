@@ -25,7 +25,9 @@ import { candidatesQueryOptions } from "@/api/queries/candidates";
 export const Route = createFileRoute("/_protectedLayout/candidates/new")({
 	component: RouteComponent,
 	loader: async ({ context }) => {
-		const candidates = await context.queryClient.fetchQuery(candidatesQueryOptions());
+		const candidates = await context.queryClient.fetchQuery(
+			candidatesQueryOptions(),
+		);
 		return { candidates };
 	},
 });
