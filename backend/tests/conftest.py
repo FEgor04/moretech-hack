@@ -3,6 +3,7 @@ import os
 from collections.abc import AsyncGenerator
 
 import pytest
+from app.core.config import settings
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from testcontainers.postgres import PostgresContainer
@@ -11,7 +12,6 @@ from testcontainers.postgres import PostgresContainer
 os.environ.setdefault("DEFAULT_USER_EMAIL", "admin@example.com")
 os.environ.setdefault("DEFAULT_USER_PASSWORD", "admin")
 os.environ.setdefault("DEFAULT_USER_NAME", "Admin")
-
 
 @pytest.fixture(scope="session")
 def postgres_container():
@@ -29,12 +29,14 @@ def postgres_container():
             f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
         )
         os.environ["DATABASE_URL"] = database_url
+        
+        # Reload pydantic settings
+        settings.__init__()
 
         # Import modules after setting the database URL
         from alembic import command
         from alembic.config import Config
 
-        # Run migrations once for the session
         alembic_cfg = Config("alembic.ini")
         command.upgrade(alembic_cfg, "head")
 

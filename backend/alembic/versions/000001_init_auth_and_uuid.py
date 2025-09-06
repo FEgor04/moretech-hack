@@ -1,6 +1,6 @@
 """add password_hash to user, switch candidate id to uuid, create default user
 
-Revision ID: 20240904_01
+Revision ID: 000001
 Revises:
 Create Date: 2025-09-04
 """
@@ -15,7 +15,7 @@ from sqlalchemy import inspect as sa_inspect
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "20240904_01"
+revision: str = "000001"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

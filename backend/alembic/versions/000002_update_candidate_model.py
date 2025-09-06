@@ -1,7 +1,7 @@
 """update candidate model
 
-Revision ID: 20250109_01
-Revises: 20240904_01
+Revision ID: 000002
+Revises: 000001
 Create Date: 2025-01-09
 """
 
@@ -13,8 +13,8 @@ from sqlalchemy import inspect as sa_inspect
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "20250109_01"
-down_revision: Union[str, None] = "20240904_01"
+revision: str = "000002"
+down_revision: Union[str, None] = "000001"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
