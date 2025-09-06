@@ -1,6 +1,8 @@
 from __future__ import with_statement
 
 import asyncio
+import sys
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import pool
@@ -8,6 +10,10 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+
+# Add the backend directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app.core.config import settings
 from app.db.base import Base
 from app.models import candidate, interview, user, vacancy  # noqa: F401
