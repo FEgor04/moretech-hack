@@ -8,6 +8,7 @@
     "build": "vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run",
+    "tsc": "tsc",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",

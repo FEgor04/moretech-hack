@@ -38,8 +38,7 @@ const schema = z.object({
 	name: z.string().min(1, "Введите имя"),
 	email: z.string().email("Неверный email"),
 	position: z.string().min(1, "Введите должность"),
-	experience: z.coerce
-		.number()
+	experience: z.number()
 		.int()
 		.min(0, "Опыт не может быть отрицательным"),
 	status: z.enum(CANDIDATE_STATUSES).optional(),
@@ -52,7 +51,8 @@ function RouteComponent() {
 	const mutation = useCreateCandidate();
 
 	const form = useForm<FormValues>({
-		resolver: zodResolver(schema),
+		// biome-ignore lint/suspicious/noExplicitAny: Type assertion needed due to Zod version compatibility
+		resolver: zodResolver(schema as any),
 		defaultValues: {
 			name: "",
 			email: "",
@@ -128,7 +128,13 @@ function RouteComponent() {
 							<FormItem>
 								<FormLabel>Опыт (лет)</FormLabel>
 								<FormControl>
-									<Input type="number" min={0} step={1} {...field} />
+									<Input 
+										type="number" 
+										min={0} 
+										step={1} 
+										{...field}
+										onChange={(e) => field.onChange(Number(e.target.value))}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>

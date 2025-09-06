@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
 	getCoreRowModel,
@@ -7,14 +6,11 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import type { CandidateRead } from "../../api/client";
-import { useDeleteCandidate } from "../../api/mutations/candidates";
 import { CandidateStatusBadge } from "./status-badge";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { CandidateAvatar } from "./candidate-avatar";
 
 export function useCandidatesTable(data: CandidateRead[]) {
-	const deleteMutation = useDeleteCandidate();
-
 	const columns = useMemo<ColumnDef<CandidateRead>[]>(
 		() => [
 			{
