@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
+import {
 	createInterviewInterviewsPost,
 	postInterviewMessageInterviewsInterviewIdMessagesPost,
-	initializeFirstMessageInterviewsInterviewIdMessagesFirstPost
+	initializeFirstMessageInterviewsInterviewIdMessagesFirstPost,
 } from "../client";
 
 export interface CreateInterviewData {
@@ -43,17 +43,18 @@ export function usePostInterviewMessageMutation() {
 
 	return useMutation({
 		mutationFn: async (data: PostInterviewMessageData) => {
-			const response = await postInterviewMessageInterviewsInterviewIdMessagesPost<true>({
-				path: { interview_id: data.interviewId },
-				body: data.message,
-				throwOnError: true,
-			});
+			const response =
+				await postInterviewMessageInterviewsInterviewIdMessagesPost<true>({
+					path: { interview_id: data.interviewId },
+					body: data.message,
+					throwOnError: true,
+				});
 			return response.data;
 		},
 		onSuccess: (_, variables) => {
 			// Invalidate and refetch interview messages for this specific interview
-			queryClient.invalidateQueries({ 
-				queryKey: ["interviews", "messages", variables.interviewId] 
+			queryClient.invalidateQueries({
+				queryKey: ["interviews", "messages", variables.interviewId],
 			});
 		},
 	});
@@ -64,16 +65,19 @@ export function useInitializeFirstMessageMutation() {
 
 	return useMutation({
 		mutationFn: async (interviewId: string) => {
-			const response = await initializeFirstMessageInterviewsInterviewIdMessagesFirstPost<true>({
-				path: { interview_id: interviewId },
-				throwOnError: true,
-			});
+			const response =
+				await initializeFirstMessageInterviewsInterviewIdMessagesFirstPost<true>(
+					{
+						path: { interview_id: interviewId },
+						throwOnError: true,
+					},
+				);
 			return response.data;
 		},
 		onSuccess: (_, interviewId) => {
 			// Invalidate and refetch interview messages for this specific interview
-			queryClient.invalidateQueries({ 
-				queryKey: ["interviews", "messages", interviewId] 
+			queryClient.invalidateQueries({
+				queryKey: ["interviews", "messages", interviewId],
 			});
 		},
 	});

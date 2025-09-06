@@ -1,8 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
-import { 
+import {
 	listInterviewsInterviewsGet,
 	getInterviewInterviewsInterviewIdGet,
-	getInterviewMessagesInterviewsInterviewIdMessagesGet
+	getInterviewMessagesInterviewsInterviewIdMessagesGet,
 } from "../client";
 
 export const interviewsQueryOptions = () =>
@@ -46,11 +46,11 @@ export const interviewMessagesQueryOptions = (interviewId: string) =>
 	queryOptions({
 		queryKey: ["interviews", "messages", interviewId],
 		queryFn: async () => {
-			const response = await getInterviewMessagesInterviewsInterviewIdMessagesGet<true>({
-				path: { interview_id: interviewId },
-				throwOnError: true,
-			});
+			const response =
+				await getInterviewMessagesInterviewsInterviewIdMessagesGet<true>({
+					path: { interview_id: interviewId },
+					throwOnError: true,
+				});
 			return response.data;
 		},
 	});
-
