@@ -99,8 +99,9 @@ export type HttpValidationError = {
 export type InterviewCreate = {
     /**
      * Candidate Id
+     * UUID of the candidate
      */
-    candidate_id: number;
+    candidate_id: string;
     /**
      * Vacancy Id
      */
@@ -133,8 +134,9 @@ export type InterviewRead = {
     updated_at?: string | null;
     /**
      * Candidate Id
+     * UUID of the candidate
      */
-    candidate_id: number;
+    candidate_id: string;
     /**
      * Vacancy Id
      */
@@ -785,6 +787,37 @@ export type CreateInterviewInterviewsPostResponses = {
 };
 
 export type CreateInterviewInterviewsPostResponse = CreateInterviewInterviewsPostResponses[keyof CreateInterviewInterviewsPostResponses];
+
+export type GetInterviewsByCandidateInterviewsCandidateCandidateIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Candidate Id
+         */
+        candidate_id: string;
+    };
+    query?: never;
+    url: '/interviews/candidate/{candidate_id}';
+};
+
+export type GetInterviewsByCandidateInterviewsCandidateCandidateIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetInterviewsByCandidateInterviewsCandidateCandidateIdGetError = GetInterviewsByCandidateInterviewsCandidateCandidateIdGetErrors[keyof GetInterviewsByCandidateInterviewsCandidateCandidateIdGetErrors];
+
+export type GetInterviewsByCandidateInterviewsCandidateCandidateIdGetResponses = {
+    /**
+     * Response Get Interviews By Candidate Interviews Candidate  Candidate Id  Get
+     * Successful Response
+     */
+    200: Array<InterviewRead>;
+};
+
+export type GetInterviewsByCandidateInterviewsCandidateCandidateIdGetResponse = GetInterviewsByCandidateInterviewsCandidateCandidateIdGetResponses[keyof GetInterviewsByCandidateInterviewsCandidateCandidateIdGetResponses];
 
 export type DeleteInterviewInterviewsInterviewIdDeleteData = {
     body?: never;

@@ -3,6 +3,8 @@ import { candidateQueryOptions } from "@/api/queries/candidates";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { CandidateAvatar } from "@/components/candidates/candidate-avatar";
 import { CandidateStatusBadge } from "@/components/candidates/status-badge";
+import { ScheduleInterviewDialog } from "@/components/interviews/schedule-interview-dialog";
+import { InterviewsList } from "@/components/candidates/interviews-list";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
@@ -13,7 +15,7 @@ export const Route = createFileRoute(
 	loader: async ({ params, context }) => {
 		const candidate = await context.queryClient.fetchQuery(
 			candidateQueryOptions(params.candidateId),
-		);
+		)
 		return { candidate };
 	},
 });
@@ -35,14 +37,21 @@ function CandidateDetail() {
 						<p className="text-muted-foreground">{c.position}</p>
 					</div>
 				</div>
-				<Button asChild>
-					<Link
-						to="/candidates/$candidateId/edit"
-						params={{ candidateId: params.candidateId }}
-					>
-						Редактировать
-					</Link>
-				</Button>
+				<div className="flex gap-2">
+					<ScheduleInterviewDialog currentCandidateId={params.candidateId}>
+						<Button variant="outline">
+							Запланировать интервью
+						</Button>
+					</ScheduleInterviewDialog>
+					<Button asChild>
+						<Link
+							to="/candidates/$candidateId/edit"
+							params={{ candidateId: params.candidateId }}
+						>
+							Редактировать
+						</Link>
+					</Button>
+				</div>
 			</div>
 
 			{/* Candidate information */}
@@ -70,6 +79,9 @@ function CandidateDetail() {
 					</div>
 				</div>
 			</div>
+
+			{/* Interviews section */}
+			<InterviewsList candidateId={params.candidateId} />
 		</div>
-	);
+	)
 }
