@@ -6,7 +6,7 @@ import { CandidateStatusBadge } from "@/components/candidates/status-badge";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute(
-	"/_protectedLayout/candidates/$candidateId/",
+	"/_protectedLayout/candidates/$candidateId",
 )({
 	component: CandidateDetail,
 	loader: async ({ params, context }) => {

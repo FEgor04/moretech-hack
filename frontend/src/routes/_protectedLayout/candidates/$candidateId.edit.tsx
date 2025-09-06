@@ -2,8 +2,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import { useUpdateCandidate } from "@/api/mutations/candidates";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import type { CandidateStatus } from "@/api/client";
 import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+
+type CandidateFormData = {
+	name: string;
+	email: string;
+	position: string;
+	experience: number;
+	status?:
+		| "pending"
+		| "reviewing"
+		| "interviewing"
+		| "accepted"
+		| "rejected"
+		| "on_hold";
+};
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId/edit",
@@ -26,17 +40,24 @@ function CandidateEdit() {
 
 	const c = candidate.data;
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		const fd = new FormData(e.currentTarget as HTMLFormElement);
-		const statusValue = String(fd.get("status") || c.status || "");
+	const form = useForm<CandidateFormData>({
+		defaultValues: {
+			name: c.name,
+			email: c.email,
+			position: c.position,
+			experience: c.experience,
+			status: c.status,
+		},
+	});
+
+	const onSubmit = (data: CandidateFormData) => {
 		mutation.mutate(
 			{
-				name: String(fd.get("name") || c.name),
-				email: String(fd.get("email") || c.email),
-				position: String(fd.get("position") || c.position),
-				experience: Number(fd.get("experience") ?? c.experience),
-				status: statusValue ? (statusValue as CandidateStatus) : undefined,
+				name: data.name,
+				email: data.email,
+				position: data.position,
+				experience: data.experience,
+				status: data.status,
 			},
 			{
 				onSuccess: () => {
@@ -58,14 +79,20 @@ function CandidateEdit() {
 					<p className="text-muted-foreground">{c.name}</p>
 				</div>
 				<Button variant="outline" asChild>
-					<Link to="/candidates/$candidateId" params={{ candidateId: params.candidateId }}>
+					<Link
+						to="/candidates/$candidateId"
+						params={{ candidateId: params.candidateId }}
+					>
 						Отмена
 					</Link>
 				</Button>
 			</div>
 
 			{/* Edit form */}
-			<form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+			<form
+				onSubmit={form.handleSubmit(onSubmit)}
+				className="max-w-2xl space-y-6"
+			>
 				<div className="rounded-lg border p-6">
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
@@ -74,11 +101,14 @@ function CandidateEdit() {
 							</label>
 							<input
 								id="name"
-								name="name"
-								defaultValue={c.name}
+								{...form.register("name")}
 								className="w-full rounded-md border px-3 py-2 text-sm"
-								required
 							/>
+							{form.formState.errors.name && (
+								<p className="text-sm text-red-600">
+									{form.formState.errors.name.message}
+								</p>
+							)}
 						</div>
 						<div className="space-y-2">
 							<label htmlFor="email" className="text-sm font-medium">
@@ -86,12 +116,15 @@ function CandidateEdit() {
 							</label>
 							<input
 								id="email"
-								name="email"
 								type="email"
-								defaultValue={c.email}
+								{...form.register("email")}
 								className="w-full rounded-md border px-3 py-2 text-sm"
-								required
 							/>
+							{form.formState.errors.email && (
+								<p className="text-sm text-red-600">
+									{form.formState.errors.email.message}
+								</p>
+							)}
 						</div>
 						<div className="space-y-2">
 							<label htmlFor="position" className="text-sm font-medium">
@@ -99,11 +132,14 @@ function CandidateEdit() {
 							</label>
 							<input
 								id="position"
-								name="position"
-								defaultValue={c.position}
+								{...form.register("position")}
 								className="w-full rounded-md border px-3 py-2 text-sm"
-								required
 							/>
+							{form.formState.errors.position && (
+								<p className="text-sm text-red-600">
+									{form.formState.errors.position.message}
+								</p>
+							)}
 						</div>
 						<div className="space-y-2">
 							<label htmlFor="experience" className="text-sm font-medium">
@@ -111,14 +147,17 @@ function CandidateEdit() {
 							</label>
 							<input
 								id="experience"
-								name="experience"
 								type="number"
 								min={0}
 								step={1}
-								defaultValue={c.experience}
+								{...form.register("experience")}
 								className="w-full rounded-md border px-3 py-2 text-sm"
-								required
 							/>
+							{form.formState.errors.experience && (
+								<p className="text-sm text-red-600">
+									{form.formState.errors.experience.message}
+								</p>
+							)}
 						</div>
 						<div className="space-y-2">
 							<label htmlFor="status" className="text-sm font-medium">
@@ -126,8 +165,7 @@ function CandidateEdit() {
 							</label>
 							<select
 								id="status"
-								name="status"
-								defaultValue={c.status ?? ""}
+								{...form.register("status")}
 								className="w-full rounded-md border px-3 py-2 text-sm"
 							>
 								<option value="">Выберите статус</option>
@@ -138,6 +176,11 @@ function CandidateEdit() {
 								<option value="rejected">Отклонен</option>
 								<option value="on_hold">Приостановлен</option>
 							</select>
+							{form.formState.errors.status && (
+								<p className="text-sm text-red-600">
+									{form.formState.errors.status.message}
+								</p>
+							)}
 						</div>
 					</div>
 				</div>
@@ -157,7 +200,10 @@ function CandidateEdit() {
 						asChild
 						disabled={mutation.isPending}
 					>
-						<Link to="/candidates/$candidateId" params={{ candidateId: params.candidateId }}>
+						<Link
+							to="/candidates/$candidateId"
+							params={{ candidateId: params.candidateId }}
+						>
 							Отмена
 						</Link>
 					</Button>
