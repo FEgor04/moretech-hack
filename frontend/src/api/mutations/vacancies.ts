@@ -3,6 +3,7 @@ import {
 	createVacancyVacanciesPost,
 	deleteVacancyVacanciesVacancyIdDelete,
 	updateVacancyVacanciesVacancyIdPatch,
+	uploadVacancyPdfVacanciesUploadPdfPost,
 } from "../client";
 
 export type VacancyBody = {
@@ -53,5 +54,19 @@ export const useUpdateVacancy = (vacancy_id: number) => {
 			qc.invalidateQueries({ queryKey: ["vacancies"] });
 			qc.invalidateQueries({ queryKey: ["vacancy", vacancy_id] });
 		},
+	});
+};
+
+export const useCreateFromPDF = () => {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: async (file: File) => {
+			const res = await uploadVacancyPdfVacanciesUploadPdfPost<true>({
+				body: { pdf_file: file },
+				throwOnError: true,
+			});
+			return res.data;
+		},
+		onSuccess: () => qc.invalidateQueries({ queryKey: ["vacancies"] }),
 	});
 };

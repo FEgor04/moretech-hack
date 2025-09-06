@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
 from app.schemas.common import VacancyCreate, VacancyRead
 from app.services import vacancies as vacancies_service
 from app.services.exceptions import NotFoundError
+from app.services.pdf_parser import (
+    get_pdf_parser_service,
+    PDFParsingError,
+    PDFParserService,
+)
 
 router = APIRouter()
 
@@ -48,3 +53,53 @@ async def delete_vacancy(vacancy_id: int, session: AsyncSession = Depends(get_se
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return None
+
+
+@router.post(
+    "/upload-pdf", response_model=VacancyRead, status_code=status.HTTP_201_CREATED
+)
+async def upload_vacancy_pdf(
+    pdf_file: UploadFile = File(...),
+    session: AsyncSession = Depends(get_session),
+    pdf_parser: PDFParserService = Depends(get_pdf_parser_service),
+):
+    """
+    Upload a PDF job description and create a vacancy from the parsed information.
+
+    Args:
+        pdf_file: PDF file containing the job description
+        session: Database session
+
+    Returns:
+        VacancyRead: Created vacancy with parsed information
+
+    Raises:
+        HTTPException: If file is not a PDF or parsing fails
+    """
+    # Validate file type
+    if not pdf_file.content_type or not pdf_file.content_type.startswith(
+        "application/pdf"
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="File must be a PDF"
+        )
+
+    try:
+        # Parse the PDF to extract vacancy information
+        vacancy_data = await pdf_parser.parse_vacancy(pdf_file.file)
+
+        # Create the vacancy using the existing service
+        vacancy = await vacancies_service.create_vacancy(session, vacancy_data)
+
+        return vacancy
+
+    except PDFParsingError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Failed to parse job description: {str(e)}",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while processing the job description: {str(e)}",
+        )
