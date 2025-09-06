@@ -8,6 +8,7 @@ from app.api.routers.interviews import router as interviews_router
 from app.api.routers.users import router as users_router
 from app.api.routers.vacancies import router as vacancies_router
 
+
 def _configure_logging() -> None:
     """Ensure application loggers use Uvicorn's handlers and INFO level.
 
