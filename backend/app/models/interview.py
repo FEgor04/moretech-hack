@@ -25,3 +25,9 @@ class Interview(Base):
 
     candidate = relationship("Candidate")
     vacancy = relationship("Vacancy")
+    messages = relationship(
+        "InterviewMessage",
+        back_populates="interview",
+        cascade="all, delete-orphan",
+        order_by="InterviewMessage.index",
+    )

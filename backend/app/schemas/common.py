@@ -79,3 +79,23 @@ class InterviewCreate(InterviewBase):
 
 class InterviewRead(InterviewBase, Timestamped):
     id: str
+
+
+class InterviewMessageType(str, Enum):
+    SYSTEM = "system"
+    USER = "user"
+
+
+class InterviewMessageBase(BaseModel):
+    interview_id: uuid.UUID
+    index: int
+    text: str | None = None
+    type: InterviewMessageType
+
+
+class InterviewMessageCreate(InterviewMessageBase):
+    pass
+
+
+class InterviewMessageRead(InterviewMessageBase):
+    pass
