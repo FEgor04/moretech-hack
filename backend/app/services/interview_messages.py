@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from gigachat import GigaChat
-from gigachat.models import MessagesRole
+from gigachat.models import Function, FunctionParameters, MessagesRole
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +10,7 @@ from app.models.candidate import Candidate
 from app.models.vacancy import Vacancy
 from app.models.interview_message import InterviewMessage, InterviewMessageType
 from app.schemas.common import InterviewMessageCreateRequest
-from app.services.exceptions import NotFoundError
+from app.services.exceptions import NotFoundError, ConflictError
 from app.clients.gigachat import get_gigachat_client
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,28 @@ class InterviewMessagesService:
     async def _call_gigachat_async(self, client: GigaChat, chat_params):
         """Call GigaChat client async method."""
         return await client.achat(chat_params)
+
+    async def _prepare_functions(self):
+        """Prepare functions for GigaChat."""
+        finish_interview = Function(
+            name="finish_review",
+            description="Завершает интервью и сохраняет фидбек",
+            parameters=FunctionParameters(
+                type="object",
+                properties={
+                    "feedback": {
+                        "type": "string",
+                        "description": "Подробный фидбек по кандидату",
+                    },
+                    "positive": {
+                        "type": "boolean",
+                        "description": "Положительный ли фидбек",
+                    },
+                },
+                required=["feedback", "positive"],
+            ),
+        )
+        return [finish_interview]
 
     async def list_messages(
         self, session: AsyncSession, interview_id: str
@@ -57,6 +79,10 @@ class InterviewMessagesService:
         interview = await session.get(Interview, interview_id)
         if not interview:
             raise NotFoundError("Interview not found")
+
+        # Do not allow new messages if interview already completed
+        if interview.status == "completed":
+            raise ConflictError("Interview already completed")
 
         # Get next index for user message
         next_index_result = await session.execute(
@@ -143,13 +169,60 @@ class InterviewMessagesService:
 
             chat_params = {
                 "messages": gigachat_messages,
+                "functions": await self._prepare_functions(),
                 "temperature": 0.7,
                 "max_tokens": 1000,
                 "stream": False,
             }
             response = await self._call_gigachat_async(client, chat_params)
 
-            ai_response = response.choices[0].message.content
+            choice = response.choices[0]
+            message = choice.message
+
+            # Handle function_call finish
+            finish_reason = getattr(choice, "finish_reason", None)
+            if finish_reason == "function_call" and getattr(
+                message, "function_call", None
+            ):
+                func = message.function_call
+                func_name = getattr(func, "name", None)
+                func_args = getattr(func, "arguments", {})
+                try:
+                    # arguments may be dict or JSON string
+                    if isinstance(func_args, str):
+                        import json
+
+                        func_args = json.loads(func_args)
+                except Exception:  # pragma: no cover - safe fallback
+                    func_args = {}
+
+                if func_name == "finish_review":
+                    feedback = func_args.get("feedback")
+                    positive = func_args.get("positive")
+
+                    interview = await session.get(Interview, interview_id)
+                    if not interview:
+                        raise NotFoundError("Interview not found")
+
+                    interview.status = "completed"
+                    interview.feedback = feedback
+                    interview.feedback_positive = (
+                        bool(positive) if positive is not None else None
+                    )
+                    await session.commit()
+
+                    logger.info(
+                        "Interview %s marked completed with feedback.", interview_id
+                    )
+
+                    # Return a closing assistant message
+                    return (
+                        "Спасибо за беседу! Интервью завершено. "
+                        "HR-команда свяжется с вами по результатам."
+                    )
+
+            # Default: return normal assistant content
+            ai_response = message.content
             logger.info(f"Received AI response: {ai_response[:100]}...")
 
             return ai_response

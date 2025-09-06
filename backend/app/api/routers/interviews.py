@@ -10,7 +10,7 @@ from app.schemas.common import (
     InterviewMessageCreateRequest,
 )
 from app.services import interviews as interviews_service
-from app.services.exceptions import NotFoundError
+from app.services.exceptions import NotFoundError, ConflictError
 
 router = APIRouter()
 
@@ -98,6 +98,8 @@ async def post_interview_message(
         )
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except ConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 
 @router.post(
