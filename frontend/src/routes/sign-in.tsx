@@ -41,13 +41,13 @@ function RouteComponent() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
 			<div className="w-full max-w-sm rounded-lg border bg-white p-6 shadow">
-				<h1 className="mb-4 text-xl font-semibold">Sign in</h1>
+				<h1 className="mb-4 text-xl font-semibold">Вход в систему</h1>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
 						<FormField
 							control={form.control}
 							name="email"
-							rules={{ required: "Email is required" }}
+							rules={{ required: "Email обязателен" }}
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Email</FormLabel>
@@ -65,10 +65,10 @@ function RouteComponent() {
 						<FormField
 							control={form.control}
 							name="password"
-							rules={{ required: "Password is required" }}
+							rules={{ required: "Пароль обязателен" }}
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Password</FormLabel>
+									<FormLabel>Пароль</FormLabel>
 									<FormControl>
 										<Input type="password" {...field} />
 									</FormControl>
@@ -78,11 +78,11 @@ function RouteComponent() {
 						/>
 						{error ? (
 							<p className="text-destructive text-sm">
-								{error instanceof Error ? error.message : "Sign in failed"}
+								{error instanceof Error ? error.message : "Ошибка входа"}
 							</p>
 						) : null}
 						<Button type="submit" disabled={isPending}>
-							{isPending ? "Signing in..." : "Sign in"}
+							{isPending ? "Вход..." : "Войти"}
 						</Button>
 					</form>
 				</Form>
