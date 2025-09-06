@@ -3,6 +3,7 @@ import {
 	createCandidateCandidatesPost,
 	deleteCandidateCandidatesCandidateIdDelete,
 	updateCandidateCandidatesCandidateIdPatch,
+	uploadCvCandidatesUploadCvPost,
 } from "../client";
 import type { CandidateCreate, CandidateRead } from "../client";
 
@@ -37,7 +38,7 @@ export const useDeleteCandidate = () => {
 
 export const useUpdateCandidate = (candidate_id: string) => {
 	const qc = useQueryClient();
-	return useMutation<CandidateRead, unknown, CandidateBody>({
+	return useMutation({
 		mutationFn: async (body: CandidateBody) => {
 			const res = await updateCandidateCandidatesCandidateIdPatch<true>({
 				path: { candidate_id },
@@ -50,5 +51,19 @@ export const useUpdateCandidate = (candidate_id: string) => {
 			qc.invalidateQueries({ queryKey: ["candidates"] });
 			qc.invalidateQueries({ queryKey: ["candidate", candidate_id] });
 		},
+	});
+};
+
+export const useCreateFromCV = () => {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: async (file: File) => {
+			const res = await uploadCvCandidatesUploadCvPost<true>({
+				body: { cv_file: file },
+				throwOnError: true,
+			});
+			return res.data;
+		},
+		onSuccess: () => qc.invalidateQueries({ queryKey: ["candidates"] }),
 	});
 };

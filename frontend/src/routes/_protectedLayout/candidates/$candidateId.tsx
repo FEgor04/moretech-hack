@@ -8,6 +8,12 @@ export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId",
 )({
 	component: CandidateDetail,
+	loader: async ({ params, context }) => {
+		const candidate = await context.queryClient.fetchQuery(
+			candidateQueryOptions(params.candidateId),
+		);
+		return { candidate };
+	},
 });
 
 function CandidateDetail() {
