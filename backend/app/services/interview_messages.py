@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import List
+from gigachat import GigaChat
 from gigachat.models import Messages, MessagesRole
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,9 +29,9 @@ class InterviewMessagesService:
             self.gigachat_client = get_gigachat_client()
         return self.gigachat_client
     
-    async def _call_gigachat_async(self, client, chat_params):
-        """Call GigaChat client in a thread pool to avoid blocking asyncio."""
-        return await asyncio.to_thread(client.chat, chat_params)
+    async def _call_gigachat_async(self, client: GigaChat, chat_params):
+        """Call GigaChat client async method."""
+        return await client.achat(chat_params)
     
     async def list_messages(
         self, session: AsyncSession, interview_id: str
