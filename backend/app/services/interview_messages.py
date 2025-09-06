@@ -36,7 +36,7 @@ class InterviewMessagesService:
         """Prepare functions for GigaChat."""
         finish_interview = Function(
             name="finish_review",
-            description="Завершает интервью и сохраняет фидбек",
+            description="Завершает интервью и сохраняет фидбек. НЕ ВЫЗЫВАЙ эту функцию, пока ты не получишь ПОЛНОЕ представление о кандидате.",
             parameters=FunctionParameters(
                 type="object",
                 properties={
@@ -181,12 +181,22 @@ class InterviewMessagesService:
 
             # Handle function_call finish
             finish_reason = getattr(choice, "finish_reason", None)
+            logger.debug(
+                "Finish reason evaluated: %s; function_call present: %s",
+                finish_reason,
+                bool(getattr(message, "function_call", None)),
+            )
             if finish_reason == "function_call" and getattr(
                 message, "function_call", None
             ):
                 func = message.function_call
                 func_name = getattr(func, "name", None)
                 func_args = getattr(func, "arguments", {})
+                logger.info(
+                    "GigaChat requested function_call '%s' for interview %s",
+                    func_name,
+                    interview_id,
+                )
                 try:
                     # arguments may be dict or JSON string
                     if isinstance(func_args, str):
@@ -195,13 +205,26 @@ class InterviewMessagesService:
                         func_args = json.loads(func_args)
                 except Exception:  # pragma: no cover - safe fallback
                     func_args = {}
+                logger.debug(
+                    "function_call arguments type=%s", type(func_args).__name__
+                )
 
                 if func_name == "finish_review":
                     feedback = func_args.get("feedback")
                     positive = func_args.get("positive")
+                    logger.info(
+                        "Handling finish_review for interview %s (positive=%s, feedback_len=%s)",
+                        interview_id,
+                        positive,
+                        len(feedback) if isinstance(feedback, str) else 0,
+                    )
 
                     interview = await session.get(Interview, interview_id)
                     if not interview:
+                        logger.warning(
+                            "Interview %s not found while finishing",
+                            interview_id,
+                        )
                         raise NotFoundError("Interview not found")
 
                     interview.status = "completed"
@@ -213,6 +236,12 @@ class InterviewMessagesService:
 
                     logger.info(
                         "Interview %s marked completed with feedback.", interview_id
+                    )
+                else:
+                    logger.warning(
+                        "Unhandled function_call '%s' for interview %s",
+                        func_name,
+                        interview_id,
                     )
 
                     # Return a closing assistant message
@@ -326,6 +355,10 @@ class InterviewMessagesService:
             f"опыт работы - {candidate.experience} лет. "
             f"{vacancy_info} "
             "Начни с приветствия и попроси кандидата рассказать о себе."
+            "В конце интервью вызови функцию finish_review, дав полное представление о кандидате."
+            "НЕ ЗАКАНЧИВАЙ интервью раньше времени. Всегда жди всей информации, дай кандидату разослать её."
+            "Если информации пока не хватает - спроси кандидата ещё раз."
+            "Интервью должно занять не меньше 5 сообщений с обоих сторон, но не более 10."
         )
 
     async def _get_initial_greeting(self, system_prompt: str) -> str:
