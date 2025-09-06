@@ -1,6 +1,16 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, EmailStr
+
+
+class CandidateStatus(str, Enum):
+    PENDING = "pending"
+    REVIEWING = "reviewing"
+    INTERVIEWING = "interviewing"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    ON_HOLD = "on_hold"
 
 
 class Timestamped(BaseModel):
@@ -25,18 +35,17 @@ class UserRead(UserBase, Timestamped):
 class CandidateBase(BaseModel):
     name: str
     email: EmailStr
-    resume_url: str | None = None
-    notes: str | None = None
-    status: str | None = None
+    position: str
+    experience: int
+    status: CandidateStatus = CandidateStatus.PENDING
 
 
 class CandidateCreate(CandidateBase):
-    user_id: int | None = None
+    pass
 
 
 class CandidateRead(CandidateBase, Timestamped):
     id: str
-    user_id: int | None = None
 
 
 class VacancyBase(BaseModel):

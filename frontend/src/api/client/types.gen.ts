@@ -13,21 +13,14 @@ export type CandidateCreate = {
      */
     email: string;
     /**
-     * Resume Url
+     * Position
      */
-    resume_url?: string | null;
+    position: string;
     /**
-     * Notes
+     * Experience
      */
-    notes?: string | null;
-    /**
-     * Status
-     */
-    status?: string | null;
-    /**
-     * User Id
-     */
-    user_id?: number | null;
+    experience: number;
+    status?: CandidateStatus;
 };
 
 /**
@@ -51,26 +44,24 @@ export type CandidateRead = {
      */
     email: string;
     /**
-     * Resume Url
+     * Position
      */
-    resume_url?: string | null;
+    position: string;
     /**
-     * Notes
+     * Experience
      */
-    notes?: string | null;
-    /**
-     * Status
-     */
-    status?: string | null;
+    experience: number;
+    status?: CandidateStatus;
     /**
      * Id
      */
     id: string;
-    /**
-     * User Id
-     */
-    user_id?: number | null;
 };
+
+/**
+ * CandidateStatus
+ */
+export type CandidateStatus = 'pending' | 'reviewing' | 'interviewing' | 'accepted' | 'rejected' | 'on_hold';
 
 /**
  * HTTPValidationError

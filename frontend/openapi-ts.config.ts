@@ -11,6 +11,6 @@ export default defineConfig({
         {
             name: '@hey-api/client-axios',
             baseUrl: '/api',
-        }
+        },
     ],
 });

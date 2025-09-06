@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
 	getCoreRowModel,
@@ -7,39 +6,73 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import type { CandidateRead } from "../../api/client";
-import { useDeleteCandidate } from "../../api/mutations/candidates";
+import { CandidateStatusBadge } from "./status-badge";
+import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
+import { CandidateAvatar } from "./candidate-avatar";
 
 export function useCandidatesTable(data: CandidateRead[]) {
-	const deleteMutation = useDeleteCandidate();
-
 	const columns = useMemo<ColumnDef<CandidateRead>[]>(
 		() => [
-			{ accessorKey: "name", header: "Name" },
-			{ accessorKey: "email", header: "Email" },
-			{ accessorKey: "status", header: "Status" },
 			{
-				header: "Actions",
+				id: "name",
+				header: "Кандидат",
 				cell: ({ row }) => (
-					<div className="flex gap-2">
-						<Link
-							to="/candidates/$candidateId"
-							params={{ candidateId: row.original.id }}
-							className="text-blue-600 hover:underline"
-						>
-							Open
-						</Link>
-						<button
-							type="button"
-							onClick={() => deleteMutation.mutate(row.original.id)}
-							className="text-red-600"
-						>
-							Delete
-						</button>
+					<div className="flex flex-row gap-2 items-center">
+						<CandidateAvatar name={row.original.name} />
+						<div className="flex flex-col">
+							<span className="font-medium">{row.original.name}</span>
+							<span className="text-muted-foreground">
+								{row.original.email}
+							</span>
+						</div>
 					</div>
 				),
 			},
+			{
+				accessorKey: "position",
+				header: "Должность",
+				cell: ({ row }) => row.original.position || <>&mdash;</>,
+			},
+			{
+				accessorKey: "experience",
+				header: "Опыт",
+				cell: ({ row }) => row.original.experience || <>&mdash;</>,
+			},
+			{
+				accessorKey: "status",
+				header: "Статус",
+				cell: ({ row }) =>
+					row.original.status ? (
+						<CandidateStatusBadge status={row.original.status} />
+					) : (
+						<>&mdash;</>
+					),
+			},
+			{
+				accessorKey: "created_at",
+				header: "Дата создания",
+				cell: ({ row }) =>
+					row.original.created_at ? (
+						<RelativeTimeTooltip date={new Date(row.original.created_at)} />
+					) : (
+						<>&mdash;</>
+					),
+			},
+			{
+				accessorKey: "updated_at",
+				header: "Последнее обновление	",
+				cell: ({ row }) =>
+					row.original.updated_at ? (
+						<RelativeTimeTooltip
+							relative
+							date={new Date(row.original.updated_at)}
+						/>
+					) : (
+						<>&mdash;</>
+					),
+			},
 		],
-		[deleteMutation],
+		[],
 	);
 
 	const [sorting, setSorting] = useState<SortingState>([]);
