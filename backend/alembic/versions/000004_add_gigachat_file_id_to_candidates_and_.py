@@ -1,7 +1,7 @@
 """Add gigachat_file_id to candidates and vacancies
 
-Revision ID: c33ffcc92bf6
-Revises: 20250109_01
+Revision ID: 000004
+Revises: 000003
 Create Date: 2025-09-06 16:39:52.660708
 
 """
@@ -12,8 +12,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "c33ffcc92bf6"
-down_revision: Union[str, None] = "20250109_01"
+revision: str = "000004"
+down_revision: Union[str, None] = "000003"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

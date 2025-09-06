@@ -27,6 +27,7 @@ dependencies = [
 dev-dependencies = [
   "pytest>=8.2.0",
   "pytest-asyncio>=0.23.6",
+  "pytest-cov>=4.1.0",
   "testcontainers[postgres]>=4.7.2",
   "ruff>=0.5.0",
   "black>=24.4.2",
@@ -37,4 +38,25 @@ addopts = "-q"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+]
 
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
