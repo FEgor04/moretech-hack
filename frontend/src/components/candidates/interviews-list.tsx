@@ -8,6 +8,8 @@ import { Button } from "../ui/button";
 import { LinkIcon, MessageCircleReply, NotebookIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { toast } from "sonner";
+import { Badge } from "../ui/badge";
+import { Label } from "../ui/label";
 
 interface InterviewsListProps {
 	candidateId: string;
@@ -41,7 +43,7 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 					(interview, index) =>
 						interview.vacancy_id && (
 							<Card key={interview.id}>
-								<CardHeader className="flex flex-row items-center">
+								<CardHeader className="flex flex-row items-center gap-2">
 									<CardTitle>
 										<Link
 											to="/vacancies/$vacancyId"
@@ -50,6 +52,9 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 											{vacancies[index].data.title}
 										</Link>
 									</CardTitle>
+									{interview.feedback_positive != null && <Badge variant={interview.feedback_positive ? "default" : "destructive"}>
+										{interview.feedback_positive ? "Положительный" : "Отрицательный"}
+									</Badge>}
 									<div className="ml-auto flex gap-2">
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -95,13 +100,19 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 										</Tooltip>
 									</div>
 								</CardHeader>
-								<CardContent>
+								<CardContent className="space-y-4 text-sm [&>div]:space-y-1">
 									{interview.created_at && (
 										<div>
-											Создано{" "}
+											<Label>Создано</Label>
 											<RelativeTimeTooltip
 												date={new Date(interview.created_at)}
 											/>
+										</div>
+									)}
+									{interview.feedback && (
+										<div>
+											<Label>Фидбек</Label>
+											<p>{interview.feedback}</p>
 										</div>
 									)}
 								</CardContent>

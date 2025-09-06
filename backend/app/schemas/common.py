@@ -71,6 +71,8 @@ class InterviewBase(BaseModel):
     transcript: str | None = None
     recording_url: str | None = None
     status: str | None = None
+    feedback: str | None = None
+    feedback_positive: bool | None = None
 
 
 class InterviewCreate(InterviewBase):

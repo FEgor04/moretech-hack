@@ -126,6 +126,14 @@ export type InterviewCreate = {
      * Status
      */
     status?: string | null;
+    /**
+     * Feedback
+     */
+    feedback?: string | null;
+    /**
+     * Feedback Positive
+     */
+    feedback_positive?: boolean | null;
 };
 
 /**
@@ -160,7 +168,7 @@ export type InterviewMessageRead = {
 /**
  * InterviewMessageType
  */
-export type InterviewMessageType = 'system' | 'user';
+export type InterviewMessageType = 'system' | 'user' | 'assistant';
 
 /**
  * InterviewRead
@@ -195,6 +203,14 @@ export type InterviewRead = {
      * Status
      */
     status?: string | null;
+    /**
+     * Feedback
+     */
+    feedback?: string | null;
+    /**
+     * Feedback Positive
+     */
+    feedback_positive?: boolean | null;
     /**
      * Id
      */

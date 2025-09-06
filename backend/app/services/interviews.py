@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +10,7 @@ from app.schemas.common import InterviewCreate, InterviewMessageCreateRequest
 from app.services.exceptions import NotFoundError
 from app.services.interview_messages import interview_messages_service
 
+logger = logging.getLogger(__name__)
 
 async def create_interview(
     session: AsyncSession, payload: InterviewCreate
@@ -19,10 +21,20 @@ async def create_interview(
         transcript=payload.transcript,
         recording_url=payload.recording_url,
         status=payload.status,
+        feedback=payload.feedback,
+        feedback_positive=payload.feedback_positive,
     )
     session.add(interview)
     await session.commit()
     await session.refresh(interview)
+
+    if payload.feedback is not None or payload.feedback_positive is not None:
+        logger.info(
+            "Interview %s initial feedback recorded (positive=%s, length=%s)",
+            interview.id,
+            payload.feedback_positive,
+            len(payload.feedback) if isinstance(payload.feedback, str) else 0,
+        )
     return interview
 
 
@@ -67,6 +79,18 @@ async def update_interview(
         interview.recording_url = payload.recording_url
     if payload.status is not None:
         interview.status = payload.status
+    if payload.feedback is not None:
+        interview.feedback = payload.feedback
+    if payload.feedback_positive is not None:
+        interview.feedback_positive = payload.feedback_positive
+
+    if payload.feedback is not None or payload.feedback_positive is not None:
+        logger.info(
+            "Interview %s feedback updated (positive=%s, length=%s)",
+            interview_id,
+            payload.feedback_positive,
+            len(payload.feedback) if isinstance(payload.feedback, str) else 0,
+        )
 
     await session.commit()
     await session.refresh(interview)
