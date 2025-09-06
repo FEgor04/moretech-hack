@@ -1,7 +1,8 @@
+import uuid
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class CandidateStatus(str, Enum):
@@ -63,7 +64,7 @@ class VacancyRead(VacancyBase, Timestamped):
 
 
 class InterviewBase(BaseModel):
-    candidate_id: int
+    candidate_id: uuid.UUID = Field(..., description="UUID of the candidate")
     vacancy_id: int | None = None
     transcript: str | None = None
     recording_url: str | None = None
