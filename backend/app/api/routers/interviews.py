@@ -3,9 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from app.db.session import get_session
-from app.schemas.common import InterviewCreate, InterviewRead
+from app.schemas.common import (
+    InterviewCreate,
+    InterviewRead,
+    InterviewMessageRead,
+    InterviewMessageCreateRequest,
+)
 from app.services import interviews as interviews_service
-from app.services.exceptions import NotFoundError
+from app.services.exceptions import NotFoundError, ConflictError
 
 router = APIRouter()
 
@@ -69,3 +74,43 @@ async def delete_interview(
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return None
+
+
+@router.get("/{interview_id}/messages", response_model=list[InterviewMessageRead])
+async def get_interview_messages(
+    interview_id: str, session: AsyncSession = Depends(get_session)
+):
+    try:
+        return await interviews_service.list_interview_messages(session, interview_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/{interview_id}/messages", response_model=list[InterviewMessageRead])
+async def post_interview_message(
+    interview_id: str,
+    payload: InterviewMessageCreateRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        return await interviews_service.create_interview_message(
+            session, interview_id, payload
+        )
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+@router.post(
+    "/{interview_id}/messages/first", response_model=list[InterviewMessageRead]
+)
+async def initialize_first_message(
+    interview_id: str, session: AsyncSession = Depends(get_session)
+):
+    try:
+        return await interviews_service.initialize_first_message(session, interview_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

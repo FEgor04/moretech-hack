@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useCreateVacancy } from "@/api/mutations/vacancies";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_protectedLayout/vacancies/new")({
 	component: RouteComponent,
@@ -92,7 +93,7 @@ function RouteComponent() {
 							<FormItem className="col-span-2">
 								<FormLabel>Описание</FormLabel>
 								<FormControl>
-									<Input placeholder="Описание вакансии..." {...field} />
+									<Textarea placeholder="Описание вакансии..." {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>

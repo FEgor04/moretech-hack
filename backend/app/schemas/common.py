@@ -71,6 +71,8 @@ class InterviewBase(BaseModel):
     transcript: str | None = None
     recording_url: str | None = None
     status: str | None = None
+    feedback: str | None = None
+    feedback_positive: bool | None = None
 
 
 class InterviewCreate(InterviewBase):
@@ -79,3 +81,28 @@ class InterviewCreate(InterviewBase):
 
 class InterviewRead(InterviewBase, Timestamped):
     id: str
+
+
+class InterviewMessageType(str, Enum):
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+class InterviewMessageBase(BaseModel):
+    interview_id: uuid.UUID
+    index: int
+    text: str | None = None
+    type: InterviewMessageType
+
+
+class InterviewMessageCreate(InterviewMessageBase):
+    pass
+
+
+class InterviewMessageRead(InterviewMessageBase):
+    pass
+
+
+class InterviewMessageCreateRequest(BaseModel):
+    text: str

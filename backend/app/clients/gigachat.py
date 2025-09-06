@@ -13,7 +13,8 @@ def get_gigachat_client():
 
         logger.info("Initializing GigaChat client...")
         client = GigaChat(
-            credentials=settings.gigachat_credentials,
+            user="206cba93-ff1e-45b6-b202-c69756401318",
+            password=settings.gigachat_credentials,
             verify_ssl_certs=False,
         )
         logger.info("GigaChat client initialized successfully")

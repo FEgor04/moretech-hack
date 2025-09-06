@@ -31,7 +31,7 @@ export type CandidateCreate = {
     /**
      * Email
      */
-    email: string;
+    email?: string | null;
     /**
      * Position
      */
@@ -41,6 +41,10 @@ export type CandidateCreate = {
      */
     experience: number;
     status?: CandidateStatus;
+    /**
+     * Gigachat File Id
+     */
+    gigachat_file_id?: string | null;
 };
 
 /**
@@ -62,7 +66,7 @@ export type CandidateRead = {
     /**
      * Email
      */
-    email: string;
+    email?: string | null;
     /**
      * Position
      */
@@ -72,6 +76,10 @@ export type CandidateRead = {
      */
     experience: number;
     status?: CandidateStatus;
+    /**
+     * Gigachat File Id
+     */
+    gigachat_file_id?: string | null;
     /**
      * Id
      */
@@ -118,7 +126,49 @@ export type InterviewCreate = {
      * Status
      */
     status?: string | null;
+    /**
+     * Feedback
+     */
+    feedback?: string | null;
+    /**
+     * Feedback Positive
+     */
+    feedback_positive?: boolean | null;
 };
+
+/**
+ * InterviewMessageCreateRequest
+ */
+export type InterviewMessageCreateRequest = {
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * InterviewMessageRead
+ */
+export type InterviewMessageRead = {
+    /**
+     * Interview Id
+     */
+    interview_id: string;
+    /**
+     * Index
+     */
+    index: number;
+    /**
+     * Text
+     */
+    text?: string | null;
+    type: InterviewMessageType;
+};
+
+/**
+ * InterviewMessageType
+ */
+export type InterviewMessageType = 'system' | 'user' | 'assistant';
 
 /**
  * InterviewRead
@@ -153,6 +203,14 @@ export type InterviewRead = {
      * Status
      */
     status?: string | null;
+    /**
+     * Feedback
+     */
+    feedback?: string | null;
+    /**
+     * Feedback Positive
+     */
+    feedback_positive?: boolean | null;
     /**
      * Id
      */
@@ -261,6 +319,10 @@ export type VacancyCreate = {
      * Status
      */
     status?: string | null;
+    /**
+     * Gigachat File Id
+     */
+    gigachat_file_id?: string | null;
 };
 
 /**
@@ -287,6 +349,10 @@ export type VacancyRead = {
      * Status
      */
     status?: string | null;
+    /**
+     * Gigachat File Id
+     */
+    gigachat_file_id?: string | null;
     /**
      * Id
      */
@@ -431,6 +497,20 @@ export type GetUserUsersUserIdGetResponses = {
 };
 
 export type GetUserUsersUserIdGetResponse = GetUserUsersUserIdGetResponses[keyof GetUserUsersUserIdGetResponses];
+
+export type TestGigachatConnectionCandidatesTestGigachatGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/candidates/test-gigachat';
+};
+
+export type TestGigachatConnectionCandidatesTestGigachatGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ListCandidatesCandidatesGetData = {
     body?: never;
@@ -908,6 +988,99 @@ export type UpdateInterviewInterviewsInterviewIdPatchResponses = {
 };
 
 export type UpdateInterviewInterviewsInterviewIdPatchResponse = UpdateInterviewInterviewsInterviewIdPatchResponses[keyof UpdateInterviewInterviewsInterviewIdPatchResponses];
+
+export type GetInterviewMessagesInterviewsInterviewIdMessagesGetData = {
+    body?: never;
+    path: {
+        /**
+         * Interview Id
+         */
+        interview_id: string;
+    };
+    query?: never;
+    url: '/interviews/{interview_id}/messages';
+};
+
+export type GetInterviewMessagesInterviewsInterviewIdMessagesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetInterviewMessagesInterviewsInterviewIdMessagesGetError = GetInterviewMessagesInterviewsInterviewIdMessagesGetErrors[keyof GetInterviewMessagesInterviewsInterviewIdMessagesGetErrors];
+
+export type GetInterviewMessagesInterviewsInterviewIdMessagesGetResponses = {
+    /**
+     * Response Get Interview Messages Interviews  Interview Id  Messages Get
+     * Successful Response
+     */
+    200: Array<InterviewMessageRead>;
+};
+
+export type GetInterviewMessagesInterviewsInterviewIdMessagesGetResponse = GetInterviewMessagesInterviewsInterviewIdMessagesGetResponses[keyof GetInterviewMessagesInterviewsInterviewIdMessagesGetResponses];
+
+export type PostInterviewMessageInterviewsInterviewIdMessagesPostData = {
+    body: InterviewMessageCreateRequest;
+    path: {
+        /**
+         * Interview Id
+         */
+        interview_id: string;
+    };
+    query?: never;
+    url: '/interviews/{interview_id}/messages';
+};
+
+export type PostInterviewMessageInterviewsInterviewIdMessagesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostInterviewMessageInterviewsInterviewIdMessagesPostError = PostInterviewMessageInterviewsInterviewIdMessagesPostErrors[keyof PostInterviewMessageInterviewsInterviewIdMessagesPostErrors];
+
+export type PostInterviewMessageInterviewsInterviewIdMessagesPostResponses = {
+    /**
+     * Response Post Interview Message Interviews  Interview Id  Messages Post
+     * Successful Response
+     */
+    200: Array<InterviewMessageRead>;
+};
+
+export type PostInterviewMessageInterviewsInterviewIdMessagesPostResponse = PostInterviewMessageInterviewsInterviewIdMessagesPostResponses[keyof PostInterviewMessageInterviewsInterviewIdMessagesPostResponses];
+
+export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostData = {
+    body?: never;
+    path: {
+        /**
+         * Interview Id
+         */
+        interview_id: string;
+    };
+    query?: never;
+    url: '/interviews/{interview_id}/messages/first';
+};
+
+export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostError = InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostErrors[keyof InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostErrors];
+
+export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponses = {
+    /**
+     * Response Initialize First Message Interviews  Interview Id  Messages First Post
+     * Successful Response
+     */
+    200: Array<InterviewMessageRead>;
+};
+
+export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse = InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponses[keyof InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponses];
 
 export type SigninAuthSigninPostData = {
     body: SignInRequest;

@@ -59,7 +59,7 @@ function CandidateEdit() {
 	const form = useForm<CandidateFormData>({
 		defaultValues: {
 			name: c.name,
-			email: c.email,
+			email: c.email ?? "",
 			position: c.position,
 			experience: c.experience,
 			status: c.status,
