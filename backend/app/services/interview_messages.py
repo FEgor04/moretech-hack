@@ -76,6 +76,7 @@ class InterviewMessagesService:
         payload: InterviewMessageCreateRequest,
     ) -> List[InterviewMessage]:
         """Create a new user message and get AI response."""
+        logger.info(f"Creating message for interview {interview_id}")
         interview = await session.get(Interview, interview_id)
         if not interview:
             raise NotFoundError("Interview not found")
