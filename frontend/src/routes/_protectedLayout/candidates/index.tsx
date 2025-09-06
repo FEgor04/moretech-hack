@@ -4,7 +4,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useCandidatesTable } from "@/components/candidates/table";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, UploadIcon } from "lucide-react";
+import { CreateFromCVButton } from "@/components/candidates/create-from-cv";
+import { PlusIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_protectedLayout/candidates/")({
 	component: CandidatesPage,
@@ -31,10 +32,7 @@ function CandidatesPage() {
 							Создать
 						</Link>
 					</Button>
-					<Button variant="outline">
-						<UploadIcon />
-						Загрузить резюме
-					</Button>
+					<CreateFromCVButton />
 				</div>
 			</header>
 			<main>
