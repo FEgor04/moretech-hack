@@ -7,6 +7,7 @@ from app.db.base import Base
 class InterviewMessageType(str):
     SYSTEM = "system"
     USER = "user"
+    ASSISTANT = "assistant"
 
 
 class InterviewMessage(Base):

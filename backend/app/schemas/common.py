@@ -84,6 +84,7 @@ class InterviewRead(InterviewBase, Timestamped):
 class InterviewMessageType(str, Enum):
     SYSTEM = "system"
     USER = "user"
+    ASSISTANT = "assistant"
 
 
 class InterviewMessageBase(BaseModel):

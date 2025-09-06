@@ -55,11 +55,11 @@ class TestPostInterviewMessages:
         r = await client.post(f"/interviews/{sample_interview['id']}/messages/first")
         assert r.status_code == 200
         messages = r.json()
-        # Should create 2 system messages: system prompt and first assistant
+        # Should create 2 messages: system prompt and first assistant greeting
         assert len(messages) == 2
         assert messages[0]["index"] == 0 and messages[0]["type"] == "system"
         assert "ассистент hr" in messages[0]["text"].lower()
-        assert messages[1]["index"] == 1 and messages[1]["type"] == "system"
+        assert messages[1]["index"] == 1 and messages[1]["type"] == "assistant"
         assert "готовы начать" in messages[1]["text"].lower()
 
         # Subsequent call should fail (already initialized)
@@ -86,8 +86,8 @@ class TestPostInterviewMessages:
         assert messages[0]["interview_id"] == sample_interview["id"]
 
         assert messages[1]["index"] == 1
-        assert messages[1]["type"] == "system"
-        assert messages[1]["text"] == "TODO: implement API"
+        assert messages[1]["type"] == "assistant"
+        assert "Извините, произошла ошибка" in messages[1]["text"]
         assert messages[1]["interview_id"] == sample_interview["id"]
 
     @pytest.mark.asyncio
@@ -114,8 +114,8 @@ class TestPostInterviewMessages:
         assert [m["index"] for m in messages2] == [0, 1, 2, 3]
         assert messages2[2]["type"] == "user" and messages2[2]["text"] == "How are you?"
         assert (
-            messages2[3]["type"] == "system"
-            and messages2[3]["text"] == "TODO: implement API"
+            messages2[3]["type"] == "assistant"
+            and "Извините, произошла ошибка" in messages2[3]["text"]
         )
 
     @pytest.mark.asyncio

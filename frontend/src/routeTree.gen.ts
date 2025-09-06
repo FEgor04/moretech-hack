@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as ProtectedLayoutRouteRouteImport } from './routes/_protectedLayout/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InterviewsInterviewIdRouteImport } from './routes/interviews.$interviewId'
 import { Route as ProtectedLayoutVacanciesIndexRouteImport } from './routes/_protectedLayout/vacancies/index'
 import { Route as ProtectedLayoutCandidatesIndexRouteImport } from './routes/_protectedLayout/candidates/index'
 import { Route as ProtectedLayoutVacanciesNewRouteImport } from './routes/_protectedLayout/vacancies/new'
@@ -32,6 +33,11 @@ const ProtectedLayoutRouteRoute = ProtectedLayoutRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterviewsInterviewIdRoute = InterviewsInterviewIdRouteImport.update({
+  id: '/interviews/$interviewId',
+  path: '/interviews/$interviewId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedLayoutVacanciesIndexRoute =
@@ -80,6 +86,7 @@ const ProtectedLayoutCandidatesCandidateIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
   '/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
   '/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protectedLayout': typeof ProtectedLayoutRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/_protectedLayout/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/_protectedLayout/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
   '/_protectedLayout/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sign-in'
+    | '/interviews/$interviewId'
     | '/candidates/new'
     | '/vacancies/$vacancyId'
     | '/vacancies/new'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/sign-in'
+    | '/interviews/$interviewId'
     | '/candidates/new'
     | '/vacancies/$vacancyId'
     | '/vacancies/new'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_protectedLayout'
     | '/sign-in'
+    | '/interviews/$interviewId'
     | '/_protectedLayout/candidates/new'
     | '/_protectedLayout/vacancies/$vacancyId'
     | '/_protectedLayout/vacancies/new'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedLayoutRouteRoute: typeof ProtectedLayoutRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
+  InterviewsInterviewIdRoute: typeof InterviewsInterviewIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interviews/$interviewId': {
+      id: '/interviews/$interviewId'
+      path: '/interviews/$interviewId'
+      fullPath: '/interviews/$interviewId'
+      preLoaderRoute: typeof InterviewsInterviewIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protectedLayout/vacancies/': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedLayoutRouteRoute: ProtectedLayoutRouteRouteWithChildren,
   SignInRoute: SignInRoute,
+  InterviewsInterviewIdRoute: InterviewsInterviewIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
