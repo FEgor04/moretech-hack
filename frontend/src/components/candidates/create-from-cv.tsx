@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from "../ui/kibo-ui/dropzone";
 import { useCreateFromCV } from "@/api/mutations/candidates";
 import { useState } from "react";
+import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
 export function CreateFromCVButton() {
     const mutation = useCreateFromCV();
@@ -27,7 +29,7 @@ export function CreateFromCVButton() {
         if (!selectedFile) return;
         
         mutation.mutate(selectedFile, {
-            onSuccess: () => {
+            onSuccess: (candidate) => {
                 setSelectedFile(null);
                 setError(null);
                 // Close dialog by triggering the trigger button
@@ -35,6 +37,16 @@ export function CreateFromCVButton() {
                 if (trigger) {
                     trigger.click();
                 }
+                toast.success("Кандидат успешно создан", {
+                    description: `Кандидат ${candidate.name} успешно создан`,
+                    action: <>
+                        <Button variant="outline" asChild>
+                            <Link to="/candidates/$candidateId" params={{ candidateId: candidate.id }}>
+                            К кандидату
+</Link>
+                        </Button>
+                    </>
+                });
             },
             onError: (error: any) => {
                 setError(error?.message || "Ошибка при загрузке файла");
