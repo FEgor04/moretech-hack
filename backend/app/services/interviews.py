@@ -1,10 +1,10 @@
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.interview import Interview
 from app.models.candidate import Candidate
 from app.models.vacancy import Vacancy
-from app.models.interview_message import InterviewMessage, InterviewMessageType
+from app.models.interview_message import InterviewMessage
 from app.schemas.common import InterviewCreate, InterviewMessageCreateRequest
 from app.services.exceptions import NotFoundError
 from app.services.interview_messages import interview_messages_service
@@ -95,7 +95,9 @@ async def create_interview_message(
     session: AsyncSession, interview_id: str, payload: InterviewMessageCreateRequest
 ) -> list[InterviewMessage]:
     """Create a new user message and get AI response."""
-    return await interview_messages_service.create_message(session, interview_id, payload)
+    return await interview_messages_service.create_message(
+        session, interview_id, payload
+    )
 
 
 def get_system_prompt(candidate: Candidate, vacancy: Vacancy | None) -> str:
@@ -116,4 +118,6 @@ async def initialize_first_message(
     session: AsyncSession, interview_id: str
 ) -> list[InterviewMessage]:
     """Initialize conversation with system prompt and first AI message."""
-    return await interview_messages_service.initialize_conversation(session, interview_id)
+    return await interview_messages_service.initialize_conversation(
+        session, interview_id
+    )

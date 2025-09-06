@@ -53,32 +53,36 @@ class TestInterviewMessagesService:
     """Test cases for InterviewMessagesService."""
 
     @pytest.mark.asyncio
-    async def test_list_messages_success(self, interview_messages_service, mock_session, sample_interview):
+    async def test_list_messages_success(
+        self, interview_messages_service, mock_session, sample_interview
+    ):
         """Test successful message listing."""
         # Arrange
         interview_id = "test-interview-id"
         mock_session.get.return_value = sample_interview
-        
+
         mock_messages = [
             InterviewMessage(
                 interview_id=interview_id,
                 index=0,
                 text="System prompt",
-                type=InterviewMessageType.SYSTEM
+                type=InterviewMessageType.SYSTEM,
             ),
             InterviewMessage(
                 interview_id=interview_id,
                 index=1,
                 text="Hello",
-                type=InterviewMessageType.USER
-            )
+                type=InterviewMessageType.USER,
+            ),
         ]
-        
+
         mock_session.scalars.return_value = mock_messages
-        
+
         # Act
-        result = await interview_messages_service.list_messages(mock_session, interview_id)
-        
+        result = await interview_messages_service.list_messages(
+            mock_session, interview_id
+        )
+
         # Assert
         assert len(result) == 2
         assert result[0].text == "System prompt"
@@ -86,37 +90,39 @@ class TestInterviewMessagesService:
         mock_session.get.assert_called_once_with(Interview, interview_id)
 
     @pytest.mark.asyncio
-    async def test_list_messages_interview_not_found(self, interview_messages_service, mock_session):
+    async def test_list_messages_interview_not_found(
+        self, interview_messages_service, mock_session
+    ):
         """Test message listing when interview not found."""
         # Arrange
         interview_id = "non-existent-id"
         mock_session.get.return_value = None
-        
+
         # Act & Assert
         with pytest.raises(NotFoundError, match="Interview not found"):
             await interview_messages_service.list_messages(mock_session, interview_id)
 
     @pytest.mark.asyncio
-    @patch('app.services.interview_messages.get_gigachat_client')
+    @patch("app.services.interview_messages.get_gigachat_client")
     async def test_create_message_success(
-        self, 
-        mock_get_gigachat_client, 
-        interview_messages_service, 
-        mock_session, 
-        sample_interview
+        self,
+        mock_get_gigachat_client,
+        interview_messages_service,
+        mock_session,
+        sample_interview,
     ):
         """Test successful message creation with AI response."""
         # Arrange
         interview_id = "test-interview-id"
         payload = InterviewMessageCreateRequest(text="Привет!")
-        
+
         mock_session.get.return_value = sample_interview
-        
+
         # Mock the execute result properly
         mock_result = MagicMock()
         mock_result.scalar_one.return_value = 2
         mock_session.execute.return_value = mock_result
-        
+
         # Mock GigaChat response
         mock_client = MagicMock()
         mock_response = MagicMock()
@@ -124,13 +130,15 @@ class TestInterviewMessagesService:
         mock_response.choices[0].message.content = "Привет! Расскажите о себе."
         mock_client.chat.return_value = mock_response
         mock_get_gigachat_client.return_value = mock_client
-        
+
         # Mock existing messages (empty conversation)
         mock_session.scalars.return_value = []
-        
+
         # Act
-        result = await interview_messages_service.create_message(mock_session, interview_id, payload)
-        
+        result = await interview_messages_service.create_message(
+            mock_session, interview_id, payload
+        )
+
         # Assert
         assert len(result) == 0  # Will be empty since we mocked empty scalars
         mock_session.add.assert_called()
@@ -138,22 +146,22 @@ class TestInterviewMessagesService:
 
     @pytest.mark.asyncio
     async def test_create_message_interview_not_found(
-        self, 
-        interview_messages_service, 
-        mock_session
+        self, interview_messages_service, mock_session
     ):
         """Test message creation when interview not found."""
         # Arrange
         interview_id = "non-existent-id"
         payload = InterviewMessageCreateRequest(text="Test message")
         mock_session.get.return_value = None
-        
+
         # Act & Assert
         with pytest.raises(NotFoundError, match="Interview not found"):
-            await interview_messages_service.create_message(mock_session, interview_id, payload)
+            await interview_messages_service.create_message(
+                mock_session, interview_id, payload
+            )
 
     @pytest.mark.asyncio
-    @patch('app.services.interview_messages.get_gigachat_client')
+    @patch("app.services.interview_messages.get_gigachat_client")
     async def test_initialize_conversation_success(
         self,
         mock_get_gigachat_client,
@@ -161,12 +169,12 @@ class TestInterviewMessagesService:
         mock_session,
         sample_interview,
         sample_candidate,
-        sample_vacancy
+        sample_vacancy,
     ):
         """Test successful conversation initialization."""
         # Arrange
         interview_id = "test-interview-id"
-        
+
         # Mock get calls with proper side effect
         async def mock_get(model, id):
             if model == Interview:
@@ -176,24 +184,28 @@ class TestInterviewMessagesService:
             elif model == Vacancy:
                 return sample_vacancy
             return None
-        
+
         mock_session.get.side_effect = mock_get
         mock_session.scalar.return_value = 0  # No existing messages
-        
+
         # Mock GigaChat response
         mock_client = MagicMock()
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "Здравствуйте! Готовы начать интервью?"
+        mock_response.choices[0].message.content = (
+            "Здравствуйте! Готовы начать интервью?"
+        )
         mock_client.chat.return_value = mock_response
         mock_get_gigachat_client.return_value = mock_client
-        
+
         # Mock empty messages list
         mock_session.scalars.return_value = []
-        
+
         # Act
-        result = await interview_messages_service.initialize_conversation(mock_session, interview_id)
-        
+        result = await interview_messages_service.initialize_conversation(
+            mock_session, interview_id
+        )
+
         # Assert
         assert len(result) == 0  # Will be empty since we mocked empty scalars
         mock_session.add.assert_called()
@@ -201,26 +213,29 @@ class TestInterviewMessagesService:
 
     @pytest.mark.asyncio
     async def test_initialize_conversation_already_exists(
-        self,
-        interview_messages_service,
-        mock_session,
-        sample_interview
+        self, interview_messages_service, mock_session, sample_interview
     ):
         """Test conversation initialization when conversation already exists."""
         # Arrange
         interview_id = "test-interview-id"
         mock_session.get.return_value = sample_interview
         mock_session.scalar.return_value = 1  # Messages already exist
-        
+
         # Act & Assert
         with pytest.raises(ValueError, match="Conversation already initialized"):
-            await interview_messages_service.initialize_conversation(mock_session, interview_id)
+            await interview_messages_service.initialize_conversation(
+                mock_session, interview_id
+            )
 
-    def test_create_system_prompt(self, interview_messages_service, sample_candidate, sample_vacancy):
+    def test_create_system_prompt(
+        self, interview_messages_service, sample_candidate, sample_vacancy
+    ):
         """Test system prompt creation."""
         # Act
-        prompt = interview_messages_service._create_system_prompt(sample_candidate, sample_vacancy)
-        
+        prompt = interview_messages_service._create_system_prompt(
+            sample_candidate, sample_vacancy
+        )
+
         # Assert
         assert "ассистент HR" in prompt
         assert "Иван Иванов" in prompt
@@ -228,11 +243,15 @@ class TestInterviewMessagesService:
         assert "Senior Python Developer" in prompt
         assert "Разработка веб-приложений" in prompt
 
-    def test_create_system_prompt_no_vacancy(self, interview_messages_service, sample_candidate):
+    def test_create_system_prompt_no_vacancy(
+        self, interview_messages_service, sample_candidate
+    ):
         """Test system prompt creation without vacancy."""
         # Act
-        prompt = interview_messages_service._create_system_prompt(sample_candidate, None)
-        
+        prompt = interview_messages_service._create_system_prompt(
+            sample_candidate, None
+        )
+
         # Assert
         assert "ассистент HR" in prompt
         assert "Иван Иванов" in prompt
