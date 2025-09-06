@@ -12,6 +12,7 @@ from app.services.interview_messages import interview_messages_service
 
 logger = logging.getLogger(__name__)
 
+
 async def create_interview(
     session: AsyncSession, payload: InterviewCreate
 ) -> Interview:
