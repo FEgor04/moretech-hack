@@ -9,6 +9,7 @@ import type { CandidateRead } from "../../api/client";
 import { CandidateStatusBadge } from "./status-badge";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { CandidateAvatar } from "./candidate-avatar";
+import { Link } from "@tanstack/react-router";
 
 export function useCandidatesTable(data: CandidateRead[]) {
 	const columns = useMemo<ColumnDef<CandidateRead>[]>(
@@ -20,7 +21,13 @@ export function useCandidatesTable(data: CandidateRead[]) {
 					<div className="flex flex-row gap-2 items-center">
 						<CandidateAvatar name={row.original.name} />
 						<div className="flex flex-col">
-							<span className="font-medium">{row.original.name}</span>
+							<Link
+								to="/candidates/$candidateId"
+								params={{ candidateId: row.original.id }}
+								className="font-medium"
+							>
+								{row.original.name}
+							</Link>
 							<span className="text-muted-foreground">
 								{row.original.email}
 							</span>
