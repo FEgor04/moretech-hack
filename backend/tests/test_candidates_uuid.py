@@ -4,10 +4,10 @@ import pytest
 @pytest.mark.asyncio
 async def test_candidate_uuid_crud_open(client):
     payload = {
-        "name": "John Doe", 
+        "name": "John Doe",
         "email": "john@example.com",
         "position": "Software Engineer",
-        "experience": 3
+        "experience": 3,
     }
     r = await client.post("/candidates/", json=payload)
     assert r.status_code == 201

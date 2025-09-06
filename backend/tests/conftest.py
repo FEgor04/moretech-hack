@@ -24,19 +24,21 @@ def postgres_container():
         database = postgres.dbname
         user = postgres.username
         password = postgres.password
-        
+
         # Set the database URL environment variable for the test session
-        database_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        database_url = (
+            f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        )
         os.environ["DATABASE_URL"] = database_url
-        
+
         # Import modules after setting the database URL
         from alembic import command
         from alembic.config import Config
-        
+
         # Run migrations once for the session
         alembic_cfg = Config("alembic.ini")
         command.upgrade(alembic_cfg, "head")
-        
+
         yield postgres
 
 
@@ -44,7 +46,7 @@ def postgres_container():
 async def _clean_db(postgres_container) -> None:
     # Ensure tests are isolated: wipe data but keep default admin user
     from app.db.session import AsyncSessionLocal
-    
+
     async with AsyncSessionLocal() as session:
         await session.execute(sa.text("DELETE FROM interview"))
         await session.execute(sa.text("DELETE FROM candidate"))
@@ -69,7 +71,7 @@ def event_loop():
 async def db_session(postgres_container) -> AsyncGenerator[AsyncSession, None]:
     """Create database session with container."""
     from app.db.session import AsyncSessionLocal
-    
+
     async with AsyncSessionLocal() as session:
         yield session
 
@@ -78,7 +80,7 @@ async def db_session(postgres_container) -> AsyncGenerator[AsyncSession, None]:
 async def client(postgres_container) -> AsyncGenerator[AsyncClient, None]:
     """Create test client with database container."""
     from app.main import app
-    
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
         yield ac
