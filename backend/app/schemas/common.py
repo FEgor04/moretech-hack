@@ -99,3 +99,7 @@ class InterviewMessageCreate(InterviewMessageBase):
 
 class InterviewMessageRead(InterviewMessageBase):
     pass
+
+
+class InterviewMessageCreateRequest(BaseModel):
+    text: str
