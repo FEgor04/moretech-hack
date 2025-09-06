@@ -1,8 +1,4 @@
-import {
-	Outlet,
-	createFileRoute,
-	redirect,
-} from "@tanstack/react-router";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { isAuthenticated, clearAccessToken } from "@/lib/auth";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { meQueryOptions } from "@/api/queries/auth";

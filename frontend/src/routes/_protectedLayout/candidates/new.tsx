@@ -38,9 +38,7 @@ const schema = z.object({
 	name: z.string().min(1, "Введите имя"),
 	email: z.string().email("Неверный email"),
 	position: z.string().min(1, "Введите должность"),
-	experience: z.number()
-		.int()
-		.min(0, "Опыт не может быть отрицательным"),
+	experience: z.number().int().min(0, "Опыт не может быть отрицательным"),
 	status: z.enum(CANDIDATE_STATUSES).optional(),
 });
 
@@ -128,10 +126,10 @@ function RouteComponent() {
 							<FormItem>
 								<FormLabel>Опыт (лет)</FormLabel>
 								<FormControl>
-									<Input 
-										type="number" 
-										min={0} 
-										step={1} 
+									<Input
+										type="number"
+										min={0}
+										step={1}
 										{...field}
 										onChange={(e) => field.onChange(Number(e.target.value))}
 									/>
