@@ -291,7 +291,8 @@ class TestGetInterview:
     @pytest.mark.asyncio
     async def test_get_interview_nonexistent(self, client: AsyncClient):
         """Test getting a nonexistent interview."""
-        response = await client.get("/interviews/99999")
+        nonexistent_id = str(uuid.uuid4())
+        response = await client.get(f"/interviews/{nonexistent_id}")
         assert response.status_code == 404
         assert "Interview not found" in response.json()["detail"]
 
@@ -338,7 +339,8 @@ class TestUpdateInterview:
             "status": "completed",
         }
 
-        response = await client.patch("/interviews/99999", json=update_data)
+        nonexistent_id = str(uuid.uuid4())
+        response = await client.patch(f"/interviews/{nonexistent_id}", json=update_data)
         assert response.status_code == 404
         assert "Interview not found" in response.json()["detail"]
 
@@ -392,7 +394,8 @@ class TestDeleteInterview:
     @pytest.mark.asyncio
     async def test_delete_interview_nonexistent(self, client: AsyncClient):
         """Test deleting a nonexistent interview."""
-        response = await client.delete("/interviews/99999")
+        nonexistent_id = str(uuid.uuid4())
+        response = await client.delete(f"/interviews/{nonexistent_id}")
         assert response.status_code == 404
         assert "Interview not found" in response.json()["detail"]
 

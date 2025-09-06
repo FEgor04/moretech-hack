@@ -1,6 +1,5 @@
 import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { interviewsByCandidateQueryOptions } from "@/api/queries/interviews";
-import { Badge } from "@/components/ui/badge";
 import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { Link } from "@tanstack/react-router";

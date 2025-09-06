@@ -76,4 +76,4 @@ class InterviewCreate(InterviewBase):
 
 
 class InterviewRead(InterviewBase, Timestamped):
-    id: int
+    id: str

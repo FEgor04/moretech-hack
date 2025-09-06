@@ -156,7 +156,7 @@ export type InterviewRead = {
     /**
      * Id
      */
-    id: number;
+    id: string;
 };
 
 /**
@@ -825,7 +825,7 @@ export type DeleteInterviewInterviewsInterviewIdDeleteData = {
         /**
          * Interview Id
          */
-        interview_id: number;
+        interview_id: string;
     };
     query?: never;
     url: '/interviews/{interview_id}';
@@ -855,7 +855,7 @@ export type GetInterviewInterviewsInterviewIdGetData = {
         /**
          * Interview Id
          */
-        interview_id: number;
+        interview_id: string;
     };
     query?: never;
     url: '/interviews/{interview_id}';
@@ -885,7 +885,7 @@ export type UpdateInterviewInterviewsInterviewIdPatchData = {
         /**
          * Interview Id
          */
-        interview_id: number;
+        interview_id: string;
     };
     query?: never;
     url: '/interviews/{interview_id}';

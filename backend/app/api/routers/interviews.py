@@ -36,7 +36,7 @@ async def get_interviews_by_candidate(
 
 @router.get("/{interview_id}", response_model=InterviewRead)
 async def get_interview(
-    interview_id: int, session: AsyncSession = Depends(get_session)
+    interview_id: str, session: AsyncSession = Depends(get_session)
 ):
     try:
         return await interviews_service.get_interview(session, interview_id)
@@ -46,7 +46,7 @@ async def get_interview(
 
 @router.patch("/{interview_id}", response_model=InterviewRead)
 async def update_interview(
-    interview_id: int,
+    interview_id: str,
     payload: InterviewCreate,
     session: AsyncSession = Depends(get_session),
 ):
@@ -62,7 +62,7 @@ async def update_interview(
 
 @router.delete("/{interview_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_interview(
-    interview_id: int, session: AsyncSession = Depends(get_session)
+    interview_id: str, session: AsyncSession = Depends(get_session)
 ):
     try:
         await interviews_service.delete_interview(session, interview_id)

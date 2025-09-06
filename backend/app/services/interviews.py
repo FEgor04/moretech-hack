@@ -38,7 +38,7 @@ async def get_interviews_by_candidate(
     return list(result)
 
 
-async def get_interview(session: AsyncSession, interview_id: int) -> Interview:
+async def get_interview(session: AsyncSession, interview_id: str) -> Interview:
     interview = await session.get(Interview, interview_id)
     if not interview:
         raise NotFoundError("Interview not found")
@@ -46,7 +46,7 @@ async def get_interview(session: AsyncSession, interview_id: int) -> Interview:
 
 
 async def update_interview(
-    session: AsyncSession, interview_id: int, payload: InterviewCreate
+    session: AsyncSession, interview_id: str, payload: InterviewCreate
 ) -> Interview:
     interview = await session.get(Interview, interview_id)
     if not interview:
@@ -69,7 +69,7 @@ async def update_interview(
     return interview
 
 
-async def delete_interview(session: AsyncSession, interview_id: int) -> None:
+async def delete_interview(session: AsyncSession, interview_id: str) -> None:
     interview = await session.get(Interview, interview_id)
     if not interview:
         raise NotFoundError("Interview not found")
