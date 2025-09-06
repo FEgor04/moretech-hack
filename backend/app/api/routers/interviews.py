@@ -76,9 +76,7 @@ async def delete_interview(
     return None
 
 
-@router.get(
-    "/{interview_id}/messages", response_model=list[InterviewMessageRead]
-)
+@router.get("/{interview_id}/messages", response_model=list[InterviewMessageRead])
 async def get_interview_messages(
     interview_id: str, session: AsyncSession = Depends(get_session)
 ):
@@ -88,9 +86,7 @@ async def get_interview_messages(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post(
-    "/{interview_id}/messages", response_model=list[InterviewMessageRead]
-)
+@router.post("/{interview_id}/messages", response_model=list[InterviewMessageRead])
 async def post_interview_message(
     interview_id: str,
     payload: InterviewMessageCreateRequest,

@@ -30,21 +30,27 @@ async def sample_interview(client: AsyncClient, sample_candidate: dict) -> dict:
 
 class TestGetInterviewMessages:
     @pytest.mark.asyncio
-    async def test_get_messages_empty(self, client: AsyncClient, sample_interview: dict):
+    async def test_get_messages_empty(
+        self, client: AsyncClient, sample_interview: dict
+    ):
         response = await client.get(f"/interviews/{sample_interview['id']}/messages")
         assert response.status_code == 200
         assert response.json() == []
 
     @pytest.mark.asyncio
     async def test_get_messages_not_found(self, client: AsyncClient):
-        response = await client.get("/interviews/00000000-0000-0000-0000-000000000000/messages")
+        response = await client.get(
+            "/interviews/00000000-0000-0000-0000-000000000000/messages"
+        )
         assert response.status_code == 404
         assert "Interview not found" in response.json()["detail"]
 
 
 class TestPostInterviewMessages:
     @pytest.mark.asyncio
-    async def test_initialize_first_message(self, client: AsyncClient, sample_interview: dict):
+    async def test_initialize_first_message(
+        self, client: AsyncClient, sample_interview: dict
+    ):
         # Initialize conversation
         r = await client.post(f"/interviews/{sample_interview['id']}/messages/first")
         assert r.status_code == 200
@@ -52,7 +58,7 @@ class TestPostInterviewMessages:
         # Should create 2 system messages: system prompt and first assistant
         assert len(messages) == 2
         assert messages[0]["index"] == 0 and messages[0]["type"] == "system"
-        assert "ассистент HR" in messages[0]["text"].lower()
+        assert "ассистент hr" in messages[0]["text"].lower()
         assert messages[1]["index"] == 1 and messages[1]["type"] == "system"
         assert "готовы начать" in messages[1]["text"].lower()
 
@@ -62,7 +68,9 @@ class TestPostInterviewMessages:
         assert "already" in r2.json()["detail"].lower()
 
     @pytest.mark.asyncio
-    async def test_post_creates_user_and_assistant(self, client: AsyncClient, sample_interview: dict):
+    async def test_post_creates_user_and_assistant(
+        self, client: AsyncClient, sample_interview: dict
+    ):
         response = await client.post(
             f"/interviews/{sample_interview['id']}/messages",
             json={"text": "Hello"},
@@ -83,7 +91,9 @@ class TestPostInterviewMessages:
         assert messages[1]["interview_id"] == sample_interview["id"]
 
     @pytest.mark.asyncio
-    async def test_post_appends_in_order(self, client: AsyncClient, sample_interview: dict):
+    async def test_post_appends_in_order(
+        self, client: AsyncClient, sample_interview: dict
+    ):
         # First message pair
         r1 = await client.post(
             f"/interviews/{sample_interview['id']}/messages", json={"text": "Hi"}
@@ -95,17 +105,23 @@ class TestPostInterviewMessages:
 
         # Second message pair
         r2 = await client.post(
-            f"/interviews/{sample_interview['id']}/messages", json={"text": "How are you?"}
+            f"/interviews/{sample_interview['id']}/messages",
+            json={"text": "How are you?"},
         )
         assert r2.status_code == 200
         messages2 = r2.json()
         assert len(messages2) == 4
         assert [m["index"] for m in messages2] == [0, 1, 2, 3]
         assert messages2[2]["type"] == "user" and messages2[2]["text"] == "How are you?"
-        assert messages2[3]["type"] == "system" and messages2[3]["text"] == "TODO: implement API"
+        assert (
+            messages2[3]["type"] == "system"
+            and messages2[3]["text"] == "TODO: implement API"
+        )
 
     @pytest.mark.asyncio
-    async def test_post_missing_text_validation(self, client: AsyncClient, sample_interview: dict):
+    async def test_post_missing_text_validation(
+        self, client: AsyncClient, sample_interview: dict
+    ):
         response = await client.post(
             f"/interviews/{sample_interview['id']}/messages",
             json={},
@@ -120,5 +136,3 @@ class TestPostInterviewMessages:
         )
         assert response.status_code == 404
         assert "Interview not found" in response.json()["detail"]
-
-

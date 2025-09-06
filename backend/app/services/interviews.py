@@ -154,16 +154,18 @@ def get_system_prompt(candidate: Candidate, vacancy: Vacancy | None) -> str:
     )
 
 
-async def initialize_first_message(session: AsyncSession, interview_id: str) -> list[InterviewMessage]:
+async def initialize_first_message(
+    session: AsyncSession, interview_id: str
+) -> list[InterviewMessage]:
     interview = await session.get(Interview, interview_id)
     if not interview:
         raise NotFoundError("Interview not found")
 
     # Ensure no messages exist yet
     existing = await session.scalar(
-        select(func.count()).select_from(InterviewMessage).where(
-            InterviewMessage.interview_id == interview_id
-        )
+        select(func.count())
+        .select_from(InterviewMessage)
+        .where(InterviewMessage.interview_id == interview_id)
     )
     if existing and int(existing) > 0:
         raise ValueError("Conversation already initialized")
@@ -188,7 +190,9 @@ async def initialize_first_message(session: AsyncSession, interview_id: str) -> 
     session.add(system_message)
 
     # Ask LLM to generate first message for user — mock for now
-    first_message_text = "Здравствуйте! Я виртуальный HR-ассистент. Готовы начать интервью?"
+    first_message_text = (
+        "Здравствуйте! Я виртуальный HR-ассистент. Готовы начать интервью?"
+    )
     first_assistant = InterviewMessage(
         interview_id=interview_id,
         index=1,

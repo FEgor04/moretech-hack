@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, String, Text, Enum
+from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -18,11 +18,7 @@ class InterviewMessage(Base):
     index: Mapped[int] = mapped_column(Integer, primary_key=True)
     text: Mapped[str | None] = mapped_column(Text, nullable=True)
     type: Mapped[str] = mapped_column(
-        Enum(
-            InterviewMessageType.SYSTEM,
-            InterviewMessageType.USER,
-            name="interviewmessagetype",
-        ),
+        String(64),
         nullable=False,
     )
 
