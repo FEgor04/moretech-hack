@@ -3,7 +3,6 @@ import os
 from collections.abc import AsyncGenerator
 
 import pytest
-import sqlalchemy as sa
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from testcontainers.postgres import PostgresContainer
@@ -40,22 +39,6 @@ def postgres_container():
         command.upgrade(alembic_cfg, "head")
 
         yield postgres
-
-
-@pytest.fixture(autouse=True)
-async def _clean_db(postgres_container) -> None:
-    # Ensure tests are isolated: wipe data but keep default admin user
-    from app.db.session import AsyncSessionLocal
-
-    async with AsyncSessionLocal() as session:
-        await session.execute(sa.text("DELETE FROM interview"))
-        await session.execute(sa.text("DELETE FROM candidate"))
-        await session.execute(sa.text("DELETE FROM vacancy"))
-        await session.execute(
-            sa.text('DELETE FROM "user" WHERE email != :email'),
-            {"email": os.environ.get("DEFAULT_USER_EMAIL", "admin@example.com")},
-        )
-        await session.commit()
 
 
 @pytest.fixture(scope="session")
