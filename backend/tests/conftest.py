@@ -13,6 +13,7 @@ os.environ.setdefault("DEFAULT_USER_EMAIL", "admin@example.com")
 os.environ.setdefault("DEFAULT_USER_PASSWORD", "admin")
 os.environ.setdefault("DEFAULT_USER_NAME", "Admin")
 
+
 @pytest.fixture(scope="session")
 def postgres_container():
     """Start PostgreSQL container for the entire test session."""
@@ -29,7 +30,7 @@ def postgres_container():
             f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
         )
         os.environ["DATABASE_URL"] = database_url
-        
+
         # Reload pydantic settings
         settings.__init__()
 
