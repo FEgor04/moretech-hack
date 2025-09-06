@@ -52,9 +52,17 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 											{vacancies[index].data.title}
 										</Link>
 									</CardTitle>
-									{interview.feedback_positive != null && <Badge variant={interview.feedback_positive ? "default" : "destructive"}>
-										{interview.feedback_positive ? "Положительный" : "Отрицательный"}
-									</Badge>}
+									{interview.feedback_positive != null && (
+										<Badge
+											variant={
+												interview.feedback_positive ? "default" : "destructive"
+											}
+										>
+											{interview.feedback_positive
+												? "Положительный"
+												: "Отрицательный"}
+										</Badge>
+									)}
 									<div className="ml-auto flex gap-2">
 										<Tooltip>
 											<TooltipTrigger asChild>
