@@ -1,7 +1,7 @@
 from typing import BinaryIO
 
 
-from app.schemas.common import CandidateCreate
+from app.schemas.common import CandidateCreate, VacancyCreate
 
 
 class PDFParsingError(Exception):
@@ -37,6 +37,30 @@ class PDFParserService:
             position="Software Engineer",
             experience=5,
             status="pending",
+        )
+
+    async def parse_vacancy(self, pdf_file: BinaryIO) -> VacancyCreate:
+        """
+        Parse a PDF job description and extract vacancy information.
+
+        Args:
+            pdf_file: Binary file object containing the PDF
+
+        Returns:
+            VacancyCreate: Parsed vacancy data
+
+        Raises:
+            PDFParsingError: If parsing fails
+        """
+        # Mock implementation - returns a sample vacancy
+        # In a real implementation, this would use libraries like PyPDF2, pdfplumber, or similar
+        # to extract text from the PDF and parse it for vacancy information
+
+        # For now, return a mock vacancy with data that would typically be extracted from a job description
+        return VacancyCreate(
+            title="Senior Software Engineer",
+            description="We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience in software development, strong problem-solving skills, and experience with modern web technologies.",
+            status="open",
         )
 
 
