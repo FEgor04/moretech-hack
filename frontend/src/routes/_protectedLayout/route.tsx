@@ -18,8 +18,7 @@ export const Route = createFileRoute("/_protectedLayout")({
 
 		try {
 			await context.queryClient.fetchQuery(meQueryOptions());
-		}
-		catch (error) {
+		} catch (error) {
 			clearAccessToken();
 			throw redirect({ to: "/sign-in" });
 		}
@@ -49,4 +48,3 @@ function RouteComponent() {
 		</SidebarProvider>
 	);
 }
-

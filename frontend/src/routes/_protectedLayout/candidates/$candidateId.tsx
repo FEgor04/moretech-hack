@@ -32,7 +32,7 @@ function CandidateDetail() {
 						position: String(fd.get("position") || c.position),
 						experience: Number(fd.get("experience") ?? c.experience),
 						status: statusValue ? (statusValue as CandidateStatus) : undefined,
-					})
+					});
 				}}
 				className="grid max-w-xl grid-cols-2 gap-2 rounded-md border p-3"
 			>
@@ -84,7 +84,7 @@ function CandidateDetail() {
 					defaultValue={c.status ?? ""}
 					className="rounded-md border px-2 py-1"
 				/>
-				
+
 				<button
 					type="submit"
 					disabled={mutation.isPending}
@@ -94,5 +94,5 @@ function CandidateDetail() {
 				</button>
 			</form>
 		</div>
-	)
+	);
 }
