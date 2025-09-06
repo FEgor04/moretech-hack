@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { LinkIcon, MessageCircleReply, NotebookIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { toast } from "sonner";
 
 interface InterviewsListProps {
 	candidateId: string;
@@ -36,7 +37,7 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 		<div className="space-y-4">
 			<h3 className="text-lg font-semibold">Интервью</h3>
 			<div className="space-y-3">
-				{interviews.data.map((interview, index) => (
+				{interviews.data.map((interview, index) => interview.vacancy_id && (
 					<Card key={interview.id}>
 						<CardHeader className="flex flex-row items-center">
 							<CardTitle>
@@ -50,12 +51,18 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 							<div className="ml-auto flex gap-2">
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="outline" size="icon">
+										<Button variant="outline" size="icon" onClick={() => {
+											const url = `${window.location.origin}/interviews/${interview.id}`;
+											void navigator.clipboard.writeText(url).then(
+												() => toast.success("Ссылка на собеседование скопирована"),
+												() => toast.error("Не удалось скопировать ссылку"),
+											);
+										}}>
 											<LinkIcon />
 										</Button>
 									</TooltipTrigger>
 									<TooltipContent>
-										Скопировать ссылку на собеседоавние
+										Скопировать ссылку на собеседование
 									</TooltipContent>
 								</Tooltip>
 								<Tooltip>
