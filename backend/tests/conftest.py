@@ -3,6 +3,7 @@ import os
 from collections.abc import AsyncGenerator
 
 import pytest
+from app.core.config import settings
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from testcontainers.postgres import PostgresContainer
@@ -30,11 +31,13 @@ def postgres_container():
         )
         os.environ["DATABASE_URL"] = database_url
 
+        # Reload pydantic settings
+        settings.__init__()
+
         # Import modules after setting the database URL
         from alembic import command
         from alembic.config import Config
 
-        # Run migrations once for the session
         alembic_cfg = Config("alembic.ini")
         command.upgrade(alembic_cfg, "head")
 

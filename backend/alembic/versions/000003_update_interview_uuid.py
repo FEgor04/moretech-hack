@@ -1,7 +1,7 @@
 """switch interview.id to uuid string
 
-Revision ID: 20250906_01
-Revises: 20250109_01
+Revision ID: 000003
+Revises: 000002
 Create Date: 2025-09-06
 """
 
@@ -13,8 +13,8 @@ from sqlalchemy import inspect as sa_inspect
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "20250906_01"
-down_revision: Union[str, None] = "20250109_01"
+revision: str = "000003"
+down_revision: Union[str, None] = "000002"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
