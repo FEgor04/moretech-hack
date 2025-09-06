@@ -17,7 +17,6 @@ import { Route as ProtectedLayoutCandidatesIndexRouteImport } from './routes/_pr
 import { Route as ProtectedLayoutVacanciesNewRouteImport } from './routes/_protectedLayout/vacancies/new'
 import { Route as ProtectedLayoutVacanciesVacancyIdRouteImport } from './routes/_protectedLayout/vacancies/$vacancyId'
 import { Route as ProtectedLayoutCandidatesNewRouteImport } from './routes/_protectedLayout/candidates/new'
-import { Route as ProtectedLayoutCandidatesCandidateIdRouteImport } from './routes/_protectedLayout/candidates/$candidateId'
 import { Route as ProtectedLayoutCandidatesCandidateIdIndexRouteImport } from './routes/_protectedLayout/candidates/$candidateId.index'
 import { Route as ProtectedLayoutCandidatesCandidateIdEditRouteImport } from './routes/_protectedLayout/candidates/$candidateId.edit'
 
@@ -65,36 +64,29 @@ const ProtectedLayoutCandidatesNewRoute =
     path: '/candidates/new',
     getParentRoute: () => ProtectedLayoutRouteRoute,
   } as any)
-const ProtectedLayoutCandidatesCandidateIdRoute =
-  ProtectedLayoutCandidatesCandidateIdRouteImport.update({
-    id: '/candidates/$candidateId',
-    path: '/candidates/$candidateId',
-    getParentRoute: () => ProtectedLayoutRouteRoute,
-  } as any)
 const ProtectedLayoutCandidatesCandidateIdIndexRoute =
   ProtectedLayoutCandidatesCandidateIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => ProtectedLayoutCandidatesCandidateIdRoute,
+    id: '/candidates/$candidateId/',
+    path: '/candidates/$candidateId/',
+    getParentRoute: () => ProtectedLayoutRouteRoute,
   } as any)
 const ProtectedLayoutCandidatesCandidateIdEditRoute =
   ProtectedLayoutCandidatesCandidateIdEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => ProtectedLayoutCandidatesCandidateIdRoute,
+    id: '/candidates/$candidateId/edit',
+    path: '/candidates/$candidateId/edit',
+    getParentRoute: () => ProtectedLayoutRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
-  '/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdRouteWithChildren
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
   '/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
   '/candidates': typeof ProtectedLayoutCandidatesIndexRoute
   '/vacancies': typeof ProtectedLayoutVacanciesIndexRoute
   '/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
-  '/candidates/$candidateId/': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
+  '/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,7 +104,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protectedLayout': typeof ProtectedLayoutRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
-  '/_protectedLayout/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdRouteWithChildren
   '/_protectedLayout/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/_protectedLayout/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
   '/_protectedLayout/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
@@ -126,14 +117,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sign-in'
-    | '/candidates/$candidateId'
     | '/candidates/new'
     | '/vacancies/$vacancyId'
     | '/vacancies/new'
     | '/candidates'
     | '/vacancies'
     | '/candidates/$candidateId/edit'
-    | '/candidates/$candidateId/'
+    | '/candidates/$candidateId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,7 +140,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_protectedLayout'
     | '/sign-in'
-    | '/_protectedLayout/candidates/$candidateId'
     | '/_protectedLayout/candidates/new'
     | '/_protectedLayout/vacancies/$vacancyId'
     | '/_protectedLayout/vacancies/new'
@@ -224,66 +213,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedLayoutCandidatesNewRouteImport
       parentRoute: typeof ProtectedLayoutRouteRoute
     }
-    '/_protectedLayout/candidates/$candidateId': {
-      id: '/_protectedLayout/candidates/$candidateId'
-      path: '/candidates/$candidateId'
-      fullPath: '/candidates/$candidateId'
-      preLoaderRoute: typeof ProtectedLayoutCandidatesCandidateIdRouteImport
-      parentRoute: typeof ProtectedLayoutRouteRoute
-    }
     '/_protectedLayout/candidates/$candidateId/': {
       id: '/_protectedLayout/candidates/$candidateId/'
-      path: '/'
-      fullPath: '/candidates/$candidateId/'
+      path: '/candidates/$candidateId'
+      fullPath: '/candidates/$candidateId'
       preLoaderRoute: typeof ProtectedLayoutCandidatesCandidateIdIndexRouteImport
-      parentRoute: typeof ProtectedLayoutCandidatesCandidateIdRoute
+      parentRoute: typeof ProtectedLayoutRouteRoute
     }
     '/_protectedLayout/candidates/$candidateId/edit': {
       id: '/_protectedLayout/candidates/$candidateId/edit'
-      path: '/edit'
+      path: '/candidates/$candidateId/edit'
       fullPath: '/candidates/$candidateId/edit'
       preLoaderRoute: typeof ProtectedLayoutCandidatesCandidateIdEditRouteImport
-      parentRoute: typeof ProtectedLayoutCandidatesCandidateIdRoute
+      parentRoute: typeof ProtectedLayoutRouteRoute
     }
   }
 }
 
-interface ProtectedLayoutCandidatesCandidateIdRouteChildren {
-  ProtectedLayoutCandidatesCandidateIdEditRoute: typeof ProtectedLayoutCandidatesCandidateIdEditRoute
-  ProtectedLayoutCandidatesCandidateIdIndexRoute: typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
-}
-
-const ProtectedLayoutCandidatesCandidateIdRouteChildren: ProtectedLayoutCandidatesCandidateIdRouteChildren =
-  {
-    ProtectedLayoutCandidatesCandidateIdEditRoute:
-      ProtectedLayoutCandidatesCandidateIdEditRoute,
-    ProtectedLayoutCandidatesCandidateIdIndexRoute:
-      ProtectedLayoutCandidatesCandidateIdIndexRoute,
-  }
-
-const ProtectedLayoutCandidatesCandidateIdRouteWithChildren =
-  ProtectedLayoutCandidatesCandidateIdRoute._addFileChildren(
-    ProtectedLayoutCandidatesCandidateIdRouteChildren,
-  )
-
 interface ProtectedLayoutRouteRouteChildren {
-  ProtectedLayoutCandidatesCandidateIdRoute: typeof ProtectedLayoutCandidatesCandidateIdRouteWithChildren
   ProtectedLayoutCandidatesNewRoute: typeof ProtectedLayoutCandidatesNewRoute
   ProtectedLayoutVacanciesVacancyIdRoute: typeof ProtectedLayoutVacanciesVacancyIdRoute
   ProtectedLayoutVacanciesNewRoute: typeof ProtectedLayoutVacanciesNewRoute
   ProtectedLayoutCandidatesIndexRoute: typeof ProtectedLayoutCandidatesIndexRoute
   ProtectedLayoutVacanciesIndexRoute: typeof ProtectedLayoutVacanciesIndexRoute
+  ProtectedLayoutCandidatesCandidateIdEditRoute: typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  ProtectedLayoutCandidatesCandidateIdIndexRoute: typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
 }
 
 const ProtectedLayoutRouteRouteChildren: ProtectedLayoutRouteRouteChildren = {
-  ProtectedLayoutCandidatesCandidateIdRoute:
-    ProtectedLayoutCandidatesCandidateIdRouteWithChildren,
   ProtectedLayoutCandidatesNewRoute: ProtectedLayoutCandidatesNewRoute,
   ProtectedLayoutVacanciesVacancyIdRoute:
     ProtectedLayoutVacanciesVacancyIdRoute,
   ProtectedLayoutVacanciesNewRoute: ProtectedLayoutVacanciesNewRoute,
   ProtectedLayoutCandidatesIndexRoute: ProtectedLayoutCandidatesIndexRoute,
   ProtectedLayoutVacanciesIndexRoute: ProtectedLayoutVacanciesIndexRoute,
+  ProtectedLayoutCandidatesCandidateIdEditRoute:
+    ProtectedLayoutCandidatesCandidateIdEditRoute,
+  ProtectedLayoutCandidatesCandidateIdIndexRoute:
+    ProtectedLayoutCandidatesCandidateIdIndexRoute,
 }
 
 const ProtectedLayoutRouteRouteWithChildren =

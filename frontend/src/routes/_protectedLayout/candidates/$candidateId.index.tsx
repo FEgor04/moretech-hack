@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { CandidateAvatar } from "@/components/candidates/candidate-avatar";
 import { CandidateStatusBadge } from "@/components/candidates/status-badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId/",
@@ -48,21 +49,21 @@ function CandidateDetail() {
 			<div className="grid max-w-2xl gap-6 rounded-lg border p-6">
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div>
-						<label className="text-sm font-medium text-muted-foreground">
+						<Label>
 							Email
-						</label>
+						</Label>
 						<p className="text-sm">{c.email}</p>
 					</div>
 					<div>
-						<label className="text-sm font-medium text-muted-foreground">
+						<Label>
 							Опыт работы
-						</label>
+						</Label>
 						<p className="text-sm">{c.experience} лет</p>
 					</div>
 					<div>
-						<label className="text-sm font-medium text-muted-foreground">
+						<Label>
 							Статус
-						</label>
+						</Label>
 						<div className="mt-1">
 							{c.status && <CandidateStatusBadge status={c.status} />}
 						</div>

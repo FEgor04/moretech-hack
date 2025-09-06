@@ -1,0 +1,167 @@
+---
+globs: *.tsx,*.ts
+description: Guidelines for writing forms with mutations, React Hook Form, Zod validation, and shadcn/ui components
+---
+
+# Forms with Mutations, React Hook Form, Zod & shadcn/ui
+
+## Form Structure Pattern
+
+When creating forms with mutations, follow this established pattern:
+
+### 1. Imports
+```typescript
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+```
+
+### 2. Schema Definition
+Define Zod schemas for form validation:
+```typescript
+const formSchema = z.object({
+  name: z.string().min(1, "Field is required"),
+  email: z.string().email("Invalid email format"),
+  experience: z.coerce.number().min(0, "Value cannot be negative"),
+  status: z.enum(["pending", "reviewing", "interviewing", "accepted", "rejected", "on_hold"]).optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+```
+
+### 3. Form Setup
+Initialize React Hook Form with proper configuration:
+```typescript
+const form = useForm<FormData>({
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    name: data.name,
+    email: data.email,
+    experience: data.experience,
+    status: data.status,
+  },
+});
+```
+
+### 4. Mutation Integration
+Handle form submission with mutations:
+```typescript
+const mutation = useUpdateMutation(id);
+
+const onSubmit = (data: FormData) => {
+  mutation.mutate(data, {
+    onSuccess: () => {
+      // Navigate or show success message
+      navigate({ to: "/success-route" });
+    },
+  });
+};
+```
+
+### 5. Form JSX Structure
+Use shadcn/ui form components:
+```typescript
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Name</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Status</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="reviewing">Reviewing</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+    
+    <div className="flex gap-3">
+      <Button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? "Saving..." : "Save"}
+      </Button>
+      <Button type="button" variant="outline" asChild>
+        <Link to="/cancel-route">Cancel</Link>
+      </Button>
+    </div>
+  </form>
+</Form>
+```
+
+## Key Guidelines
+
+### Form Validation
+- Always use Zod schemas for validation
+- Use `z.coerce.number()` for number inputs to handle string-to-number conversion
+- Provide meaningful error messages in Russian for user-facing forms
+- Use `z.enum()` for select options with proper typing
+
+### Component Usage
+- Always wrap forms with `<Form {...form}>` provider
+- Use `FormField` with render prop pattern for each field
+- Wrap inputs with `FormControl` for proper accessibility
+- Use `FormMessage` for error display (automatically shows validation errors)
+- Use shadcn/ui `Input` component for text inputs
+- Use shadcn/ui `Select` component for dropdowns
+
+### Mutation Handling
+- Use mutation hooks from the API layer
+- Handle loading states with `mutation.isPending`
+- Provide success callbacks for navigation or feedback
+- Disable form buttons during submission
+
+### Accessibility
+- Always provide proper labels with `FormLabel`
+- Use semantic form structure
+- Ensure proper ARIA attributes through shadcn/ui components
+
+### Styling
+- Use consistent spacing with `space-y-6` for form sections
+- Use responsive grid layouts with `grid-cols-1 md:grid-cols-2`
+- Apply consistent button styling and spacing
+- Use proper form container styling with borders and padding
+
+## Example Reference
+See [frontend/src/routes/_protectedLayout/candidates/$candidateId.edit.tsx](mdc:frontend/src/routes/_protectedLayout/candidates/$candidateId.edit.tsx) for a complete implementation example.
