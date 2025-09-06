@@ -11,6 +11,16 @@ export type BodyUploadCvCandidatesUploadCvPost = {
 };
 
 /**
+ * Body_upload_vacancy_pdf_vacancies_upload_pdf_post
+ */
+export type BodyUploadVacancyPdfVacanciesUploadPdfPost = {
+    /**
+     * Pdf File
+     */
+    pdf_file: Blob | File;
+};
+
+/**
  * CandidateCreate
  */
 export type CandidateCreate = {
@@ -708,6 +718,31 @@ export type UpdateVacancyVacanciesVacancyIdPatchResponses = {
 };
 
 export type UpdateVacancyVacanciesVacancyIdPatchResponse = UpdateVacancyVacanciesVacancyIdPatchResponses[keyof UpdateVacancyVacanciesVacancyIdPatchResponses];
+
+export type UploadVacancyPdfVacanciesUploadPdfPostData = {
+    body: BodyUploadVacancyPdfVacanciesUploadPdfPost;
+    path?: never;
+    query?: never;
+    url: '/vacancies/upload-pdf';
+};
+
+export type UploadVacancyPdfVacanciesUploadPdfPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadVacancyPdfVacanciesUploadPdfPostError = UploadVacancyPdfVacanciesUploadPdfPostErrors[keyof UploadVacancyPdfVacanciesUploadPdfPostErrors];
+
+export type UploadVacancyPdfVacanciesUploadPdfPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: VacancyRead;
+};
+
+export type UploadVacancyPdfVacanciesUploadPdfPostResponse = UploadVacancyPdfVacanciesUploadPdfPostResponses[keyof UploadVacancyPdfVacanciesUploadPdfPostResponses];
 
 export type ListInterviewsInterviewsGetData = {
     body?: never;

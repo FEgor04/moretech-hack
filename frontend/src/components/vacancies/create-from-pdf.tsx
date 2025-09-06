@@ -14,10 +14,14 @@ import {
 } from "../ui/kibo-ui/dropzone";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCreateFromPDF } from "../../api/mutations/vacancies";
 
 export function CreateFromPDFButton() {
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [isOpen, setIsOpen] = useState(false);
+
+	const createFromPDFMutation = useCreateFromPDF();
 
 	const handleFileDrop = (acceptedFiles: File[]) => {
 		setError(null);
@@ -32,13 +36,22 @@ export function CreateFromPDFButton() {
 		setError(error.message);
 	};
 
-	const handleUpload = () => {
+	const handleUpload = async () => {
 		if (!selectedFile) return;
 
-		// TODO: Implement when backend supports vacancy PDF upload
-		toast.error("Функция загрузки PDF для вакансий пока не реализована", {
-			description: "Обратитесь к администратору для добавления этой функции",
-		});
+		try {
+			await createFromPDFMutation.mutateAsync(selectedFile);
+			toast.success("Вакансия успешно создана из PDF", {
+				description: "Вакансия была загружена и обработана",
+			});
+			setIsOpen(false);
+			resetForm();
+		} catch (error) {
+			console.error("Error uploading PDF:", error);
+			toast.error("Ошибка при загрузке PDF", {
+				description: "Не удалось создать вакансию из PDF файла",
+			});
+		}
 	};
 
 	const resetForm = () => {
@@ -47,7 +60,13 @@ export function CreateFromPDFButton() {
 	};
 
 	return (
-		<Dialog onOpenChange={(open) => !open && resetForm()}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				setIsOpen(open);
+				if (!open) resetForm();
+			}}
+		>
 			<DialogTrigger asChild>
 				<Button variant="outline">
 					<UploadIcon className="w-4 h-4 mr-2" />
@@ -71,13 +90,13 @@ export function CreateFromPDFButton() {
 						onError={handleError}
 						src={selectedFile ? [selectedFile] : undefined}
 						className="h-auto"
-						disabled
 					>
 						<DropzoneContent>
 							<div className="space-y-2">
 								<UploadIcon className="w-8 h-8 text-muted-foreground mx-auto" />
 								<p className="text-sm font-medium text-muted-foreground">
-									{selectedFile?.name || "Функция недоступна"}
+									{selectedFile?.name ||
+										"Перетащите PDF файл сюда или нажмите для выбора"}
 								</p>
 								{selectedFile && (
 									<p className="text-xs text-muted-foreground">
@@ -92,10 +111,10 @@ export function CreateFromPDFButton() {
 								<UploadIcon className="w-8 h-8 text-muted-foreground mx-auto" />
 								<div>
 									<p className="text-sm font-medium text-muted-foreground">
-										Функция загрузки PDF для вакансий пока не реализована
+										Перетащите PDF файл сюда или нажмите для выбора
 									</p>
 									<p className="text-xs text-muted-foreground">
-										Обратитесь к администратору
+										Поддерживаются только PDF файлы до 10MB
 									</p>
 								</div>
 							</div>
@@ -111,9 +130,13 @@ export function CreateFromPDFButton() {
 					)}
 
 					{/* Upload Button */}
-					<Button onClick={handleUpload} disabled={true} className="w-full">
+					<Button
+						onClick={handleUpload}
+						disabled={!selectedFile || createFromPDFMutation.isPending}
+						className="w-full"
+					>
 						<UploadIcon className="w-4 h-4 mr-2" />
-						Функция недоступна
+						{createFromPDFMutation.isPending ? "Загрузка..." : "Загрузить PDF"}
 					</Button>
 				</div>
 			</DialogContent>
