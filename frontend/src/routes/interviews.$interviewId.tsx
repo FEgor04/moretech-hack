@@ -7,10 +7,26 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { MessageCircle, Clock, FileText, Play, Send, User, Bot } from 'lucide-react';
+import { MessageCircle, Clock, FileText, Play } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
+import { 
+  Conversation, 
+  ConversationContent, 
+  ConversationScrollButton 
+} from '@/components/ai-elements/conversation';
+import { Response } from '@/components/ai-elements/response';
+import { 
+  Message, 
+  MessageContent, 
+  MessageAvatar 
+} from '@/components/ai-elements/message';
+import { 
+  PromptInput, 
+  PromptInputTextarea, 
+  PromptInputSubmit, 
+  PromptInputToolbar
+} from '@/components/ai-elements/prompt-input';
 
 export const Route = createFileRoute('/interviews/$interviewId')({
   component: RouteComponent,
@@ -179,7 +195,7 @@ function StartInterview({ interviewId }: { interviewId: string }) {
                                     >
                                         {initializeFirstMessageMutation.isPending ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                                                 Запуск...
                                             </>
                                         ) : (
@@ -208,7 +224,6 @@ function StartInterview({ interviewId }: { interviewId: string }) {
 
 function InterviewChat({ interviewId }: { interviewId: string }) {
     const [message, setMessage] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     
     const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
     const candidate = useSuspenseQuery(candidateQueryOptions(interview.data.candidate_id));
@@ -224,16 +239,7 @@ function InterviewChat({ interviewId }: { interviewId: string }) {
     
     const postMessageMutation = usePostInterviewMessageMutation();
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages.data]);
-
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSendMessage = async () => {
         if (!message.trim() || postMessageMutation.isPending) return;
 
         const messageText = message.trim();
@@ -258,7 +264,7 @@ function InterviewChat({ interviewId }: { interviewId: string }) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
                     <p className="text-gray-600">Загрузка собеседования...</p>
                 </div>
             </div>
@@ -289,70 +295,43 @@ function InterviewChat({ interviewId }: { interviewId: string }) {
             {/* Chat Container */}
             <div className="max-w-4xl mx-auto h-[calc(100vh-140px)] flex flex-col">
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {messages.data?.map((msg, index) => (
-                        <div
-                            key={index}
-                            className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div
-                                className={`flex items-start gap-3 max-w-[80%] ${
-                                    msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-                                }`}
-                            >
-                                {/* Avatar */}
-                                <div
-                                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                                        msg.type === 'user'
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'bg-gray-200 text-gray-600'
-                                    }`}
-                                >
-                                    {msg.type === 'user' ? (
-                                        <User className="h-4 w-4" />
-                                    ) : (
-                                        <Bot className="h-4 w-4" />
-                                    )}
-                                </div>
-
-                                {/* Message Bubble */}
-                                <div
-                                    className={`px-4 py-3 rounded-2xl ${
-                                        msg.type === 'user'
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'bg-white border border-gray-200 text-gray-900'
-                                    }`}
-                                >
-                                    <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                </div>
+                <Conversation className="flex-1">
+                    <ConversationContent>
+                        {messages.data?.map((msg) => (
+                            <Message key={`${msg.interview_id}-${msg.index}`} from={msg.type as 'user' | 'assistant'}>
+                                <MessageContent>
+                                    <Response>
+                                        {msg.text}
+                                    </Response>
+                                </MessageContent>
+                                <MessageAvatar
+                                    src={msg.type === 'user' ? '' : ''}
+                                    name={msg.type === 'user' ? candidate.data.name : 'AI'}
+                                />
+                            </Message>
+                        ))}
+                    </ConversationContent>
+                    <ConversationScrollButton />
+                </Conversation>
 
                 {/* Message Input */}
-                <div className="border-t border-gray-200 bg-white p-6">
-                    <form onSubmit={handleSendMessage} className="flex gap-3">
-                        <Input
+                <div className="">
+                    <PromptInput className='mt-4 relative'>
+                        <PromptInputTextarea
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Введите ваше сообщение..."
                             disabled={postMessageMutation.isPending}
-                            className="flex-1"
                         />
-                        <Button
-                            type="submit"
-                            disabled={!message.trim() || postMessageMutation.isPending}
-                            className="bg-indigo-600 hover:bg-indigo-700"
-                        >
-                            {postMessageMutation.isPending ? (
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            ) : (
-                                <Send className="h-4 w-4" />
-                            )}
-                        </Button>
-                    </form>
+                        <PromptInputToolbar>
+                            <PromptInputSubmit
+                                onClick={handleSendMessage}
+                                disabled={!message.trim() || postMessageMutation.isPending}
+                                status={postMessageMutation.isPending ? 'submitted' : undefined}
+                                className="absolute right-1 bottom-1"
+                            />
+                        </PromptInputToolbar>
+                    </PromptInput>
                 </div>
             </div>
         </div>
