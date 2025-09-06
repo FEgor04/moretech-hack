@@ -1,46 +1,46 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 
 interface SelectCandidateProps {
-  value?: string;
-  onValueChange: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-  excludeCandidateId?: string;
+	value?: string;
+	onValueChange: (value: string) => void;
+	placeholder?: string;
+	className?: string;
+	excludeCandidateId?: string;
 }
 
 export function SelectCandidate({
-  value,
-  onValueChange,
-  placeholder = "Выберите кандидата",
-  excludeCandidateId,
-  ...props
+	value,
+	onValueChange,
+	placeholder = "Выберите кандидата",
+	excludeCandidateId,
+	...props
 }: SelectCandidateProps) {
-  const candidates = useSuspenseQuery(candidatesQueryOptions());
+	const candidates = useSuspenseQuery(candidatesQueryOptions());
 
-  const filteredCandidates = candidates.data.filter(
-    (candidate) => candidate.id !== excludeCandidateId
-  );
+	const filteredCandidates = candidates.data.filter(
+		(candidate) => candidate.id !== excludeCandidateId,
+	);
 
-  return (
-    <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger {...props}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {filteredCandidates.map((candidate) => (
-          <SelectItem key={candidate.id} value={candidate.id}>
-            {candidate.name} - {candidate.position}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+	return (
+		<Select value={value} onValueChange={onValueChange}>
+			<SelectTrigger {...props}>
+				<SelectValue placeholder={placeholder} />
+			</SelectTrigger>
+			<SelectContent>
+				{filteredCandidates.map((candidate) => (
+					<SelectItem key={candidate.id} value={candidate.id}>
+						{candidate.name} - {candidate.position}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
+	);
 }

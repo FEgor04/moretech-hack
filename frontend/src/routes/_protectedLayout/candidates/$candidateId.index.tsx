@@ -15,7 +15,7 @@ export const Route = createFileRoute(
 	loader: async ({ params, context }) => {
 		const candidate = await context.queryClient.fetchQuery(
 			candidateQueryOptions(params.candidateId),
-		)
+		);
 		return { candidate };
 	},
 });
@@ -39,9 +39,7 @@ function CandidateDetail() {
 				</div>
 				<div className="flex gap-2">
 					<ScheduleInterviewDialog currentCandidateId={params.candidateId}>
-						<Button variant="outline">
-							Запланировать интервью
-						</Button>
+						<Button variant="outline">Запланировать интервью</Button>
 					</ScheduleInterviewDialog>
 					<Button asChild>
 						<Link
@@ -58,21 +56,15 @@ function CandidateDetail() {
 			<div className="grid max-w-2xl gap-6 rounded-lg border p-6">
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div>
-						<Label>
-							Email
-						</Label>
+						<Label>Email</Label>
 						<p className="text-sm">{c.email}</p>
 					</div>
 					<div>
-						<Label>
-							Опыт работы
-						</Label>
+						<Label>Опыт работы</Label>
 						<p className="text-sm">{c.experience} лет</p>
 					</div>
 					<div>
-						<Label>
-							Статус
-						</Label>
+						<Label>Статус</Label>
 						<div className="mt-1">
 							{c.status && <CandidateStatusBadge status={c.status} />}
 						</div>
@@ -83,5 +75,5 @@ function CandidateDetail() {
 			{/* Interviews section */}
 			<InterviewsList candidateId={params.candidateId} />
 		</div>
-	)
+	);
 }
