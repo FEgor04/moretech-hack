@@ -31,6 +31,18 @@ services:
     volumes:
       - ./backend:/app
 
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+
 volumes:
   db-data:
 
