@@ -65,7 +65,7 @@ export function CreateFromCVButton() {
 					),
 				});
 			},
-			onError: (error: any) => {
+			onError: (error: Error) => {
 				setError(error?.message || "Ошибка при загрузке файла");
 			},
 		});
@@ -108,9 +108,9 @@ export function CreateFromCVButton() {
 								<p className="text-sm font-medium text-green-700">
 									{selectedFile?.name}
 								</p>
-								<p className="text-xs text-muted-foreground">
-									{(selectedFile?.size! / 1024 / 1024).toFixed(2)} MB
-								</p>
+								{selectedFile && <p className="text-xs text-muted-foreground">
+									{(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+								</p>}
 							</div>
 						</DropzoneContent>
 
