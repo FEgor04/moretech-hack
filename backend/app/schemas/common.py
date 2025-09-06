@@ -35,10 +35,11 @@ class UserRead(UserBase, Timestamped):
 
 class CandidateBase(BaseModel):
     name: str
-    email: EmailStr
+    email: EmailStr | None = None
     position: str
     experience: int
     status: CandidateStatus = CandidateStatus.PENDING
+    gigachat_file_id: str | None = None
 
 
 class CandidateCreate(CandidateBase):
@@ -53,6 +54,7 @@ class VacancyBase(BaseModel):
     title: str
     description: str | None = None
     status: str | None = None
+    gigachat_file_id: str | None = None
 
 
 class VacancyCreate(VacancyBase):

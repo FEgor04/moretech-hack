@@ -11,6 +11,7 @@ class Vacancy(Base):
     title: Mapped[str] = mapped_column(String(255), index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(64), default="open")  # open | closed
+    gigachat_file_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()

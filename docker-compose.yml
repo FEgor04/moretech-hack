@@ -17,6 +17,7 @@ services:
       retries: 10
 
   backend:
+    env_file: docker.env
     container_name: backend
     build:
       context: ./backend

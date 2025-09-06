@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +12,37 @@ from app.services.pdf_parser import (
     PDFParserService,
 )
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+
+@router.get("/test-gigachat")
+async def test_gigachat_connection():
+    """Test GigaChat API connectivity"""
+    try:
+        logger.info("Testing GigaChat connection...")
+        pdf_parser = get_pdf_parser_service()
+
+        # Test basic chat without file
+        result = pdf_parser.gigachat_client.chat(
+            {
+                "messages": [
+                    {"role": "user", "content": "Привет! Это тест подключения."}
+                ],
+                "temperature": 0.1,
+            }
+        )
+
+        logger.info("GigaChat connection test successful")
+        return {
+            "status": "success",
+            "message": "GigaChat connection is working",
+            "response": result.choices[0].message.content,
+        }
+    except Exception as e:
+        logger.error(f"GigaChat connection test failed: {e}", exc_info=True)
+        return {"status": "error", "message": f"GigaChat connection failed: {str(e)}"}
 
 
 @router.post("/", response_model=CandidateRead, status_code=status.HTTP_201_CREATED)
@@ -80,29 +111,42 @@ async def upload_cv(
     Raises:
         HTTPException: If file is not a PDF or parsing fails
     """
+    logger.info(f"Received CV upload request for file: {cv_file.filename}")
+    logger.info(f"File content type: {cv_file.content_type}")
+    logger.info(f"File size: {cv_file.size if hasattr(cv_file, 'size') else 'Unknown'}")
+
     # Validate file type
     if not cv_file.content_type or not cv_file.content_type.startswith(
         "application/pdf"
     ):
+        logger.error(f"Invalid file type: {cv_file.content_type}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="File must be a PDF"
         )
 
     try:
+        logger.info("Starting CV parsing process...")
         # Parse the PDF to extract candidate information
-        candidate_data = await pdf_parser.parse_cv(cv_file.file)
+        candidate_data, file_id = await pdf_parser.parse_cv(
+            cv_file.file, cv_file.filename or "resume.pdf"
+        )
+        logger.info(f"CV parsing completed successfully. File ID: {file_id}")
 
+        logger.info("Creating candidate in database...")
         # Create the candidate using the existing service
         candidate = await candidates_service.create_candidate(session, candidate_data)
+        logger.info(f"Candidate created successfully with ID: {candidate.id}")
 
         return candidate
 
     except PDFParsingError as e:
+        logger.error(f"PDF parsing error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Failed to parse CV: {str(e)}",
         )
     except Exception as e:
+        logger.error(f"Unexpected error during CV upload: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while processing the CV: {str(e)}",
