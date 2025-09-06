@@ -45,15 +45,17 @@ jobs:
       run: |
         uv run ruff check .
 
-    - name: Run tests
+    - name: Run tests with coverage
       working-directory: ./backend
       run: |
-        uv run pytest
+        uv run pytest --cov=app --cov-report=xml --cov-report=html
 
     - name: Upload coverage reports
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
-        path: backend/.coverage
+        name: coverage-reports
+        path: |
+          backend/coverage.xml
+          backend/htmlcov/
         retention-days: 7
