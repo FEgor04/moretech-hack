@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     default_user_email: str = "admin@example.com"
     default_user_password: str = "admin"
     default_user_name: str = "Admin"
+    gigachat_credentials: str = "devsecret"
 
     class Config:
         env_file = ".env"
