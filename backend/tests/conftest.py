@@ -6,45 +6,47 @@ import pytest
 import sqlalchemy as sa
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
+from testcontainers.postgres import PostgresContainer
 
-# Ensure database configuration before importing the app
-os.environ.setdefault(
-    "DATABASE_URL", "postgresql+asyncpg://aihr:aihr@localhost:5432/aihr"
-)
+# Set default environment variables
 os.environ.setdefault("DEFAULT_USER_EMAIL", "admin@example.com")
 os.environ.setdefault("DEFAULT_USER_PASSWORD", "admin")
 os.environ.setdefault("DEFAULT_USER_NAME", "Admin")
 
-from alembic import command  # noqa: E402
-from alembic.config import Config  # noqa: E402
-from app.db.session import AsyncSessionLocal  # noqa: E402
-from app.main import app  # noqa: E402
 
+@pytest.fixture(scope="session")
+def postgres_container():
+    """Start PostgreSQL container for the entire test session."""
+    with PostgresContainer("postgres:15") as postgres:
+        # Get connection details and construct asyncpg URL
+        host = postgres.get_container_host_ip()
+        port = postgres.get_exposed_port(5432)
+        database = postgres.dbname
+        user = postgres.username
+        password = postgres.password
 
-@pytest.fixture(scope="session", autouse=True)
-def _migrate_db():
-    # Wait for docker-compose postgres if running
-    import socket
-    import time
+        # Set the database URL environment variable for the test session
+        database_url = (
+            f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        )
+        os.environ["DATABASE_URL"] = database_url
 
-    host = "localhost"
-    port = 5432
-    for _ in range(60):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            try:
-                s.connect((host, port))
-                break
-            except OSError:
-                time.sleep(1)
-    # run migrations once, synchronously (no running event loop here)
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
+        # Import modules after setting the database URL
+        from alembic import command
+        from alembic.config import Config
+
+        # Run migrations once for the session
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+
+        yield postgres
 
 
 @pytest.fixture(autouse=True)
-async def _clean_db() -> None:
+async def _clean_db(postgres_container) -> None:
     # Ensure tests are isolated: wipe data but keep default admin user
+    from app.db.session import AsyncSessionLocal
+
     async with AsyncSessionLocal() as session:
         await session.execute(sa.text("DELETE FROM interview"))
         await session.execute(sa.text("DELETE FROM candidate"))
@@ -58,19 +60,27 @@ async def _clean_db() -> None:
 
 @pytest.fixture(scope="session")
 def event_loop():
-    loop = asyncio.get_event_loop()
+    """Create an instance of the default event loop for the test session."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     yield loop
+    loop.close()
 
 
 @pytest.fixture()
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
+async def db_session(postgres_container) -> AsyncGenerator[AsyncSession, None]:
+    """Create database session with container."""
+    from app.db.session import AsyncSessionLocal
+
     async with AsyncSessionLocal() as session:
         yield session
 
 
 @pytest.fixture()
-async def client() -> AsyncGenerator[AsyncClient, None]:
-    # DB is migrated in session-scoped fixture above
+async def client(postgres_container) -> AsyncGenerator[AsyncClient, None]:
+    """Create test client with database container."""
+    from app.main import app
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
         yield ac
