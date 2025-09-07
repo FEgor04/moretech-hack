@@ -2,7 +2,14 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, PlainSerializer
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    PlainSerializer,
+)
 from typing import Union, Annotated
 
 
