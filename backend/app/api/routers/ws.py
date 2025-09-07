@@ -101,6 +101,60 @@ class InterviewWebsocketService:
             logger.exception("Failed to cut video fragment %s", path)
             return False
 
+    def extract_audio_from_video(self, video_path: str) -> str | None:
+        """Extract audio from video file and save as WAV with same base filename."""
+        try:
+            # Generate audio file path with .wav extension
+            audio_path = video_path.replace('.webm', '.wav')
+            
+            logger.debug("Extracting audio from %s to %s", video_path, audio_path)
+            
+            # ffmpeg command to extract audio
+            cmd = [
+                "ffmpeg",
+                "-y",  # Overwrite output file
+                "-i", video_path,  # Input video file
+                "-vn",  # No video
+                "-acodec", "pcm_s16le",  # PCM 16-bit little-endian
+                "-ar", "48000",  # Sample rate 48kHz
+                "-ac", "1",  # Mono
+                audio_path
+            ]
+            
+            logger.debug("Running ffmpeg audio extraction command: %s", " ".join(cmd))
+            
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                logger.error(
+                    "ffmpeg audio extraction failed for %s (return code %d): %s",
+                    video_path, result.returncode, result.stderr[-1000:]
+                )
+                return None
+            
+            logger.debug("Audio extraction successful: %s", audio_path)
+            return audio_path
+            
+        except Exception as e:
+            logger.exception("Failed to extract audio from video %s", video_path)
+            return None
+
+    def recognize_user_answer(self, audio_path: str) -> str:
+        """Recognize speech from audio file and return transcribed text."""
+        try:
+            logger.debug("Recognizing speech from audio file: %s", audio_path)
+            
+            # TODO: Implement actual speech recognition
+            # For now, return a mock response
+            mock_response = "тестовое сообщение"
+            
+            logger.info("Speech recognition result: %s", mock_response)
+            return mock_response
+            
+        except Exception as e:
+            logger.exception("Failed to recognize speech from %s", audio_path)
+            return ""
+
     def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
         elapsed_ms = int((time.monotonic() - self.connection_started_monotonic) * 1000)
@@ -114,20 +168,41 @@ class InterviewWebsocketService:
 
         fragment_path = self.save_interview_video(f".{self.fragment_index}")
         self.fragment_index += 1
+
+        if not fragment_path:
+            logger.warning("Failed to save interview video for interview %s", self.interview_id)
+            return
+    
+        # Get the two latest markers
+        start_ms, end_ms = self.get_latest_markers()
+        logger.debug(
+            "Using markers for cutting: start=%dms, end=%dms (all markers: %s)",
+            start_ms, end_ms, self.audio_marker_timings
+        )
         
-        if fragment_path:
-            # Get the two latest markers
-            start_ms, end_ms = self.get_latest_markers()
-            logger.debug(
-                "Using markers for cutting: start=%dms, end=%dms (all markers: %s)",
-                start_ms, end_ms, self.audio_marker_timings
-            )
+        # Cut the fragment video to only include time between markers
+        if not self.cut_fragment_video(fragment_path, start_ms, end_ms):
+            logger.warning("Failed to cut fragment: %s", fragment_path)
+            return
             
-            # Cut the fragment video to only include time between markers
-            if self.cut_fragment_video(fragment_path, start_ms, end_ms):
-                logger.info("Fragment cut successfully: %s", fragment_path)
-            else:
-                logger.warning("Failed to cut fragment: %s", fragment_path)
+        logger.info("Fragment cut successfully: %s", fragment_path)
+
+        audio_path = self.extract_audio_from_video(fragment_path)
+        if not audio_path:
+            logger.warning("Failed to extract audio from: %s", fragment_path)
+            return
+            
+        logger.info("Audio extracted successfully: %s", audio_path)
+        
+        # Recognize speech from the audio
+        recognized_text = self.recognize_user_answer(audio_path)
+        if not recognized_text:
+            logger.warning("Failed to recognize speech from: %s", audio_path)
+            return
+            
+        logger.info("User said: %s", recognized_text)
+    
+
 
     
     def add_video_chunk(self, chunk: bytes) -> None:
