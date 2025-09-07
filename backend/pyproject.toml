@@ -3,7 +3,7 @@ name = "ai-hr-backend"
 version = "0.1.0"
 description = "AI HR system backend (FastAPI)"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 license = { text = "MIT" }
 authors = [
   { name = "MoreTech Team" }
