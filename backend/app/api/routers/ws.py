@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 import time
 from typing import Dict, List
+import httpx
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
@@ -155,7 +156,37 @@ class InterviewWebsocketService:
             logger.exception("Failed to recognize speech from %s", audio_path)
             return ""
 
-    def handle_audio_marker(self) -> None:
+    async def submit_user_answer(self, interview_id: str, text: str) -> bool:
+        """Submit user answer to the interview messages endpoint."""
+        try:
+            logger.debug("Submitting user answer for interview %s: %s", interview_id, text)
+            
+            # Prepare the request payload
+            payload = {"text": text}
+            
+            # Make POST request to the interview messages endpoint
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"http://localhost:8000/interviews/{interview_id}/messages",
+                    json=payload,
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    logger.info("Successfully submitted user answer for interview %s", interview_id)
+                    return True
+                else:
+                    logger.error(
+                        "Failed to submit user answer for interview %s: status=%d, response=%s",
+                        interview_id, response.status_code, response.text
+                    )
+                    return False
+                    
+        except Exception as e:
+            logger.exception("Failed to submit user answer for interview %s", interview_id)
+            return False
+
+    async def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
         elapsed_ms = int((time.monotonic() - self.connection_started_monotonic) * 1000)
         self.audio_marker_timings.append(elapsed_ms)
@@ -201,6 +232,13 @@ class InterviewWebsocketService:
             return
             
         logger.info("User said: %s", recognized_text)
+        
+        # Submit the recognized text to the interview messages endpoint
+        if not await self.submit_user_answer(self.interview_id, recognized_text):
+            logger.warning("Failed to submit user answer for interview %s", self.interview_id)
+            return
+            
+        logger.info("User answer submitted successfully for interview %s", self.interview_id)
     
 
 
@@ -354,7 +392,7 @@ async def websocket_video_stream(
             else:
                 text_data = message.get("text")
                 if text_data == "audio-ready":
-                    service.handle_audio_marker()
+                    await service.handle_audio_marker()
                     continue
                 if text_data is not None:
                     logger.warning(
