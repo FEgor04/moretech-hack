@@ -5,7 +5,6 @@ import {
 } from "@/api/queries/interviews";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import {
 	Conversation,
 	ConversationContent,
