@@ -2,8 +2,25 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, field_serializer
-from typing import Union
+from pydantic import BaseModel, EmailStr, Field, field_validator, PlainSerializer
+from typing import Union, Annotated
+
+
+def _to_utc_iso_z(value: datetime | None) -> str | None:
+    if value is None:
+        return None
+    dt_utc = (
+        value.replace(tzinfo=timezone.utc)
+        if value.tzinfo is None
+        else value.astimezone(timezone.utc)
+    )
+    return dt_utc.isoformat().replace("+00:00", "Z")
+
+
+IsoDatetime = Annotated[
+    datetime,
+    PlainSerializer(_to_utc_iso_z, when_used="json"),
+]
 
 
 class CandidateStatus(str, Enum):
@@ -30,19 +47,8 @@ class ExperienceLevel(str, Enum):
 
 
 class Timestamped(BaseModel):
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
-
-    @field_serializer("created_at", "updated_at", when_used="json")
-    def _serialize_timestamp(self, value: datetime | None) -> str | None:
-        if value is None:
-            return None
-        dt_utc = (
-            value.replace(tzinfo=timezone.utc)
-            if value.tzinfo is None
-            else value.astimezone(timezone.utc)
-        )
-        return dt_utc.isoformat().replace("+00:00", "Z")
+    created_at: IsoDatetime | None = None
+    updated_at: IsoDatetime | None = None
 
 
 class UserBase(BaseModel):
@@ -247,18 +253,7 @@ class NoteUpdate(BaseModel):
 
 class NoteRead(NoteBase):
     id: int
-    created_at: datetime | None = None
-
-    @field_serializer("created_at", when_used="json")
-    def _serialize_created_at(self, value: datetime | None) -> str | None:
-        if value is None:
-            return None
-        dt_utc = (
-            value.replace(tzinfo=timezone.utc)
-            if value.tzinfo is None
-            else value.astimezone(timezone.utc)
-        )
-        return dt_utc.isoformat().replace("+00:00", "Z")
+    created_at: IsoDatetime | None = None
 
 
 class InterviewNoteBase(BaseModel):
@@ -272,15 +267,4 @@ class InterviewNoteCreate(InterviewNoteBase):
 
 class InterviewNoteRead(InterviewNoteBase):
     id: int
-    created_at: datetime | None = None
-
-    @field_serializer("created_at", when_used="json")
-    def _serialize_created_at(self, value: datetime | None) -> str | None:
-        if value is None:
-            return None
-        dt_utc = (
-            value.replace(tzinfo=timezone.utc)
-            if value.tzinfo is None
-            else value.astimezone(timezone.utc)
-        )
-        return dt_utc.isoformat().replace("+00:00", "Z")
+    created_at: IsoDatetime | None = None
