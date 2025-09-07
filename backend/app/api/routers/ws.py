@@ -52,7 +52,7 @@ class InterviewWebsocketService:
             end_sec = end_ms / 1000.0
             duration = end_sec - start_sec
             
-            logger.info(
+            logger.debug(
                 "Cutting video %s: start=%dms (%.3fs), end=%dms (%.3fs), duration=%.3fs",
                 path, start_ms, start_sec, end_ms, end_sec, duration
             )
@@ -79,7 +79,7 @@ class InterviewWebsocketService:
                 temp_path
             ]
             
-            logger.info("Running ffmpeg command: %s", " ".join(cmd))
+            logger.debug("Running ffmpeg command: %s", " ".join(cmd))
             
             result = subprocess.run(cmd, capture_output=True, text=True)
             
@@ -90,11 +90,11 @@ class InterviewWebsocketService:
                 )
                 return False
             
-            logger.info("ffmpeg cut successful for %s", path)
+            logger.debug("ffmpeg cut successful for %s", path)
             
             # Replace original file with cut version
             Path(temp_path).replace(path)
-            logger.info("Replaced original file with cut version: %s", path)
+            logger.debug("Replaced original file with cut version: %s", path)
             return True
             
         except Exception as e:
@@ -118,7 +118,7 @@ class InterviewWebsocketService:
         if fragment_path:
             # Get the two latest markers
             start_ms, end_ms = self.get_latest_markers()
-            logger.info(
+            logger.debug(
                 "Using markers for cutting: start=%dms, end=%dms (all markers: %s)",
                 start_ms, end_ms, self.audio_marker_timings
             )
