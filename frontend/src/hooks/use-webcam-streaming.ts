@@ -134,8 +134,7 @@ export function useWebcamStreaming(interviewId: string) {
 
 								audioRef.current
 									?.play()
-									.then(() => {
-									})
+									.then(() => {})
 									.catch((fallbackError) => {
 										console.error(
 											`Fallback ${fallbackType} failed:`,
