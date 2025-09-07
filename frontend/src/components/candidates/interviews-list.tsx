@@ -19,7 +19,6 @@ interface InterviewsListProps {
 export function InterviewsList({ candidateId }: InterviewsListProps) {
 	const interviews = useSuspenseQuery(
 		interviewsByCandidateQueryOptions(candidateId),
-		
 	);
 
 	const vacancies = useSuspenseQueries({
