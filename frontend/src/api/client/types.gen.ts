@@ -22,7 +22,9 @@ export type BodyUploadVacancyPdfVacanciesUploadPdfPost = {
 
 /**
  * CandidateCreate
+ * CandidateCreate
  */
+export type CandidateCreate = {
 export type CandidateCreate = {
     /**
      * Name
@@ -77,7 +79,17 @@ export type CandidateCreate = {
 
 /**
  * CandidateRead
+ * CandidateRead
  */
+export type CandidateRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
 export type CandidateRead = {
     /**
      * Created At
@@ -91,6 +103,7 @@ export type CandidateRead = {
      * Name
      */
     name: string;
+    name: string;
     /**
      * Email
      */
@@ -98,6 +111,7 @@ export type CandidateRead = {
     /**
      * Position
      */
+    position: string;
     position: string;
     /**
      * Experience
@@ -115,7 +129,7 @@ export type CandidateRead = {
      */
     gigachat_file_id?: string | null;
     /**
-     * Skills
+     * Gigachat File Id
      */
     skills?: Array<string> | string | null;
     /**
@@ -227,6 +241,42 @@ export type InterviewMessageRead = {
 export type InterviewMessageType = 'system' | 'user' | 'assistant';
 
 /**
+ * InterviewNoteCreate
+ */
+export type InterviewNoteCreate = {
+    /**
+     * Interview Id
+     */
+    interview_id: string;
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * InterviewNoteRead
+ */
+export type InterviewNoteRead = {
+    /**
+     * Interview Id
+     */
+    interview_id: string;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
  * InterviewRead
  */
 export type InterviewRead = {
@@ -281,6 +331,52 @@ export type MeResponse = {
      * User Id
      */
     user_id: number;
+};
+
+/**
+ * NoteCreate
+ */
+export type NoteCreate = {
+    /**
+     * Vacancy Id
+     */
+    vacancy_id: number;
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * NoteRead
+ */
+export type NoteRead = {
+    /**
+     * Vacancy Id
+     */
+    vacancy_id: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * NoteUpdate
+ */
+export type NoteUpdate = {
+    /**
+     * Text
+     */
+    text: string;
 };
 
 /**
@@ -373,6 +469,7 @@ export type VacancyCreate = {
     description?: string | null;
     /**
      * Status
+     * Status
      */
     status?: string | null;
     /**
@@ -384,7 +481,7 @@ export type VacancyCreate = {
      */
     company?: string | null;
     /**
-     * Location
+     * Salary Min
      */
     location?: string | null;
     /**
@@ -467,6 +564,7 @@ export type VacancyRead = {
     description?: string | null;
     /**
      * Status
+     * Status
      */
     status?: string | null;
     /**
@@ -478,7 +576,7 @@ export type VacancyRead = {
      */
     company?: string | null;
     /**
-     * Location
+     * Remote Work
      */
     location?: string | null;
     /**
@@ -564,6 +662,7 @@ export type VacancyUpdate = {
      */
     gigachat_file_id?: string | null;
     /**
+     * Company
      * Company
      */
     company?: string | null;
@@ -801,6 +900,7 @@ export type ListCandidatesCandidatesGetResponse = ListCandidatesCandidatesGetRes
 
 export type CreateCandidateCandidatesPostData = {
     body: CandidateCreate;
+    body: CandidateCreate;
     path?: never;
     query?: never;
     url: '/candidates/';
@@ -886,6 +986,7 @@ export type GetCandidateCandidatesCandidateIdGetResponse = GetCandidateCandidate
 
 export type UpdateCandidateCandidatesCandidateIdPatchData = {
     body: CandidateCreate;
+    body: CandidateCreate;
     path: {
         /**
          * Candidate Id
@@ -939,106 +1040,6 @@ export type UploadCvCandidatesUploadCvPostResponses = {
 
 export type UploadCvCandidatesUploadCvPostResponse = UploadCvCandidatesUploadCvPostResponses[keyof UploadCvCandidatesUploadCvPostResponses];
 
-export type ListVacanciesVacanciesGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/vacancies/';
-};
-
-export type ListVacanciesVacanciesGetResponses = {
-    /**
-     * Response List Vacancies Vacancies  Get
-     * Successful Response
-     */
-    200: Array<VacancyRead>;
-};
-
-export type ListVacanciesVacanciesGetResponse = ListVacanciesVacanciesGetResponses[keyof ListVacanciesVacanciesGetResponses];
-
-export type CreateVacancyVacanciesPostData = {
-    body: VacancyCreate;
-    path?: never;
-    query?: never;
-    url: '/vacancies/';
-};
-
-export type CreateVacancyVacanciesPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateVacancyVacanciesPostError = CreateVacancyVacanciesPostErrors[keyof CreateVacancyVacanciesPostErrors];
-
-export type CreateVacancyVacanciesPostResponses = {
-    /**
-     * Successful Response
-     */
-    201: VacancyRead;
-};
-
-export type CreateVacancyVacanciesPostResponse = CreateVacancyVacanciesPostResponses[keyof CreateVacancyVacanciesPostResponses];
-
-export type DeleteVacancyVacanciesVacancyIdDeleteData = {
-    body?: never;
-    path: {
-        /**
-         * Vacancy Id
-         */
-        vacancy_id: number;
-    };
-    query?: never;
-    url: '/vacancies/{vacancy_id}';
-};
-
-export type DeleteVacancyVacanciesVacancyIdDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteVacancyVacanciesVacancyIdDeleteError = DeleteVacancyVacanciesVacancyIdDeleteErrors[keyof DeleteVacancyVacanciesVacancyIdDeleteErrors];
-
-export type DeleteVacancyVacanciesVacancyIdDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    204: void;
-};
-
-export type DeleteVacancyVacanciesVacancyIdDeleteResponse = DeleteVacancyVacanciesVacancyIdDeleteResponses[keyof DeleteVacancyVacanciesVacancyIdDeleteResponses];
-
-export type GetVacancyVacanciesVacancyIdGetData = {
-    body?: never;
-    path: {
-        /**
-         * Vacancy Id
-         */
-        vacancy_id: number;
-    };
-    query?: never;
-    url: '/vacancies/{vacancy_id}';
-};
-
-export type GetVacancyVacanciesVacancyIdGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetVacancyVacanciesVacancyIdGetError = GetVacancyVacanciesVacancyIdGetErrors[keyof GetVacancyVacanciesVacancyIdGetErrors];
-
-export type GetVacancyVacanciesVacancyIdGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: VacancyRead;
-};
-
 export type GetVacancyVacanciesVacancyIdGetResponse = GetVacancyVacanciesVacancyIdGetResponses[keyof GetVacancyVacanciesVacancyIdGetResponses];
 
 export type UpdateVacancyVacanciesVacancyIdPatchData = {
@@ -1070,6 +1071,144 @@ export type UpdateVacancyVacanciesVacancyIdPatchResponses = {
 };
 
 export type UpdateVacancyVacanciesVacancyIdPatchResponse = UpdateVacancyVacanciesVacancyIdPatchResponses[keyof UpdateVacancyVacanciesVacancyIdPatchResponses];
+
+export type ListVacancyNotesVacanciesVacancyIdNotesGetData = {
+    body?: never;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/vacancies/{vacancy_id}/notes';
+};
+
+export type ListVacancyNotesVacanciesVacancyIdNotesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListVacancyNotesVacanciesVacancyIdNotesGetError = ListVacancyNotesVacanciesVacancyIdNotesGetErrors[keyof ListVacancyNotesVacanciesVacancyIdNotesGetErrors];
+
+export type ListVacancyNotesVacanciesVacancyIdNotesGetResponses = {
+    /**
+     * Response List Vacancy Notes Vacancies  Vacancy Id  Notes Get
+     * Successful Response
+     */
+    200: Array<NoteRead>;
+};
+
+export type ListVacancyNotesVacanciesVacancyIdNotesGetResponse = ListVacancyNotesVacanciesVacancyIdNotesGetResponses[keyof ListVacancyNotesVacanciesVacancyIdNotesGetResponses];
+
+export type CreateVacancyNoteVacanciesVacancyIdNotesPostData = {
+    body: NoteCreate;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+    };
+    query?: never;
+    url: '/vacancies/{vacancy_id}/notes';
+};
+
+export type CreateVacancyNoteVacanciesVacancyIdNotesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateVacancyNoteVacanciesVacancyIdNotesPostError = CreateVacancyNoteVacanciesVacancyIdNotesPostErrors[keyof CreateVacancyNoteVacanciesVacancyIdNotesPostErrors];
+
+export type CreateVacancyNoteVacanciesVacancyIdNotesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: NoteRead;
+};
+
+export type CreateVacancyNoteVacanciesVacancyIdNotesPostResponse = CreateVacancyNoteVacanciesVacancyIdNotesPostResponses[keyof CreateVacancyNoteVacanciesVacancyIdNotesPostResponses];
+
+export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+        /**
+         * Note Id
+         */
+        note_id: number;
+    };
+    query?: never;
+    url: '/vacancies/{vacancy_id}/notes/{note_id}';
+};
+
+export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteError = DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteErrors[keyof DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteErrors];
+
+export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponse = DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses[keyof DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses];
+
+export type UpdateVacancyVacanciesVacancyIdPatchData = {
+    body: VacancyUpdate;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+        /**
+         * Note Id
+         */
+        note_id: number;
+    };
+    query?: never;
+    url: '/vacancies/{vacancy_id}/notes/{note_id}';
+};
+
+export type UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchError = UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchErrors[keyof UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchErrors];
+
+export type UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: NoteRead;
+};
+
+export type UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchResponse = UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchResponses[keyof UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchResponses];
 
 export type UploadVacancyPdfVacanciesUploadPdfPostData = {
     body: BodyUploadVacancyPdfVacanciesUploadPdfPost;
@@ -1351,6 +1490,110 @@ export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse
 };
 
 export type InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse = InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponses[keyof InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponses];
+
+export type ListInterviewNotesInterviewsInterviewIdNotesGetData = {
+    body?: never;
+    path: {
+        /**
+         * Interview Id
+         */
+        interview_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/interviews/{interview_id}/notes';
+};
+
+export type ListInterviewNotesInterviewsInterviewIdNotesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListInterviewNotesInterviewsInterviewIdNotesGetError = ListInterviewNotesInterviewsInterviewIdNotesGetErrors[keyof ListInterviewNotesInterviewsInterviewIdNotesGetErrors];
+
+export type ListInterviewNotesInterviewsInterviewIdNotesGetResponses = {
+    /**
+     * Response List Interview Notes Interviews  Interview Id  Notes Get
+     * Successful Response
+     */
+    200: Array<InterviewNoteRead>;
+};
+
+export type ListInterviewNotesInterviewsInterviewIdNotesGetResponse = ListInterviewNotesInterviewsInterviewIdNotesGetResponses[keyof ListInterviewNotesInterviewsInterviewIdNotesGetResponses];
+
+export type CreateInterviewNoteInterviewsInterviewIdNotesPostData = {
+    body: InterviewNoteCreate;
+    path: {
+        /**
+         * Interview Id
+         */
+        interview_id: string;
+    };
+    query?: never;
+    url: '/interviews/{interview_id}/notes';
+};
+
+export type CreateInterviewNoteInterviewsInterviewIdNotesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateInterviewNoteInterviewsInterviewIdNotesPostError = CreateInterviewNoteInterviewsInterviewIdNotesPostErrors[keyof CreateInterviewNoteInterviewsInterviewIdNotesPostErrors];
+
+export type CreateInterviewNoteInterviewsInterviewIdNotesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: InterviewNoteRead;
+};
+
+export type CreateInterviewNoteInterviewsInterviewIdNotesPostResponse = CreateInterviewNoteInterviewsInterviewIdNotesPostResponses[keyof CreateInterviewNoteInterviewsInterviewIdNotesPostResponses];
+
+export type DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Interview Id
+         */
+        interview_id: string;
+        /**
+         * Note Id
+         */
+        note_id: number;
+    };
+    query?: never;
+    url: '/interviews/{interview_id}/notes/{note_id}';
+};
+
+export type DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteError = DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteErrors[keyof DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteErrors];
+
+export type DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteResponse = DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteResponses[keyof DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteResponses];
 
 export type SigninAuthSigninPostData = {
     body: SignInRequest;

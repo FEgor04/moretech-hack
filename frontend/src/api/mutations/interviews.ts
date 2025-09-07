@@ -3,6 +3,8 @@ import {
 	createInterviewInterviewsPost,
 	postInterviewMessageInterviewsInterviewIdMessagesPost,
 	initializeFirstMessageInterviewsInterviewIdMessagesFirstPost,
+	createInterviewNoteInterviewsInterviewIdNotesPost,
+	deleteInterviewNoteInterviewsInterviewIdNotesNoteIdDelete,
 } from "../client";
 import type {
 	InterviewMessageRead,
@@ -150,3 +152,37 @@ export function useInitializeFirstMessageMutation() {
 		},
 	});
 }
+
+export const useCreateInterviewNote = (interviewId: string) => {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: async (text: string) => {
+			const res = await createInterviewNoteInterviewsInterviewIdNotesPost<true>(
+				{
+					path: { interview_id: interviewId },
+					body: { interview_id: interviewId, text },
+					throwOnError: true,
+				},
+			);
+			return res.data;
+		},
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: ["interview", interviewId, "notes"] });
+		},
+	});
+};
+
+export const useDeleteInterviewNote = (interviewId: string) => {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: async (noteId: number) => {
+			await deleteInterviewNoteInterviewsInterviewIdNotesNoteIdDelete<true>({
+				path: { interview_id: interviewId, note_id: noteId },
+				throwOnError: true,
+			});
+		},
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: ["interview", interviewId, "notes"] });
+		},
+	});
+};

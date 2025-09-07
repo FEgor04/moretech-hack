@@ -58,8 +58,10 @@ const formSchema = z.object({
 	location: z.string().optional(),
 	salary_min: z.number().optional(),
 	salary_max: z.number().optional(),
-	employment_type: z.string().optional(),
-	experience_level: z.string().optional(),
+	employment_type: z
+		.enum(["full_time", "part_time", "contract", "internship"])
+		.optional(),
+	experience_level: z.enum(["junior", "middle", "senior", "lead"]).optional(),
 	remote_work: z.boolean().optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),

@@ -3,6 +3,9 @@ import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { VacancyRead } from "@/api/client/types.gen";
+import { vacancyNotesQueryOptions } from "@/api/queries/vacancies";
+import { useCreateVacancyNote } from "@/api/mutations/vacancies";
+import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -32,6 +35,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useDeleteVacancyNote } from "@/api/mutations/vacancies";
 import {
 	Card,
 	CardContent,
@@ -52,6 +56,19 @@ import {
 	BarChart3Icon,
 } from "lucide-react";
 
+const employmentTypeLocalization = {
+	part_time: "Частичная занятость",
+	full_time: "Полная занятость",
+	contract: "Контракт",
+	internship: "Стажировка",
+} as const;
+
+const noteFormSchema = z.object({
+	text: z.string().min(1, "Заметка не может быть пустой"),
+});
+
+type NoteFormData = z.infer<typeof noteFormSchema>;
+
 const formSchema = z.object({
 	title: z.string().min(1, "Название обязательно"),
 	description: z.string().optional(),
@@ -60,8 +77,10 @@ const formSchema = z.object({
 	location: z.string().optional(),
 	salary_min: z.number().optional(),
 	salary_max: z.number().optional(),
-	employment_type: z.string().optional(),
-	experience_level: z.string().optional(),
+	employment_type: z
+		.enum(["full_time", "part_time", "contract", "internship"])
+		.optional(),
+	experience_level: z.enum(["junior", "middle", "senior", "lead"]).optional(),
 	remote_work: z.boolean().optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),
@@ -94,6 +113,18 @@ function VacancyDetail() {
 	const vacancy = useSuspenseQuery(
 		vacancyQueryOptions(Number(params.vacancyId)),
 	);
+	const notes = useSuspenseQuery(
+		vacancyNotesQueryOptions(Number(params.vacancyId)),
+	);
+	const createNote = useCreateVacancyNote(Number(params.vacancyId));
+	const deleteNote = useDeleteVacancyNote(Number(params.vacancyId));
+
+	const noteForm = useForm<NoteFormData>({
+		resolver: zodResolver(noteFormSchema),
+		defaultValues: {
+			text: "",
+		},
+	});
 
 	const mutation = useUpdateVacancy(Number(params.vacancyId));
 	const v = vacancy.data as ExtendedVacancy;
@@ -175,6 +206,20 @@ function VacancyDetail() {
 			onError: (error) => {
 				toast.error("Ошибка при обновлении вакансии", {
 					description: error.message,
+				});
+			},
+		});
+	};
+
+	const onNoteSubmit = (data: NoteFormData) => {
+		createNote.mutate(data.text, {
+			onSuccess: () => {
+				noteForm.reset();
+				toast.success("Заметка добавлена");
+			},
+			onError: (err) => {
+				toast.error("Не удалось добавить заметку", {
+					description: err.message,
 				});
 			},
 		});
@@ -366,10 +411,10 @@ function VacancyDetail() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="full-time">
+																<SelectItem value="full_time">
 																	Полная занятость
 																</SelectItem>
-																<SelectItem value="part-time">
+																<SelectItem value="part_time">
 																	Частичная занятость
 																</SelectItem>
 																<SelectItem value="contract">
@@ -650,7 +695,11 @@ function VacancyDetail() {
 										<span className="text-muted-foreground">
 											Тип занятости:
 										</span>
-										<span>{v.employment_type}</span>
+										<span>
+											{employmentTypeLocalization[
+												v.employment_type as keyof typeof employmentTypeLocalization
+											] || v.employment_type}
+										</span>
 									</div>
 								)}
 
@@ -661,6 +710,69 @@ function VacancyDetail() {
 										<span>{v.experience_level}</span>
 									</div>
 								)}
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Заметки</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<Form {...noteForm}>
+									<form
+										onSubmit={noteForm.handleSubmit(onNoteSubmit)}
+										className="flex gap-2"
+									>
+										<FormField
+											control={noteForm.control}
+											name="text"
+											render={({ field }) => (
+												<FormItem className="flex-1">
+													<FormControl>
+														<Input
+															{...field}
+															placeholder="Оставить заметку..."
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<Button type="submit" disabled={createNote.isPending}>
+											{createNote.isPending ? "Добавление..." : "Добавить"}
+										</Button>
+									</form>
+								</Form>
+
+								<div className="space-y-3 max-h-80 overflow-auto pr-1">
+									{notes.data?.length ? (
+										notes.data.map((n) => (
+											<div
+												key={n.id}
+												className="p-3 border rounded-md text-sm relative"
+											>
+												<Button
+													variant="ghost"
+													size="icon"
+													className="absolute top-1 right-1 h-6 w-6"
+													onClick={() => deleteNote.mutate(n.id)}
+												>
+													<span className="sr-only">Удалить</span>×
+												</Button>
+												<div className="text-muted-foreground text-xs mb-1 pr-6">
+													<RelativeTimeTooltip
+														date={new Date(n.created_at || "")}
+													/>
+												</div>
+												<div className="whitespace-pre-wrap">{n.text}</div>
+											</div>
+										))
+									) : (
+										<div className="text-sm text-muted-foreground">
+											Заметок пока нет
+										</div>
+									)}
+								</div>
 							</CardContent>
 						</Card>
 					</div>

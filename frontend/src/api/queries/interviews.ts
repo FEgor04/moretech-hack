@@ -3,7 +3,16 @@ import {
 	listInterviewsInterviewsGet,
 	getInterviewInterviewsInterviewIdGet,
 	getInterviewMessagesInterviewsInterviewIdMessagesGet,
+	getInterviewsByCandidateInterviewsCandidateCandidateIdGet,
+	listInterviewNotesInterviewsInterviewIdNotesGet,
 } from "../client";
+
+export type InterviewNoteDTO = {
+	id: number;
+	interview_id: string;
+	text: string;
+	created_at?: string | null;
+};
 
 export const interviewsQueryOptions = () =>
 	queryOptions({
@@ -32,13 +41,12 @@ export const interviewsByCandidateQueryOptions = (candidateId: string) =>
 	queryOptions({
 		queryKey: ["interviews", "candidate", candidateId],
 		queryFn: async () => {
-			const response = await listInterviewsInterviewsGet<true>({
-				throwOnError: true,
-			});
-			// Filter interviews by candidate ID on the frontend
-			return response.data.filter(
-				(interview) => interview.candidate_id === candidateId,
-			);
+			const response =
+				await getInterviewsByCandidateInterviewsCandidateCandidateIdGet<true>({
+					path: { candidate_id: candidateId },
+					throwOnError: true,
+				});
+			return response.data;
 		},
 	});
 
@@ -52,5 +60,17 @@ export const interviewMessagesQueryOptions = (interviewId: string) =>
 					throwOnError: true,
 				});
 			return response.data;
+		},
+	});
+
+export const interviewNotesQueryOptions = (interviewId: string) =>
+	queryOptions({
+		queryKey: ["interview", interviewId, "notes"],
+		queryFn: async () => {
+			const res = await listInterviewNotesInterviewsInterviewIdNotesGet<true>({
+				path: { interview_id: interviewId },
+				throwOnError: true,
+			});
+			return res.data;
 		},
 	});

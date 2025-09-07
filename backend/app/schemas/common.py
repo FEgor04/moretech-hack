@@ -364,3 +364,35 @@ class InterviewMessageRead(InterviewMessageBase):
 
 class InterviewMessageCreateRequest(BaseModel):
     text: str
+
+
+class NoteBase(BaseModel):
+    vacancy_id: int
+    text: str
+
+
+class NoteCreate(NoteBase):
+    pass
+
+
+class NoteUpdate(BaseModel):
+    text: str
+
+
+class NoteRead(NoteBase):
+    id: int
+    created_at: datetime | None = None
+
+
+class InterviewNoteBase(BaseModel):
+    interview_id: str
+    text: str
+
+
+class InterviewNoteCreate(InterviewNoteBase):
+    pass
+
+
+class InterviewNoteRead(InterviewNoteBase):
+    id: int
+    created_at: datetime | None = None

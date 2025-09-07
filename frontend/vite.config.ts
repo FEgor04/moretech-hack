@@ -24,6 +24,10 @@ export default defineConfig({
 				// never fucking mind this bullshit
 				rewrite: (path) => path.replace(/^\/api\/api/, ""),
 			},
+			"/ws": {
+				target: "http://localhost:8000",
+				ws: true,
+			},
 		},
 	},
 	resolve: {

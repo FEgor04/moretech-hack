@@ -1,5 +1,8 @@
 import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
-import { interviewsByCandidateQueryOptions } from "@/api/queries/interviews";
+import {
+	interviewsByCandidateQueryOptions,
+	interviewNotesQueryOptions,
+} from "@/api/queries/interviews";
 import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { Link } from "@tanstack/react-router";
@@ -10,6 +13,26 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { toast } from "sonner";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { useCreateInterviewNote } from "@/api/mutations/interviews";
+import { useDeleteInterviewNote } from "@/api/mutations/interviews";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormMessage,
+} from "@/components/ui/form";
 
 interface InterviewsListProps {
 	candidateId: string;
@@ -88,14 +111,19 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 												Скопировать ссылку на собеседование
 											</TooltipContent>
 										</Tooltip>
-										<Tooltip>
-											<TooltipTrigger asChild>
+										<Dialog>
+											<DialogTrigger asChild>
 												<Button variant="outline" size="icon">
 													<NotebookIcon />
 												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Оставить заметки</TooltipContent>
-										</Tooltip>
+											</DialogTrigger>
+											<DialogContent className="max-w-lg">
+												<DialogHeader>
+													<DialogTitle>Заметки для интервью</DialogTitle>
+												</DialogHeader>
+												<InterviewNotesPane interviewId={interview.id} />
+											</DialogContent>
+										</Dialog>
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<Button variant="outline" size="icon">
@@ -126,6 +154,84 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 								</CardContent>
 							</Card>
 						),
+				)}
+			</div>
+		</div>
+	);
+}
+
+const noteFormSchema = z.object({
+	text: z.string().min(1, "Заметка не может быть пустой"),
+});
+
+type NoteFormData = z.infer<typeof noteFormSchema>;
+
+function InterviewNotesPane({ interviewId }: { interviewId: string }) {
+	const notes = useSuspenseQuery(interviewNotesQueryOptions(interviewId));
+	const create = useCreateInterviewNote(interviewId);
+	const remove = useDeleteInterviewNote(interviewId);
+
+	const form = useForm<NoteFormData>({
+		resolver: zodResolver(noteFormSchema),
+		defaultValues: {
+			text: "",
+		},
+	});
+
+	const onSubmit = (data: NoteFormData) => {
+		create.mutate(data.text, {
+			onSuccess: () => {
+				form.reset();
+			},
+		});
+	};
+
+	return (
+		<div className="space-y-3">
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+					<FormField
+						control={form.control}
+						name="text"
+						render={({ field }) => (
+							<FormItem className="flex-1">
+								<FormControl>
+									<Input {...field} placeholder="Оставить заметку..." />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<Button type="submit" disabled={create.isPending}>
+						{create.isPending ? "Добавление..." : "Добавить"}
+					</Button>
+				</form>
+			</Form>
+
+			<div className="space-y-2 max-h-80 overflow-auto pr-1">
+				{notes.data?.length ? (
+					notes.data.map((n) => (
+						<div key={n.id} className="p-2 border rounded text-sm relative">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="absolute top-1 right-1 h-6 w-6"
+								onClick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									remove.mutate(n.id);
+								}}
+							>
+								<span className="sr-only">Удалить</span>×
+							</Button>
+							<div className="text-muted-foreground text-xs mb-1">
+								<RelativeTimeTooltip date={new Date(n.created_at || "")} />
+							</div>
+							<div>{n.text}</div>
+						</div>
+					))
+				) : (
+					<div className="text-sm text-muted-foreground">Заметок пока нет</div>
 				)}
 			</div>
 		</div>

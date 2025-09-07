@@ -246,6 +246,57 @@ export const updateVacancyVacanciesVacancyIdPatch = <ThrowOnError extends boolea
 };
 
 /**
+ * List Vacancy Notes
+ */
+export const listVacancyNotesVacanciesVacancyIdNotesGet = <ThrowOnError extends boolean = false>(options: Options<ListVacancyNotesVacanciesVacancyIdNotesGetData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<ListVacancyNotesVacanciesVacancyIdNotesGetResponses, ListVacancyNotesVacanciesVacancyIdNotesGetErrors, ThrowOnError>({
+        responseType: 'json',
+        url: '/vacancies/{vacancy_id}/notes',
+        ...options
+    });
+};
+
+/**
+ * Create Vacancy Note
+ */
+export const createVacancyNoteVacanciesVacancyIdNotesPost = <ThrowOnError extends boolean = false>(options: Options<CreateVacancyNoteVacanciesVacancyIdNotesPostData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).post<CreateVacancyNoteVacanciesVacancyIdNotesPostResponses, CreateVacancyNoteVacanciesVacancyIdNotesPostErrors, ThrowOnError>({
+        responseType: 'json',
+        url: '/vacancies/{vacancy_id}/notes',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete Vacancy Note
+ */
+export const deleteVacancyNoteVacanciesVacancyIdNotesNoteIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).delete<DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses, DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteErrors, ThrowOnError>({
+        url: '/vacancies/{vacancy_id}/notes/{note_id}',
+        ...options
+    });
+};
+
+/**
+ * Update Vacancy Note
+ */
+export const updateVacancyNoteVacanciesVacancyIdNotesNoteIdPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).patch<UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchResponses, UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchErrors, ThrowOnError>({
+        responseType: 'json',
+        url: '/vacancies/{vacancy_id}/notes/{note_id}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
  * Upload Vacancy Pdf
  * Upload a PDF job description and create a vacancy from the parsed information.
  *
@@ -378,6 +429,42 @@ export const initializeFirstMessageInterviewsInterviewIdMessagesFirstPost = <Thr
     return (options.client ?? _heyApiClient).post<InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponses, InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostErrors, ThrowOnError>({
         responseType: 'json',
         url: '/interviews/{interview_id}/messages/first',
+        ...options
+    });
+};
+
+/**
+ * List Interview Notes
+ */
+export const listInterviewNotesInterviewsInterviewIdNotesGet = <ThrowOnError extends boolean = false>(options: Options<ListInterviewNotesInterviewsInterviewIdNotesGetData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<ListInterviewNotesInterviewsInterviewIdNotesGetResponses, ListInterviewNotesInterviewsInterviewIdNotesGetErrors, ThrowOnError>({
+        responseType: 'json',
+        url: '/interviews/{interview_id}/notes',
+        ...options
+    });
+};
+
+/**
+ * Create Interview Note
+ */
+export const createInterviewNoteInterviewsInterviewIdNotesPost = <ThrowOnError extends boolean = false>(options: Options<CreateInterviewNoteInterviewsInterviewIdNotesPostData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).post<CreateInterviewNoteInterviewsInterviewIdNotesPostResponses, CreateInterviewNoteInterviewsInterviewIdNotesPostErrors, ThrowOnError>({
+        responseType: 'json',
+        url: '/interviews/{interview_id}/notes',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete Interview Note
+ */
+export const deleteInterviewNoteInterviewsInterviewIdNotesNoteIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).delete<DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteResponses, DeleteInterviewNoteInterviewsInterviewIdNotesNoteIdDeleteErrors, ThrowOnError>({
+        url: '/interviews/{interview_id}/notes/{note_id}',
         ...options
     });
 };

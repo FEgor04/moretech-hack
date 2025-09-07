@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     default_user_password: str = "admin"
     default_user_name: str = "Admin"
     gigachat_credentials: str = ""
+    yandex_speech_key: str = ""
+    use_yandex_speech_synthesis: bool = False
 
     class Config:
         env_file = ".env"
