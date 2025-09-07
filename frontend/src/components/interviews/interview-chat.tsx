@@ -17,14 +17,15 @@ import { Response } from "../ai-elements/response";
 import type Webcam from "react-webcam";
 import WebcamComponent from "react-webcam";
 import { Button } from "../ui/button";
+import { useWebcamStreaming } from "@/hooks/use-webcam-streaming";
 
 type Props = {
 	interviewId: string;
-	webcamRef: React.RefObject<Webcam | null>;
-	sendAudioReadyMarker: () => void;
 };
 
-export function InterviewChat({ interviewId, webcamRef, sendAudioReadyMarker }: Props) {
+export function InterviewChat({ interviewId }: Props) {
+	const { webcamRef, sendAudioReadyMarker } = useWebcamStreaming(interviewId);
+
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
