@@ -1,5 +1,8 @@
 import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
-import { interviewsByCandidateQueryOptions } from "@/api/queries/interviews";
+import {
+	interviewsByCandidateQueryOptions,
+	interviewNotesQueryOptions,
+} from "@/api/queries/interviews";
 import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { Link } from "@tanstack/react-router";
@@ -18,10 +21,18 @@ import {
 	DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { useState } from "react";
-import { interviewNotesPageQueryOptions } from "@/api/queries/interviews";
 import { useCreateInterviewNote } from "@/api/mutations/interviews";
 import { useDeleteInterviewNote } from "@/api/mutations/interviews";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormMessage,
+} from "@/components/ui/form";
 
 interface InterviewsListProps {
 	candidateId: string;
@@ -149,49 +160,57 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 	);
 }
 
+const noteFormSchema = z.object({
+	text: z.string().min(1, "Заметка не может быть пустой"),
+});
+
+type NoteFormData = z.infer<typeof noteFormSchema>;
+
 function InterviewNotesPane({ interviewId }: { interviewId: string }) {
-	const [limit] = useState(10);
-	const [pageIndex, setPageIndex] = useState(1);
-	const offset = (pageIndex - 1) * limit;
-	const page = useSuspenseQuery(
-		interviewNotesPageQueryOptions(interviewId, limit, offset),
-	);
+	const notes = useSuspenseQuery(interviewNotesQueryOptions(interviewId));
 	const create = useCreateInterviewNote(interviewId);
 	const remove = useDeleteInterviewNote(interviewId);
 
+	const form = useForm<NoteFormData>({
+		resolver: zodResolver(noteFormSchema),
+		defaultValues: {
+			text: "",
+		},
+	});
+
+	const onSubmit = (data: NoteFormData) => {
+		create.mutate(data.text, {
+			onSuccess: () => {
+				form.reset();
+			},
+		});
+	};
+
 	return (
 		<div className="space-y-3">
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					const formEl = e.currentTarget as HTMLFormElement;
-					const input = formEl.elements.namedItem(
-						"noteText",
-					) as HTMLInputElement;
-					const value = input.value.trim();
-					if (!value) return;
-					create.mutate(value, {
-						onSuccess: () => {
-							input.value = "";
-							setPageIndex(1); // refresh from first page
-						},
-					});
-				}}
-				className="flex gap-2"
-			>
-				<Input
-					name="noteText"
-					placeholder="Оставить заметку..."
-					className="flex-1"
-				/>
-				<Button type="submit" disabled={create.isPending}>
-					{create.isPending ? "Добавление..." : "Добавить"}
-				</Button>
-			</form>
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+					<FormField
+						control={form.control}
+						name="text"
+						render={({ field }) => (
+							<FormItem className="flex-1">
+								<FormControl>
+									<Input {...field} placeholder="Оставить заметку..." />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<Button type="submit" disabled={create.isPending}>
+						{create.isPending ? "Добавление..." : "Добавить"}
+					</Button>
+				</form>
+			</Form>
 
 			<div className="space-y-2 max-h-80 overflow-auto pr-1">
-				{page.data?.length ? (
-					page.data.map((n) => (
+				{notes.data?.length ? (
+					notes.data.map((n) => (
 						<div key={n.id} className="p-2 border rounded text-sm relative">
 							<Button
 								variant="ghost"
@@ -206,7 +225,7 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 								<span className="sr-only">Удалить</span>×
 							</Button>
 							<div className="text-muted-foreground text-xs mb-1">
-								{n.created_at ? new Date(n.created_at).toLocaleString() : ""}
+								<RelativeTimeTooltip date={new Date(n.created_at || "")} />
 							</div>
 							<div>{n.text}</div>
 						</div>
@@ -214,35 +233,6 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 				) : (
 					<div className="text-sm text-muted-foreground">Заметок пока нет</div>
 				)}
-			</div>
-			<div className="flex items-center justify-center gap-2">
-				<Button
-					variant="outline"
-					size="icon"
-					disabled={pageIndex <= 1}
-					onClick={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						setPageIndex((p) => Math.max(1, p - 1));
-					}}
-				>
-					‹
-				</Button>
-				<span className="text-xs text-muted-foreground min-w-[56px] text-center">
-					Стр. {pageIndex}
-				</span>
-				<Button
-					variant="outline"
-					size="icon"
-					disabled={(page.data?.length ?? 0) < limit}
-					onClick={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						setPageIndex((p) => p + 1);
-					}}
-				>
-					›
-				</Button>
 			</div>
 		</div>
 	);

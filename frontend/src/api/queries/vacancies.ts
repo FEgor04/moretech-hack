@@ -2,12 +2,12 @@ import { queryOptions } from "@tanstack/react-query";
 import {
 	getVacancyVacanciesVacancyIdGet,
 	listVacanciesVacanciesGet,
+	listVacancyNotesVacanciesVacancyIdNotesGet,
 } from "../client";
 import type {
 	GetVacancyVacanciesVacancyIdGetResponse,
 	ListVacanciesVacanciesGetResponse,
 } from "../client";
-import { apiClient } from "../api-client";
 
 export const vacanciesQueryOptions = () =>
 	queryOptions({
@@ -37,20 +37,14 @@ export type NoteDTO = {
 	created_at?: string | null;
 };
 
-export const vacancyNotesPageQueryOptions = (
-	vacancyId: number,
-	limit: number,
-	offset: number,
-) =>
+export const vacancyNotesQueryOptions = (vacancyId: number) =>
 	queryOptions({
-		queryKey: ["vacancy", vacancyId, "notes", { limit, offset }],
+		queryKey: ["vacancy", vacancyId, "notes"],
 		queryFn: async () => {
-			const res = await apiClient.get({
-				url: "/vacancies/{vacancy_id}/notes",
+			const res = await listVacancyNotesVacanciesVacancyIdNotesGet<true>({
 				path: { vacancy_id: vacancyId },
-				query: { limit, offset },
 				throwOnError: true,
 			});
-			return res.data as Array<NoteDTO>;
+			return res.data;
 		},
 	});

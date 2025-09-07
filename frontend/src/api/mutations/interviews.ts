@@ -3,13 +3,14 @@ import {
 	createInterviewInterviewsPost,
 	postInterviewMessageInterviewsInterviewIdMessagesPost,
 	initializeFirstMessageInterviewsInterviewIdMessagesFirstPost,
+	createInterviewNoteInterviewsInterviewIdNotesPost,
+	deleteInterviewNoteInterviewsInterviewIdNotesNoteIdDelete,
 } from "../client";
 import type {
 	InterviewMessageRead,
 	PostInterviewMessageInterviewsInterviewIdMessagesPostResponse,
 	InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse,
 } from "../client";
-import { apiClient } from "../api-client";
 
 export interface CreateInterviewData {
 	candidate_id: string;
@@ -156,18 +157,14 @@ export const useCreateInterviewNote = (interviewId: string) => {
 	const qc = useQueryClient();
 	return useMutation({
 		mutationFn: async (text: string) => {
-			const res = await apiClient.post({
-				url: "/interviews/{interview_id}/notes",
-				path: { interview_id: interviewId },
-				body: { interview_id: interviewId, text },
-				throwOnError: true,
-			});
-			return res.data as {
-				id: number;
-				interview_id: string;
-				text: string;
-				created_at?: string | null;
-			};
+			const res = await createInterviewNoteInterviewsInterviewIdNotesPost<true>(
+				{
+					path: { interview_id: interviewId },
+					body: { interview_id: interviewId, text },
+					throwOnError: true,
+				},
+			);
+			return res.data;
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ["interview", interviewId, "notes"] });
@@ -179,8 +176,7 @@ export const useDeleteInterviewNote = (interviewId: string) => {
 	const qc = useQueryClient();
 	return useMutation({
 		mutationFn: async (noteId: number) => {
-			await apiClient.delete({
-				url: "/interviews/{interview_id}/notes/{note_id}",
+			await deleteInterviewNoteInterviewsInterviewIdNotesNoteIdDelete<true>({
 				path: { interview_id: interviewId, note_id: noteId },
 				throwOnError: true,
 			});

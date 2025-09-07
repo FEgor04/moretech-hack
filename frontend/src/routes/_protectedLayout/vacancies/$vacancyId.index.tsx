@@ -3,9 +3,9 @@ import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { VacancyRead } from "@/api/client/types.gen";
-import { vacancyNotesPageQueryOptions } from "@/api/queries/vacancies";
+import { vacancyNotesQueryOptions } from "@/api/queries/vacancies";
 import { useCreateVacancyNote } from "@/api/mutations/vacancies";
-import { useMemo, useState } from "react";
+import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -54,9 +54,20 @@ import {
 	ClockIcon,
 	UsersIcon,
 	BarChart3Icon,
-	ChevronLeft,
-	ChevronRight,
 } from "lucide-react";
+
+const employmentTypeLocalization = {
+	part_time: "Частичная занятость",
+	full_time: "Полная занятость",
+	contract: "Контракт",
+	internship: "Стажировка",
+} as const;
+
+const noteFormSchema = z.object({
+	text: z.string().min(1, "Заметка не может быть пустой"),
+});
+
+type NoteFormData = z.infer<typeof noteFormSchema>;
 
 const formSchema = z.object({
 	title: z.string().min(1, "Название обязательно"),
@@ -66,8 +77,10 @@ const formSchema = z.object({
 	location: z.string().optional(),
 	salary_min: z.number().optional(),
 	salary_max: z.number().optional(),
-	employment_type: z.string().optional(),
-	experience_level: z.string().optional(),
+	employment_type: z
+		.enum(["full_time", "part_time", "contract", "internship"])
+		.optional(),
+	experience_level: z.enum(["junior", "middle", "senior", "lead"]).optional(),
 	remote_work: z.boolean().optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),
@@ -93,21 +106,18 @@ function VacancyDetail() {
 	const vacancy = useSuspenseQuery(
 		vacancyQueryOptions(Number(params.vacancyId)),
 	);
-	const [notesLimit] = useState(10);
-	const [notesPageIndex, setNotesPageIndex] = useState(1);
-	const notesOffset = useMemo(
-		() => (notesPageIndex - 1) * notesLimit,
-		[notesPageIndex, notesLimit],
-	);
-	const notesPage = useSuspenseQuery(
-		vacancyNotesPageQueryOptions(
-			Number(params.vacancyId),
-			notesLimit,
-			notesOffset,
-		),
+	const notes = useSuspenseQuery(
+		vacancyNotesQueryOptions(Number(params.vacancyId)),
 	);
 	const createNote = useCreateVacancyNote(Number(params.vacancyId));
 	const deleteNote = useDeleteVacancyNote(Number(params.vacancyId));
+
+	const noteForm = useForm<NoteFormData>({
+		resolver: zodResolver(noteFormSchema),
+		defaultValues: {
+			text: "",
+		},
+	});
 
 	const mutation = useUpdateVacancy(Number(params.vacancyId));
 	const v = vacancy.data as ExtendedVacancy;
@@ -141,6 +151,20 @@ function VacancyDetail() {
 			onError: (error) => {
 				toast.error("Ошибка при обновлении вакансии", {
 					description: error.message,
+				});
+			},
+		});
+	};
+
+	const onNoteSubmit = (data: NoteFormData) => {
+		createNote.mutate(data.text, {
+			onSuccess: () => {
+				noteForm.reset();
+				toast.success("Заметка добавлена");
+			},
+			onError: (err) => {
+				toast.error("Не удалось добавить заметку", {
+					description: err.message,
 				});
 			},
 		});
@@ -504,15 +528,9 @@ function VacancyDetail() {
 											Тип занятости:
 										</span>
 										<span>
-											{v.employment_type === "full_time"
-												? "Полная занятость"
-												: v.employment_type === "part_time"
-													? "Частичная занятость"
-													: v.employment_type === "contract"
-														? "Контракт"
-														: v.employment_type === "internship"
-															? "Стажировка"
-															: v.employment_type}
+											{employmentTypeLocalization[
+												v.employment_type as keyof typeof employmentTypeLocalization
+											] || v.employment_type}
 										</span>
 									</div>
 								)}
@@ -532,43 +550,35 @@ function VacancyDetail() {
 								<CardTitle>Заметки</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								<form
-									onSubmit={(e) => {
-										e.preventDefault();
-										const formEl = e.currentTarget as HTMLFormElement;
-										const input = formEl.elements.namedItem(
-											"noteText",
-										) as HTMLInputElement;
-										const value = input.value.trim();
-										if (!value) return;
-										createNote.mutate(value, {
-											onSuccess: () => {
-												input.value = "";
-												toast.success("Заметка добавлена");
-												setNotesPageIndex(1);
-											},
-											onError: (err) => {
-												toast.error("Не удалось добавить заметку", {
-													description: err.message,
-												});
-											},
-										});
-									}}
-									className="flex gap-2"
-								>
-									<Input
-										name="noteText"
-										placeholder="Оставить заметку..."
-										className="flex-1"
-									/>
-									<Button type="submit" disabled={createNote.isPending}>
-										{createNote.isPending ? "Добавление..." : "Добавить"}
-									</Button>
-								</form>
+								<Form {...noteForm}>
+									<form
+										onSubmit={noteForm.handleSubmit(onNoteSubmit)}
+										className="flex gap-2"
+									>
+										<FormField
+											control={noteForm.control}
+											name="text"
+											render={({ field }) => (
+												<FormItem className="flex-1">
+													<FormControl>
+														<Input
+															{...field}
+															placeholder="Оставить заметку..."
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<Button type="submit" disabled={createNote.isPending}>
+											{createNote.isPending ? "Добавление..." : "Добавить"}
+										</Button>
+									</form>
+								</Form>
 
 								<div className="space-y-3 max-h-80 overflow-auto pr-1">
-									{notesPage.data?.length ? (
-										notesPage.data.map((n) => (
+									{notes.data?.length ? (
+										notes.data.map((n) => (
 											<div
 												key={n.id}
 												className="p-3 border rounded-md text-sm relative"
@@ -582,9 +592,9 @@ function VacancyDetail() {
 													<span className="sr-only">Удалить</span>×
 												</Button>
 												<div className="text-muted-foreground text-xs mb-1 pr-6">
-													{n.created_at
-														? new Date(n.created_at).toLocaleString()
-														: ""}
+													<RelativeTimeTooltip
+														date={new Date(n.created_at || "")}
+													/>
 												</div>
 												<div className="whitespace-pre-wrap">{n.text}</div>
 											</div>
@@ -594,27 +604,6 @@ function VacancyDetail() {
 											Заметок пока нет
 										</div>
 									)}
-								</div>
-								<div className="flex items-center justify-center gap-2">
-									<Button
-										variant="outline"
-										size="icon"
-										disabled={notesPageIndex <= 1}
-										onClick={() => setNotesPageIndex((p) => Math.max(1, p - 1))}
-									>
-										<ChevronLeft className="h-4 w-4" />
-									</Button>
-									<span className="text-xs text-muted-foreground min-w-[56px] text-center">
-										Стр. {notesPageIndex}
-									</span>
-									<Button
-										variant="outline"
-										size="icon"
-										disabled={(notesPage.data?.length ?? 0) < notesLimit}
-										onClick={() => setNotesPageIndex((p) => p + 1)}
-									>
-										<ChevronRight className="h-4 w-4" />
-									</Button>
 								</div>
 							</CardContent>
 						</Card>

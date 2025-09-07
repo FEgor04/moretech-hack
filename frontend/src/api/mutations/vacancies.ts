@@ -4,9 +4,11 @@ import {
 	deleteVacancyVacanciesVacancyIdDelete,
 	updateVacancyVacanciesVacancyIdPatch,
 	uploadVacancyPdfVacanciesUploadPdfPost,
+	createVacancyNoteVacanciesVacancyIdNotesPost,
+	updateVacancyNoteVacanciesVacancyIdNotesNoteIdPatch,
+	deleteVacancyNoteVacanciesVacancyIdNotesNoteIdDelete,
 } from "../client";
 import type { VacancyCreate } from "../client";
-import { apiClient } from "../api-client";
 
 // Use the generated VacancyCreate type which includes all supported fields
 export type VacancyBody = VacancyCreate;
@@ -75,18 +77,12 @@ export const useCreateVacancyNote = (vacancy_id: number) => {
 	const qc = useQueryClient();
 	return useMutation({
 		mutationFn: async (text: string) => {
-			const res = await apiClient.post({
-				url: "/vacancies/{vacancy_id}/notes",
+			const res = await createVacancyNoteVacanciesVacancyIdNotesPost<true>({
 				path: { vacancy_id },
 				body: { vacancy_id, text },
 				throwOnError: true,
 			});
-			return res.data as {
-				id: number;
-				vacancy_id: number;
-				text: string;
-				created_at?: string | null;
-			};
+			return res.data;
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ["vacancy", vacancy_id, "notes"] });
@@ -98,18 +94,13 @@ export const useUpdateVacancyNote = (vacancy_id: number) => {
 	const qc = useQueryClient();
 	return useMutation({
 		mutationFn: async (params: { noteId: number; text: string }) => {
-			const res = await apiClient.patch({
-				url: "/vacancies/{vacancy_id}/notes/{note_id}",
-				path: { vacancy_id, note_id: params.noteId },
-				body: { text: params.text },
-				throwOnError: true,
-			});
-			return res.data as {
-				id: number;
-				vacancy_id: number;
-				text: string;
-				created_at?: string | null;
-			};
+			const res =
+				await updateVacancyNoteVacanciesVacancyIdNotesNoteIdPatch<true>({
+					path: { vacancy_id, note_id: params.noteId },
+					body: { text: params.text },
+					throwOnError: true,
+				});
+			return res.data;
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ["vacancy", vacancy_id, "notes"] });
@@ -121,8 +112,7 @@ export const useDeleteVacancyNote = (vacancy_id: number) => {
 	const qc = useQueryClient();
 	return useMutation({
 		mutationFn: async (noteId: number) => {
-			await apiClient.delete({
-				url: "/vacancies/{vacancy_id}/notes/{note_id}",
+			await deleteVacancyNoteVacanciesVacancyIdNotesNoteIdDelete<true>({
 				path: { vacancy_id, note_id: noteId },
 				throwOnError: true,
 			});

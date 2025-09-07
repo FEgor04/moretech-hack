@@ -3,8 +3,8 @@ import {
 	listInterviewsInterviewsGet,
 	getInterviewInterviewsInterviewIdGet,
 	getInterviewMessagesInterviewsInterviewIdMessagesGet,
+	listInterviewNotesInterviewsInterviewIdNotesGet,
 } from "../client";
-import { apiClient } from "../api-client";
 
 export type InterviewNoteDTO = {
 	id: number;
@@ -63,20 +63,14 @@ export const interviewMessagesQueryOptions = (interviewId: string) =>
 		},
 	});
 
-export const interviewNotesPageQueryOptions = (
-	interviewId: string,
-	limit: number,
-	offset: number,
-) =>
+export const interviewNotesQueryOptions = (interviewId: string) =>
 	queryOptions({
-		queryKey: ["interview", interviewId, "notes", { limit, offset }],
+		queryKey: ["interview", interviewId, "notes"],
 		queryFn: async () => {
-			const res = await apiClient.get({
-				url: "/interviews/{interview_id}/notes",
+			const res = await listInterviewNotesInterviewsInterviewIdNotesGet<true>({
 				path: { interview_id: interviewId },
-				query: { limit, offset },
 				throwOnError: true,
 			});
-			return res.data as Array<InterviewNoteDTO>;
+			return res.data;
 		},
 	});
