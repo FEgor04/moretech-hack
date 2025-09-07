@@ -1,0 +1,3 @@
+export { Route } from "./$vacancyId";
+
+

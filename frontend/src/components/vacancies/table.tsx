@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-table";
 import type { VacancyRead } from "../../api/client";
 import { VacancyStatusBadge } from "./status-badge";
-import { VacancyStatsModal } from "./vacancy-stats-modal";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { Link } from "@tanstack/react-router";
 import { Button } from "../ui/button";
@@ -93,12 +92,15 @@ export function useVacanciesTable(data: VacancyRead[]) {
 				header: "Действия",
 				cell: ({ row }) => (
 					<div className="flex items-center gap-2">
-						<VacancyStatsModal vacancy={row.original}>
-							<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+						<Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0">
+							<Link
+								to="/vacancies/$vacancyId"
+								params={{ vacancyId: row.original.id.toString() }}
+							>
 								<BarChart3Icon className="h-4 w-4" />
 								<span className="sr-only">Статистика вакансии</span>
-							</Button>
-						</VacancyStatsModal>
+							</Link>
+						</Button>
 						<AlertDialog>
 							<AlertDialogTrigger asChild>
 								<Button
@@ -135,7 +137,7 @@ export function useVacanciesTable(data: VacancyRead[]) {
 				),
 			},
 		],
-		[handleDelete], // ✅ теперь только handleDelete
+		[handleDelete],
 	);
 
 	const [sorting, setSorting] = useState<SortingState>([]);

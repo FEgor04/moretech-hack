@@ -4,13 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9eca1837-3140-4134-914b-9177f755d59d" name="Changes" comment="feat: add vacancy statistics modal and candidate skills functionality&#10;&#10;- Add VacancyStatsModal component with detailed analytics&#10;  - Display vacancy info (company, location, salary, employment type)&#10;  - Show candidate statistics and status distribution&#10;  - Include interview metrics and feedback analysis&#10;  - Add conversion rate and time-in-system metrics&#10;&#10;- Implement candidate skills feature&#10;  - Add skills field to Candidate model and database schema&#10;  - Create migration for skills column in candidate table&#10;  - Update Pydantic schemas with skills validation&#10;  - Add skills input field to candidate edit form&#10;  - Display skills as badges on candidate detail page&#10;&#10;- Enhance vacancy table with statistics button&#10;  - Add BarChart3Icon button for opening statistics modal&#10;  - Integrate VacancyStatsModal with vacancy table actions&#10;&#10;- Improve dashboard with additional metrics&#10;  - Add salary analysis and experience statistics&#10;  - Include company and location diversity metrics&#10;  - Add interview completion rates and feedback analysis&#10;  - Enhance candidate detail page with interview statistics&#10;&#10;- Update backend services for skills handling&#10;  - Modify candidate service to handle JSON skills serialization&#10;  - Add proper validation for skills array/string conversion&#10;  - Ensure API compatibility with frontend skills format&#10;&#10;- Fix JSX structure issues in candidate edit form&#10;  - Remove redundant closing div tag causing JSX error&#10;  - Improve form layout and validation&#10;&#10;- Regenerate frontend API types&#10;  - Update TypeScript types to match backend schema changes&#10;  - Ensure proper type safety for skills field" />
+    <list default="true" id="9eca1837-3140-4134-914b-9177f755d59d" name="Changes" comment="fix ci">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
     <option name="RESET_MODE" value="HARD" />
   </component>
@@ -33,7 +40,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "pnpm",
-    "ts.external.directory.path": "/Users/forafox/hack/moretech-hack/frontend/node_modules/typescript/lib",
+    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -59,7 +66,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1757208762472</updated>
-      <workItem from="1757208763970" duration="1155000" />
+      <workItem from="1757208763970" duration="4158000" />
     </task>
     <task id="LOCAL-00002" summary="feat: add vacancy statistics modal and candidate skills functionality&#10;&#10;- Add VacancyStatsModal component with detailed analytics&#10;  - Display vacancy info (company, location, salary, employment type)&#10;  - Show candidate statistics and status distribution&#10;  - Include interview metrics and feedback analysis&#10;  - Add conversion rate and time-in-system metrics&#10;&#10;- Implement candidate skills feature&#10;  - Add skills field to Candidate model and database schema&#10;  - Create migration for skills column in candidate table&#10;  - Update Pydantic schemas with skills validation&#10;  - Add skills input field to candidate edit form&#10;  - Display skills as badges on candidate detail page&#10;&#10;- Enhance vacancy table with statistics button&#10;  - Add BarChart3Icon button for opening statistics modal&#10;  - Integrate VacancyStatsModal with vacancy table actions&#10;&#10;- Improve dashboard with additional metrics&#10;  - Add salary analysis and experience statistics&#10;  - Include company and location diversity metrics&#10;  - Add interview completion rates and feedback analysis&#10;  - Enhance candidate detail page with interview statistics&#10;&#10;- Update backend services for skills handling&#10;  - Modify candidate service to handle JSON skills serialization&#10;  - Add proper validation for skills array/string conversion&#10;  - Ensure API compatibility with frontend skills format&#10;&#10;- Fix JSX structure issues in candidate edit form&#10;  - Remove redundant closing div tag causing JSX error&#10;  - Improve form layout and validation&#10;&#10;- Regenerate frontend API types&#10;  - Update TypeScript types to match backend schema changes&#10;  - Ensure proper type safety for skills field">
       <option name="closed" value="true" />
@@ -69,15 +76,47 @@
       <option name="project" value="LOCAL" />
       <updated>1757210406693</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fix ci">
+      <option name="closed" value="true" />
+      <created>1757211493906</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1757211493906</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="self-page" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat: add logout button and clickable header" />
     <MESSAGE value="feat: add vacancy statistics modal and candidate skills functionality&#10;&#10;- Add VacancyStatsModal component with detailed analytics&#10;  - Display vacancy info (company, location, salary, employment type)&#10;  - Show candidate statistics and status distribution&#10;  - Include interview metrics and feedback analysis&#10;  - Add conversion rate and time-in-system metrics&#10;&#10;- Implement candidate skills feature&#10;  - Add skills field to Candidate model and database schema&#10;  - Create migration for skills column in candidate table&#10;  - Update Pydantic schemas with skills validation&#10;  - Add skills input field to candidate edit form&#10;  - Display skills as badges on candidate detail page&#10;&#10;- Enhance vacancy table with statistics button&#10;  - Add BarChart3Icon button for opening statistics modal&#10;  - Integrate VacancyStatsModal with vacancy table actions&#10;&#10;- Improve dashboard with additional metrics&#10;  - Add salary analysis and experience statistics&#10;  - Include company and location diversity metrics&#10;  - Add interview completion rates and feedback analysis&#10;  - Enhance candidate detail page with interview statistics&#10;&#10;- Update backend services for skills handling&#10;  - Modify candidate service to handle JSON skills serialization&#10;  - Add proper validation for skills array/string conversion&#10;  - Ensure API compatibility with frontend skills format&#10;&#10;- Fix JSX structure issues in candidate edit form&#10;  - Remove redundant closing div tag causing JSX error&#10;  - Improve form layout and validation&#10;&#10;- Regenerate frontend API types&#10;  - Update TypeScript types to match backend schema changes&#10;  - Ensure proper type safety for skills field" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: add vacancy statistics modal and candidate skills functionality&#10;&#10;- Add VacancyStatsModal component with detailed analytics&#10;  - Display vacancy info (company, location, salary, employment type)&#10;  - Show candidate statistics and status distribution&#10;  - Include interview metrics and feedback analysis&#10;  - Add conversion rate and time-in-system metrics&#10;&#10;- Implement candidate skills feature&#10;  - Add skills field to Candidate model and database schema&#10;  - Create migration for skills column in candidate table&#10;  - Update Pydantic schemas with skills validation&#10;  - Add skills input field to candidate edit form&#10;  - Display skills as badges on candidate detail page&#10;&#10;- Enhance vacancy table with statistics button&#10;  - Add BarChart3Icon button for opening statistics modal&#10;  - Integrate VacancyStatsModal with vacancy table actions&#10;&#10;- Improve dashboard with additional metrics&#10;  - Add salary analysis and experience statistics&#10;  - Include company and location diversity metrics&#10;  - Add interview completion rates and feedback analysis&#10;  - Enhance candidate detail page with interview statistics&#10;&#10;- Update backend services for skills handling&#10;  - Modify candidate service to handle JSON skills serialization&#10;  - Add proper validation for skills array/string conversion&#10;  - Ensure API compatibility with frontend skills format&#10;&#10;- Fix JSX structure issues in candidate edit form&#10;  - Remove redundant closing div tag causing JSX error&#10;  - Improve form layout and validation&#10;&#10;- Regenerate frontend API types&#10;  - Update TypeScript types to match backend schema changes&#10;  - Ensure proper type safety for skills field" />
+    <MESSAGE value="fix ci" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix ci" />
   </component>
 </project>
