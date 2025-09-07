@@ -14,12 +14,8 @@ function RouteComponent() {
 		interviewMessagesQueryOptions(params.interviewId),
 	);
 	if (messages.data.length === 0) {
-		return (
-			<StartInterview interviewId={params.interviewId} />
-		);
+		return <StartInterview interviewId={params.interviewId} />;
 	}
 
-	return (
-		<InterviewChat interviewId={params.interviewId} />
-	);
+	return <InterviewChat interviewId={params.interviewId} />;
 }

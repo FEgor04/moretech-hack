@@ -16,9 +16,7 @@ import { Button } from "../ui/button";
 import Webcam from "react-webcam";
 import { Badge } from "../ui/badge";
 
-export function StartInterview({
-	interviewId,
-}: { interviewId: string}) {
+export function StartInterview({ interviewId }: { interviewId: string }) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
