@@ -323,7 +323,7 @@ function CandidateDetail() {
 														if (Array.isArray(educationData)) {
 															return educationData.map((edu, index) => (
 																<div
-																	key={index}
+																	key={`edu-${edu.organization || "unknown"}-${edu.speciality || "unknown"}-${index}`}
 																	className="p-3 bg-blue-50 rounded-lg border border-blue-200"
 																>
 																	<div className="flex items-start justify-between">
@@ -347,15 +347,15 @@ function CandidateDetail() {
 																</div>
 															));
 														}
-															return (
-																<div className="p-3 bg-gray-50 rounded-lg">
-																	<pre className="text-sm whitespace-pre-wrap">
-																		{typeof c.education === "string"
-																			? c.education
-																			: JSON.stringify(c.education, null, 2)}
-																	</pre>
-																</div>
-															);
+														return (
+															<div className="p-3 bg-gray-50 rounded-lg">
+																<pre className="text-sm whitespace-pre-wrap">
+																	{typeof c.education === "string"
+																		? c.education
+																		: JSON.stringify(c.education, null, 2)}
+																</pre>
+															</div>
+														);
 													} catch {
 														return (
 															<div className="p-3 bg-gray-50 rounded-lg">
@@ -387,7 +387,7 @@ function CandidateDetail() {
 														if (Array.isArray(experienceData)) {
 															return experienceData.map((exp, index) => (
 																<div
-																	key={index}
+																	key={`exp-${exp.company || "unknown"}-${exp.position || "unknown"}-${index}`}
 																	className="p-3 bg-green-50 rounded-lg border border-green-200"
 																>
 																	<div className="flex items-start justify-between">
@@ -416,15 +416,15 @@ function CandidateDetail() {
 																</div>
 															));
 														}
-															return (
-																<div className="p-3 bg-gray-50 rounded-lg">
-																	<pre className="text-sm whitespace-pre-wrap">
-																		{typeof c.experience === "string"
-																			? c.experience
-																			: JSON.stringify(c.experience, null, 2)}
-																	</pre>
-																</div>
-															);
+														return (
+															<div className="p-3 bg-gray-50 rounded-lg">
+																<pre className="text-sm whitespace-pre-wrap">
+																	{typeof c.experience === "string"
+																		? c.experience
+																		: JSON.stringify(c.experience, null, 2)}
+																</pre>
+															</div>
+														);
 													} catch {
 														return (
 															<div className="p-3 bg-gray-50 rounded-lg">
