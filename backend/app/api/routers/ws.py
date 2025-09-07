@@ -8,6 +8,8 @@ import httpx
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
+from app.clients.yandex import get_yandex_speech_client
+
 
 logger = logging.getLogger("app")
 
@@ -142,19 +144,14 @@ class InterviewWebsocketService:
 
     def recognize_user_answer(self, audio_path: str) -> str:
         """Recognize speech from audio file and return transcribed text."""
-        try:
-            logger.debug("Recognizing speech from audio file: %s", audio_path)
-            
-            # TODO: Implement actual speech recognition
-            # For now, return a mock response
-            mock_response = "тестовое сообщение"
-            
-            logger.info("Speech recognition result: %s", mock_response)
-            return mock_response
-            
-        except Exception as e:
-            logger.exception("Failed to recognize speech from %s", audio_path)
-            return ""
+        logger.debug("Recognizing speech from audio file: %s", audio_path)
+
+        client = get_yandex_speech_client()
+        result = client.transcribe_file(audio_path)
+        text = result[0].normalized_text or result[0].raw_text
+        logger.info("Speech recognition result: %s", result)
+        logger.info("Speech recognition text: %s", text)
+        return text
 
     async def submit_user_answer(self, interview_id: str, text: str) -> bool:
         """Submit user answer to the interview messages endpoint."""
