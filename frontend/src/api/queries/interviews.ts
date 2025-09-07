@@ -3,6 +3,7 @@ import {
 	listInterviewsInterviewsGet,
 	getInterviewInterviewsInterviewIdGet,
 	getInterviewMessagesInterviewsInterviewIdMessagesGet,
+	getInterviewsByCandidateInterviewsCandidateCandidateIdGet,
 	listInterviewNotesInterviewsInterviewIdNotesGet,
 } from "../client";
 
@@ -40,13 +41,12 @@ export const interviewsByCandidateQueryOptions = (candidateId: string) =>
 	queryOptions({
 		queryKey: ["interviews", "candidate", candidateId],
 		queryFn: async () => {
-			const response = await listInterviewsInterviewsGet<true>({
-				throwOnError: true,
-			});
-			// Filter interviews by candidate ID on the frontend
-			return response.data.filter(
-				(interview) => interview.candidate_id === candidateId,
-			);
+			const response =
+				await getInterviewsByCandidateInterviewsCandidateCandidateIdGet<true>({
+					path: { candidate_id: candidateId },
+					throwOnError: true,
+				});
+			return response.data;
 		},
 	});
 

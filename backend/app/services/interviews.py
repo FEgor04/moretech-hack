@@ -45,7 +45,9 @@ async def create_interview(
 
 
 async def list_interviews(session: AsyncSession) -> list[Interview]:
-    result = await session.scalars(select(Interview).order_by(Interview.id))
+    result = await session.scalars(
+        select(Interview).order_by(Interview.created_at.desc())
+    )
     return list(result)
 
 
