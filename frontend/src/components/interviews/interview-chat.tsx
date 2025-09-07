@@ -28,7 +28,7 @@ import WebcamComponent from "react-webcam";
 type Props = {
 	interviewId: string;
 	webcamRef: React.RefObject<Webcam | null>;
-}
+};
 
 export function InterviewChat({ interviewId, webcamRef }: Props) {
 	const [message, setMessage] = useState("");

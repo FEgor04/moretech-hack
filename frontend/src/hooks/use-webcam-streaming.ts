@@ -1,37 +1,53 @@
 import { useRef, useState } from "react";
 import type Webcam from "react-webcam";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
-export function useWebcamStreaming() {
+export function useWebcamStreaming(interviewId: string) {
 	const webcamRef = useRef<Webcam | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const [isRecording, setIsRecording] = useState(false);
+	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+	const [isRecording, setIsRecording] = useState(false);
+	const { sendMessage, readyState } = useWebSocket(`/ws/${interviewId}/video`, {
+		onError: (error) => {
+			console.error("Error connecting to webcam stream", error);
+		},
+		onOpen: () => {
+			console.log("Connected to webcam stream");
+		},
+	});
 
-    function handleDataAvailable(data: BlobEvent) {
-        console.log("Data available", data);
-    }
+	// TODO: check if webcam is also ready.
+	const isReady = readyState === ReadyState.OPEN;
 
-    function startRecording() {
-        setIsRecording(true);
-        if(!webcamRef.current) {
-            return;
-        }
+	function handleDataAvailable(data: BlobEvent) {
+		sendMessage(data.data);
+	}
 
-        mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream!, {
-            mimeType: "video/webm",
-        });
-        mediaRecorderRef.current.addEventListener("dataavailable", handleDataAvailable);
-        mediaRecorderRef.current.start();
-    }
+	function startRecording() {
+		setIsRecording(true);
+		if (!webcamRef.current) {
+			return;
+		}
 
-    function handleStopRecording() {
-        setIsRecording(false);
-        mediaRecorderRef.current?.stop();
-    }   
+		mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream!, {
+			mimeType: "video/webm",
+		});
+		mediaRecorderRef.current.addEventListener(
+			"dataavailable",
+			handleDataAvailable,
+		);
+		mediaRecorderRef.current.start();
+	}
+
+	function handleStopRecording() {
+		setIsRecording(false);
+		mediaRecorderRef.current?.stop();
+	}
 
 	return {
 		webcamRef,
-        isRecording,
-        startRecording,
-        handleStopRecording,
+		isReady,
+		isRecording,
+		startRecording,
+		handleStopRecording,
 	};
 }
