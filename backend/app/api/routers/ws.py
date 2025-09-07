@@ -8,7 +8,7 @@ import httpx
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
-from app.clients.yandex import get_yandex_speech_client
+from app.clients.yandex import get_yandex_speech_recognition_model, get_yandex_speech_synthesis_client
 from app.schemas.common import InterviewMessageRead
 
 
@@ -158,7 +158,7 @@ class InterviewWebsocketService:
         """Recognize speech from audio file and return transcribed text."""
         logger.debug("Recognizing speech from audio file: %s", audio_path)
 
-        client = get_yandex_speech_client()
+        client = get_yandex_speech_recognition_model()
         result = client.transcribe_file(audio_path)
         text = result[0].normalized_text or result[0].raw_text
         logger.info("Speech recognition result: %s", result)
@@ -289,7 +289,16 @@ class InterviewWebsocketService:
             latest_message[:100] if latest_message else "None"
         )
 
-        
+        await self.send_message_to_user(latest_message)
+
+    async def send_message_to_user(self, message: str) -> None:
+        """Synthesize message and send it to the user."""
+        logger.info("Sending message to user: %s", message)
+        model = get_yandex_speech_synthesis_client()
+
+        result = model.synthesize(message)
+
+        await self.websocket.send_bytes(result)
 
     def add_video_chunk(self, chunk: bytes) -> None:
         """Add a video chunk to the buffer."""
@@ -378,13 +387,13 @@ _interview_services: Dict[str, InterviewWebsocketService] = {}
 
 
 def get_or_create_interview_service(
-    interview_id: str, prefix: str = ""
+    interview_id: str, websocket: WebSocket, prefix: str = ""
 ) -> InterviewWebsocketService:
     """Get existing or create new interview service."""
     service_key = f"{prefix}{interview_id}" if prefix else interview_id
     if service_key not in _interview_services:
         _interview_services[service_key] = InterviewWebsocketService(
-            interview_id, prefix
+            interview_id, websocket, prefix
         )
     return _interview_services[service_key]
 
@@ -407,7 +416,7 @@ async def websocket_video_stream(
     await websocket.accept()
 
     # Get or create interview service
-    service = get_or_create_interview_service(interview_id, prefix)
+    service = get_or_create_interview_service(interview_id, websocket, prefix)
 
     logger.info(
         "WS video connection established for interview %s with prefix '%s'",
