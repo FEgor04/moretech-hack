@@ -89,7 +89,11 @@ async def update_interview(
     if payload.status is not None:
         interview.status = payload.status
     if payload.state is not None:
-        interview.state = payload.state.value
+        # Allow direct state updates via API (used by tests); value may be enum or str
+        try:
+            interview.state = payload.state.value
+        except AttributeError:
+            interview.state = str(payload.state)
     if payload.feedback is not None:
         interview.feedback = payload.feedback
     if payload.feedback_positive is not None:

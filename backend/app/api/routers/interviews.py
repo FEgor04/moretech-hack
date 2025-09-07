@@ -114,8 +114,8 @@ async def initialize_first_message(
         return await interviews_service.initialize_first_message(session, interview_id)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ConflictError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 
 @router.get("/{interview_id}/notes", response_model=list[InterviewNoteRead])
