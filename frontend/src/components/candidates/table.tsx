@@ -10,8 +10,31 @@ import { CandidateStatusBadge } from "./status-badge";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { CandidateAvatar } from "./candidate-avatar";
 import { Link } from "@tanstack/react-router";
+import { Button } from "../ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { MoreHorizontalIcon, TrashIcon } from "lucide-react";
+import { useDeleteCandidate } from "@/api/mutations/candidates";
+import { toast } from "sonner";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 export function useCandidatesTable(data: CandidateRead[]) {
+	const deleteMutation = useDeleteCandidate();
+
 	const columns = useMemo<ColumnDef<CandidateRead>[]>(
 		() => [
 			{
@@ -67,7 +90,7 @@ export function useCandidatesTable(data: CandidateRead[]) {
 			},
 			{
 				accessorKey: "updated_at",
-				header: "Последнее обновление	",
+				header: "Последнее обновление",
 				cell: ({ row }) =>
 					row.original.updated_at ? (
 						<RelativeTimeTooltip
@@ -78,8 +101,69 @@ export function useCandidatesTable(data: CandidateRead[]) {
 						<>&mdash;</>
 					),
 			},
+			{
+				id: "actions",
+				cell: ({ row }) => {
+					const candidate = row.original;
+					return (
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" className="h-8 w-8 p-0">
+									<span className="sr-only">Открыть меню</span>
+									<MoreHorizontalIcon className="h-4 w-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<DropdownMenuItem
+											onSelect={(e) => e.preventDefault()}
+											className="text-red-600"
+										>
+											<TrashIcon className="mr-2 h-4 w-4" />
+											Удалить
+										</DropdownMenuItem>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle>
+												Вы уверены, что хотите удалить кандидата?
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Это действие нельзя отменить. Кандидат &quot;
+												{candidate.name}&quot; будет безвозвратно удален вместе со всеми связанными данными.
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel>Отмена</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={() => {
+													deleteMutation.mutate(candidate.id, {
+														onSuccess: () => {
+															toast.success("Кандидат удален", {
+																description: `Кандидат "${candidate.name}" успешно удален.`,
+															});
+														},
+														onError: (error) => {
+															toast.error("Ошибка при удалении кандидата", {
+																description: error.message,
+															});
+														},
+													});
+												}}
+											>
+												Удалить
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialog>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					);
+				},
+			},
 		],
-		[],
+		[deleteMutation],
 	);
 
 	const [sorting, setSorting] = useState<SortingState>([]);

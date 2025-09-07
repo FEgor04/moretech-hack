@@ -14,6 +14,20 @@ class CandidateStatus(str, Enum):
     ON_HOLD = "on_hold"
 
 
+class EmploymentType(str, Enum):
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+    INTERNSHIP = "internship"
+
+
+class ExperienceLevel(str, Enum):
+    JUNIOR = "junior"
+    MIDDLE = "middle"
+    SENIOR = "senior"
+    LEAD = "lead"
+
+
 class Timestamped(BaseModel):
     created_at: datetime | None = None
     updated_at: datetime | None = None
@@ -55,6 +69,17 @@ class VacancyBase(BaseModel):
     description: str | None = None
     status: str | None = None
     gigachat_file_id: str | None = None
+    
+    # Новые поля
+    company: str | None = None
+    location: str | None = None
+    salary_min: int | None = None
+    salary_max: int | None = None
+    employment_type: EmploymentType | None = None
+    experience_level: ExperienceLevel | None = None
+    remote_work: bool = False
+    requirements: str | None = None
+    benefits: str | None = None
 
 
 class VacancyCreate(VacancyBase):

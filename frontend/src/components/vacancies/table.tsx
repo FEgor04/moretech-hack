@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
 	getCoreRowModel,
@@ -28,17 +28,22 @@ import {
 export function useVacanciesTable(data: VacancyRead[]) {
 	const deleteMutation = useDeleteVacancy();
 
-	const handleDelete = (vacancyId: number, title: string) => {
-		deleteMutation.mutate(vacancyId, {
-			onSuccess: () => {
-				toast.success(`Вакансия "${title}" удалена`);
-			},
-			onError: () => {
-				toast.error("Ошибка при удалении вакансии");
-			},
-		});
-	};
+	// ✅ оборачиваем в useCallback, чтобы линтер был доволен
+	const handleDelete = useCallback(
+		(vacancyId: number, title: string) => {
+			deleteMutation.mutate(vacancyId, {
+				onSuccess: () => {
+					toast.success(`Вакансия "${title}" удалена`);
+				},
+				onError: () => {
+					toast.error("Ошибка при удалении вакансии");
+				},
+			});
+		},
+		[deleteMutation],
+	);
 
+	// ✅ используем handleDelete как зависимость
 	const columns = useMemo<ColumnDef<VacancyRead>[]>(
 		() => [
 			{
@@ -101,14 +106,16 @@ export function useVacanciesTable(data: VacancyRead[]) {
 							<AlertDialogHeader>
 								<AlertDialogTitle>Удалить вакансию</AlertDialogTitle>
 								<AlertDialogDescription>
-									Вы уверены, что хотите удалить вакансию "{row.original.title}"? 
+									Вы уверены, что хотите удалить вакансию "{row.original.title}"?
 									Это действие нельзя отменить.
 								</AlertDialogDescription>
 							</AlertDialogHeader>
 							<AlertDialogFooter>
 								<AlertDialogCancel>Отмена</AlertDialogCancel>
 								<AlertDialogAction
-									onClick={() => handleDelete(row.original.id, row.original.title)}
+									onClick={() =>
+										handleDelete(row.original.id, row.original.title)
+									}
 									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 								>
 									Удалить
@@ -119,7 +126,7 @@ export function useVacanciesTable(data: VacancyRead[]) {
 				),
 			},
 		],
-		[deleteMutation],
+		[handleDelete], // ✅ теперь только handleDelete
 	);
 
 	const [sorting, setSorting] = useState<SortingState>([]);

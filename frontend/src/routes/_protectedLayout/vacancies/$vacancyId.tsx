@@ -50,6 +50,7 @@ function VacancyDetail() {
 			<div className="flex items-center justify-between">
 				<h1 className="text-xl font-semibold">{v.title}</h1>
 				<button
+					type="button"
 					onClick={() => navigate({ to: "/vacancies" })}
 					className="text-sm text-muted-foreground hover:text-foreground"
 				>

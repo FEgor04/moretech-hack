@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as InterviewsInterviewIdRouteImport } from './routes/interviews.$interviewId'
 import { Route as CandidateCandidateIdRouteImport } from './routes/candidate.$candidateId'
 import { Route as ProtectedLayoutDashboardRouteImport } from './routes/_protectedLayout/dashboard'
+import { Route as CandidateRouteImport } from './routes/candidate.'
 import { Route as ProtectedLayoutVacanciesIndexRouteImport } from './routes/_protectedLayout/vacancies/index'
 import { Route as ProtectedLayoutCandidatesIndexRouteImport } from './routes/_protectedLayout/candidates/index'
 import { Route as ProtectedLayoutVacanciesNewRouteImport } from './routes/_protectedLayout/vacancies/new'
@@ -53,6 +54,11 @@ const ProtectedLayoutDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => ProtectedLayoutRouteRoute,
   } as any)
+const CandidateRoute = CandidateRouteImport.update({
+  id: '/candidate/',
+  path: '/candidate/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedLayoutVacanciesIndexRoute =
   ProtectedLayoutVacanciesIndexRouteImport.update({
     id: '/vacancies/',
@@ -99,6 +105,7 @@ const ProtectedLayoutCandidatesCandidateIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/candidate': typeof CandidateRoute
   '/dashboard': typeof ProtectedLayoutDashboardRoute
   '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/candidate': typeof CandidateRoute
   '/dashboard': typeof ProtectedLayoutDashboardRoute
   '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protectedLayout': typeof ProtectedLayoutRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/candidate/': typeof CandidateRoute
   '/_protectedLayout/dashboard': typeof ProtectedLayoutDashboardRoute
   '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sign-in'
+    | '/candidate'
     | '/dashboard'
     | '/candidate/$candidateId'
     | '/interviews/$interviewId'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/sign-in'
+    | '/candidate'
     | '/dashboard'
     | '/candidate/$candidateId'
     | '/interviews/$interviewId'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_protectedLayout'
     | '/sign-in'
+    | '/candidate/'
     | '/_protectedLayout/dashboard'
     | '/candidate/$candidateId'
     | '/interviews/$interviewId'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedLayoutRouteRoute: typeof ProtectedLayoutRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
+  CandidateRoute: typeof CandidateRoute
   CandidateCandidateIdRoute: typeof CandidateCandidateIdRoute
   InterviewsInterviewIdRoute: typeof InterviewsInterviewIdRoute
 }
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof ProtectedLayoutDashboardRouteImport
       parentRoute: typeof ProtectedLayoutRouteRoute
+    }
+    '/candidate/': {
+      id: '/candidate/'
+      path: '/candidate'
+      fullPath: '/candidate'
+      preLoaderRoute: typeof CandidateRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_protectedLayout/vacancies/': {
       id: '/_protectedLayout/vacancies/'
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedLayoutRouteRoute: ProtectedLayoutRouteRouteWithChildren,
   SignInRoute: SignInRoute,
+  CandidateRoute: CandidateRoute,
   CandidateCandidateIdRoute: CandidateCandidateIdRoute,
   InterviewsInterviewIdRoute: InterviewsInterviewIdRoute,
 }
