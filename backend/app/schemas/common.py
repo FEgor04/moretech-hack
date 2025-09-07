@@ -99,6 +99,33 @@ class VacancyBase(BaseModel):
     requirements: str | None = None
     benefits: str | None = None
 
+    # Normalize enums that might come with dashes from DB or external sources
+    @field_validator("employment_type", mode="before")
+    @classmethod
+    def normalize_employment_type(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.replace("-", "_")
+            try:
+                return EmploymentType(normalized)
+            except Exception:
+                return normalized
+        return value
+
+    @field_validator("experience_level", mode="before")
+    @classmethod
+    def normalize_experience_level(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.replace("-", "_")
+            try:
+                return ExperienceLevel(normalized)
+            except Exception:
+                return normalized
+        return value
+
 
 class VacancyCreate(VacancyBase):
     pass
@@ -118,6 +145,33 @@ class VacancyUpdate(BaseModel):
     remote_work: bool | None = None
     requirements: str | None = None
     benefits: str | None = None
+
+    # The update payload may also contain dashed enum values
+    @field_validator("employment_type", mode="before")
+    @classmethod
+    def normalize_employment_type_update(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.replace("-", "_")
+            try:
+                return EmploymentType(normalized)
+            except Exception:
+                return normalized
+        return value
+
+    @field_validator("experience_level", mode="before")
+    @classmethod
+    def normalize_experience_level_update(cls, value):
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.replace("-", "_")
+            try:
+                return ExperienceLevel(normalized)
+            except Exception:
+                return normalized
+        return value
 
 
 class VacancyRead(VacancyBase, Timestamped):
