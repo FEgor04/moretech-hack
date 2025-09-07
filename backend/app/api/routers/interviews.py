@@ -142,3 +142,16 @@ async def create_interview_note(
 ):
     payload.interview_id = interview_id
     return await interviews_service.create_note(session, payload)
+
+
+@router.delete(
+    "/{interview_id}/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_interview_note(
+    interview_id: str, note_id: int, session: AsyncSession = Depends(get_session)
+):
+    try:
+        await interviews_service.delete_note(session, note_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return None

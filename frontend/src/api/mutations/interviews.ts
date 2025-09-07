@@ -169,3 +169,19 @@ export const useCreateInterviewNote = (interviewId: string) => {
 		},
 	});
 };
+
+export const useDeleteInterviewNote = (interviewId: string) => {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: async (noteId: number) => {
+			await apiClient.delete({
+				url: "/interviews/{interview_id}/notes/{note_id}",
+				path: { interview_id: interviewId, note_id: noteId },
+				throwOnError: true,
+			});
+		},
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: ["interview", interviewId, "notes"] });
+		},
+	});
+};

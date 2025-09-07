@@ -21,6 +21,7 @@ import { Input } from "../ui/input";
 import { useState } from "react";
 import { interviewNotesPageQueryOptions } from "@/api/queries/interviews";
 import { useCreateInterviewNote } from "@/api/mutations/interviews";
+import { useDeleteInterviewNote } from "@/api/mutations/interviews";
 
 interface InterviewsListProps {
 	candidateId: string;
@@ -150,11 +151,11 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 
 function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 	const [limit] = useState(10);
-	const [offset, setOffset] = useState(0);
-	const page = useSuspenseQuery(
-		interviewNotesPageQueryOptions(interviewId, limit, offset),
-	);
+	const [pageIndex, setPageIndex] = useState(1);
+	const offset = (pageIndex - 1) * limit;
+	const page = useSuspenseQuery(interviewNotesPageQueryOptions(interviewId, limit, offset));
 	const create = useCreateInterviewNote(interviewId);
+  const remove = useDeleteInterviewNote(interviewId);
 
 	return (
 		<div className="space-y-3">
@@ -162,25 +163,19 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 				onSubmit={(e) => {
 					e.preventDefault();
 					const formEl = e.currentTarget as HTMLFormElement;
-					const input = formEl.elements.namedItem(
-						"noteText",
-					) as HTMLInputElement;
+					const input = formEl.elements.namedItem("noteText") as HTMLInputElement;
 					const value = input.value.trim();
 					if (!value) return;
 					create.mutate(value, {
 						onSuccess: () => {
 							input.value = "";
-							setOffset(0); // refresh from first page
+							setPageIndex(1); // refresh from first page
 						},
 					});
 				}}
 				className="flex gap-2"
 			>
-				<Input
-					name="noteText"
-					placeholder="Оставить заметку..."
-					className="flex-1"
-				/>
+				<Input name="noteText" placeholder="Оставить заметку..." className="flex-1" />
 				<Button type="submit" disabled={create.isPending}>
 					{create.isPending ? "Добавление..." : "Добавить"}
 				</Button>
@@ -189,7 +184,19 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 			<div className="space-y-2 max-h-80 overflow-auto pr-1">
 				{page.data?.length ? (
 					page.data.map((n) => (
-						<div key={n.id} className="p-2 border rounded text-sm">
+						<div key={n.id} className="p-2 border rounded text-sm relative">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="absolute top-1 right-1 h-6 w-6"
+								onClick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									remove.mutate(n.id);
+								}}
+							>
+								<span className="sr-only">Удалить</span>×
+							</Button>
 							<div className="text-muted-foreground text-xs mb-1">
 								{n.created_at ? new Date(n.created_at).toLocaleString() : ""}
 							</div>
@@ -200,9 +207,33 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 					<div className="text-sm text-muted-foreground">Заметок пока нет</div>
 				)}
 			</div>
-			<div className="flex justify-center">
-				<Button variant="outline" onClick={() => setOffset(offset + limit)}>
-					Показать ещё
+			<div className="flex items-center justify-center gap-2">
+				<Button
+					variant="outline"
+					size="icon"
+					disabled={pageIndex <= 1}
+					onClick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						setPageIndex((p) => Math.max(1, p - 1));
+					}}
+				>
+					‹
+				</Button>
+				<span className="text-xs text-muted-foreground min-w-[56px] text-center">
+					Стр. {pageIndex}
+				</span>
+				<Button
+					variant="outline"
+					size="icon"
+					disabled={(page.data?.length ?? 0) < limit}
+					onClick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						setPageIndex((p) => p + 1);
+					}}
+				>
+					›
 				</Button>
 			</div>
 		</div>

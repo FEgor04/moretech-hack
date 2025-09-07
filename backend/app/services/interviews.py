@@ -156,6 +156,14 @@ async def create_note(
     return note
 
 
+async def delete_note(session: AsyncSession, note_id: int) -> None:
+    note = await session.get(InterviewNote, note_id)
+    if not note:
+        raise NotFoundError("Note not found")
+    await session.delete(note)
+    await session.commit()
+
+
 def get_system_prompt(candidate: Candidate, vacancy: Vacancy | None) -> str:
     vacancy_part = (
         f"Вакансия: {vacancy.title}. Описание: {vacancy.description or 'нет описания.'}"
