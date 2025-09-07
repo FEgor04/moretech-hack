@@ -14,7 +14,7 @@ function RouteComponent() {
 	const messages = useSuspenseQuery(
 		interviewMessagesQueryOptions(params.interviewId),
 	);
-	const { webcamRef, startRecording } = useWebcamStreaming(params.interviewId);
+	const { webcamRef, startRecording, sendAudioReadyMarker } = useWebcamStreaming(params.interviewId);
 
 	if (messages.data.length === 0) {
 		return (
@@ -23,6 +23,6 @@ function RouteComponent() {
 	}
 
 	return (
-		<InterviewChat webcamRef={webcamRef} interviewId={params.interviewId} startRecording={startRecording} />
+		<InterviewChat webcamRef={webcamRef} interviewId={params.interviewId} startRecording={startRecording} sendAudioReadyMarker={sendAudioReadyMarker} />
 	);
 }

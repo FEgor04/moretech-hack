@@ -2,6 +2,7 @@ import asyncio
 import logging
 import subprocess
 from pathlib import Path
+import time
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -14,10 +15,14 @@ router = APIRouter()
 RECORDINGS_DIR = Path("recordings")
 RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
+# Global store for audio marker timings (ms since WS connection start) per interview
+AUDIO_MARKER_TIMINGS: dict[str, list[int]] = {}
+
 
 @router.websocket("/ws/{interview_id}/video")
 async def websocket_video_stream(websocket: WebSocket, interview_id: str) -> None:
     await websocket.accept()
+    connection_started_monotonic = time.monotonic()
     file_path = RECORDINGS_DIR / f"{interview_id}.webm"
     temp_path = RECORDINGS_DIR / f"{interview_id}.raw.webm"
     chunk_index = 0
@@ -35,7 +40,10 @@ async def websocket_video_stream(websocket: WebSocket, interview_id: str) -> Non
                 logger.info("WS video disconnected for interview %s", interview_id)
                 break
             except RuntimeError as exc:  # Starlette raises this after a disconnect
-                if 'Cannot call "receive" once a disconnect message has been received' in str(exc):
+                if (
+                    'Cannot call "receive" once a disconnect message has been received'
+                    in str(exc)
+                ):
                     logger.info("WS video disconnected for interview %s", interview_id)
                     break
                 raise
@@ -46,6 +54,16 @@ async def websocket_video_stream(websocket: WebSocket, interview_id: str) -> Non
                 data_bytes = b
             else:
                 text_data = message.get("text")
+                if text_data == "audio-ready":
+                    # Calculate elapsed time in ms since WS connection start and store globally
+                    elapsed_ms = int((time.monotonic() - connection_started_monotonic) * 1000)
+                    AUDIO_MARKER_TIMINGS.setdefault(interview_id, []).append(elapsed_ms)
+                    logger.info(
+                        "Audio ready marker received for interview %s at %d ms",
+                        interview_id,
+                        elapsed_ms,
+                    )
+                    continue
                 if text_data is not None:
                     logger.warning(
                         "Ignoring text frame on video WS for interview %s (len=%d)",
@@ -101,7 +119,9 @@ async def websocket_video_stream(websocket: WebSocket, interview_id: str) -> Non
                         "libopus",
                         str(file_path),
                     ]
-                    result2 = subprocess.run(cmd_reencode, capture_output=True, text=True)
+                    result2 = subprocess.run(
+                        cmd_reencode, capture_output=True, text=True
+                    )
                     if result2.returncode != 0:
                         logger.error(
                             "ffmpeg re-encode failed for interview %s: %s",
@@ -115,7 +135,9 @@ async def websocket_video_stream(websocket: WebSocket, interview_id: str) -> Non
                 except Exception:
                     pass
         except Exception:
-            logger.exception("Failed to save buffered video for interview %s", interview_id)
+            logger.exception(
+                "Failed to save buffered video for interview %s", interview_id
+            )
 
         logger.info(
             "WS video stream closed for interview %s, file at %s",

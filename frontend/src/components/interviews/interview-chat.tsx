@@ -1,4 +1,3 @@
-import { usePostInterviewMessageMutation } from "@/api/mutations/interviews";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import {
 	interviewQueryOptions,
@@ -6,34 +5,26 @@ import {
 } from "@/api/queries/interviews";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useEffect } from "react";
 import {
 	Conversation,
 	ConversationContent,
 	ConversationScrollButton,
 } from "../ai-elements/conversation";
 import { Message, MessageContent, MessageAvatar } from "../ai-elements/message";
-import {
-	PromptInput,
-	PromptInputTextarea,
-	PromptInputToolbar,
-	PromptInputSubmit,
-} from "../ai-elements/prompt-input";
 import { Badge } from "../ui/badge";
 import { Response } from "../ai-elements/response";
 import type Webcam from "react-webcam";
 import WebcamComponent from "react-webcam";
+import { Button } from "../ui/button";
 
 type Props = {
 	interviewId: string;
 	webcamRef: React.RefObject<Webcam | null>;
-	startRecording: () => void;
+	sendAudioReadyMarker: () => void;
 };
 
-export function InterviewChat({ interviewId, webcamRef, startRecording }: Props) {
-	const [message, setMessage] = useState("");
-
+export function InterviewChat({ interviewId, webcamRef, sendAudioReadyMarker }: Props) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
@@ -48,35 +39,9 @@ export function InterviewChat({ interviewId, webcamRef, startRecording }: Props)
 		refetchInterval: 1000,
 	});
 
-	const postMessageMutation = usePostInterviewMessageMutation();
-
 	useEffect(() => {
 		// startRecording();
 	}, []);
-
-	const handleSendMessage = async () => {
-		if (!message.trim() || postMessageMutation.isPending) return;
-
-		const messageText = message.trim();
-		setMessage("");
-
-		postMessageMutation.mutate(
-			{
-				interviewId,
-				message: {
-					text: messageText,
-					type: "user",
-				},
-			},
-			{
-				onError: (error) => {
-					toast.error("Ошибка при отправке сообщения");
-					console.error("Failed to send message:", error);
-					setMessage(messageText); // Restore message on error
-				},
-			},
-		);
-	};
 
 	if (messages.isLoading) {
 		return (
@@ -145,22 +110,7 @@ export function InterviewChat({ interviewId, webcamRef, startRecording }: Props)
 
 				{/* Message Input */}
 				<div className="">
-					<PromptInput className="mt-4 relative">
-						<PromptInputTextarea
-							value={message}
-							onChange={(e) => setMessage(e.target.value)}
-							placeholder="Введите ваше сообщение..."
-							disabled={postMessageMutation.isPending}
-						/>
-						<PromptInputToolbar>
-							<PromptInputSubmit
-								onClick={handleSendMessage}
-								disabled={!message.trim() || postMessageMutation.isPending}
-								status={postMessageMutation.isPending ? "submitted" : undefined}
-								className="absolute right-1 bottom-1"
-							/>
-						</PromptInputToolbar>
-					</PromptInput>
+					<Button onClick={sendAudioReadyMarker}>Ответ готов</Button>
 				</div>
 			</div>
 		</div>
