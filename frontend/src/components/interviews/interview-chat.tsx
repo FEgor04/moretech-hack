@@ -39,10 +39,6 @@ export function InterviewChat({ interviewId }: Props) {
 		refetchInterval: 1000,
 	});
 
-	useEffect(() => {
-		// startRecording();
-	}, []);
-
 	if (messages.isLoading) {
 		return (
 			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
