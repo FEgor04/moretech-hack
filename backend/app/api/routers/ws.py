@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum, StrEnum, auto
 import logging
 import subprocess
 from pathlib import Path
@@ -25,6 +26,13 @@ RECORDINGS_DIR = Path("recordings")
 RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+class InterviewSocketState(Enum, StrEnum):
+    AWAITING_USER_ANSWER = auto()
+    SPEECH_RECOGNITION = auto()
+    GENERATING_RESPONSE = auto()
+    SPEECH_SYNTHESIS = auto()
+
+
 class InterviewWebsocketService:
     """Service to manage WebSocket connections and state for a single interview."""
 
@@ -43,6 +51,13 @@ class InterviewWebsocketService:
         self.base_filename = f"{prefix}{interview_id}" if prefix else interview_id
         self.file_path = RECORDINGS_DIR / f"{self.base_filename}.webm"
         self.temp_path = RECORDINGS_DIR / f"{self.base_filename}.raw.webm"
+
+    async def update_state(self, state: InterviewSocketState) -> None:
+        """Update the state of the interview socket."""
+        logger.info(
+            "Updating state for interview %s to %s", self.interview_id, state.value
+        )
+        await self.websocket.send_json({"state": state.value})
 
     def get_latest_markers(self) -> tuple[int, int]:
         """Get the two latest markers or 0 and latest marker if only one exists."""
@@ -230,6 +245,9 @@ class InterviewWebsocketService:
 
     async def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
+
+        await self.update_state(InterviewSocketState.SPEECH_RECOGNITION)
+
         elapsed_ms = int((time.monotonic() - self.connection_started_monotonic) * 1000)
         self.audio_marker_timings.append(elapsed_ms)
         logger.info(
@@ -279,6 +297,8 @@ class InterviewWebsocketService:
 
         logger.info("User said: %s", recognized_text)
 
+        await self.update_state(InterviewSocketState.GENERATING_RESPONSE)
+
         # Submit the recognized text to the interview messages endpoint
         latest_message = await self.submit_user_answer(
             self.interview_id, recognized_text
@@ -297,7 +317,10 @@ class InterviewWebsocketService:
 
         # Не хочу использовать синтез в разработке, он сильно мешает и тратит кучу бабок
         if settings.use_yandex_speech_synthesis:
+            await self.update_state(InterviewSocketState.SPEECH_SYNTHESIS)
             await self.send_message_to_user(latest_message)
+
+        await self.update_state(InterviewSocketState.AWAITING_USER_ANSWER)
 
     async def send_message_to_user(self, message: str) -> None:
         """Synthesize message and send it to the user."""
@@ -427,6 +450,7 @@ async def websocket_video_stream(
 
     # Get or create interview service
     service = get_or_create_interview_service(interview_id, websocket, prefix)
+    await service.update_state(InterviewSocketState.AWAITING_USER_ANSWER)
 
     logger.info(
         "WS video connection established for interview %s with prefix '%s'",
