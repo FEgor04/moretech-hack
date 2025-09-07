@@ -35,18 +35,100 @@ class InterviewWebsocketService:
         self.file_path = RECORDINGS_DIR / f"{self.base_filename}.webm"
         self.temp_path = RECORDINGS_DIR / f"{self.base_filename}.raw.webm"
     
+    def get_latest_markers(self) -> tuple[int, int]:
+        """Get the two latest markers or 0 and latest marker if only one exists."""
+        if len(self.audio_marker_timings) == 0:
+            return 0, 0
+        elif len(self.audio_marker_timings) == 1:
+            return 0, self.audio_marker_timings[0]
+        else:
+            return self.audio_marker_timings[-2], self.audio_marker_timings[-1]
+
+    def cut_fragment_video(self, path: str, start_ms: int, end_ms: int) -> bool:
+        """Cut video fragment to only include time between start_ms and end_ms using ffmpeg."""
+        try:
+            # Convert milliseconds to seconds for ffmpeg
+            start_sec = start_ms / 1000.0
+            end_sec = end_ms / 1000.0
+            duration = end_sec - start_sec
+            
+            logger.info(
+                "Cutting video %s: start=%dms (%.3fs), end=%dms (%.3fs), duration=%.3fs",
+                path, start_ms, start_sec, end_ms, end_sec, duration
+            )
+            
+            if duration <= 0:
+                logger.warning(
+                    "Invalid duration for cutting video %s: start=%dms, end=%dms",
+                    path, start_ms, end_ms
+                )
+                return False
+            
+            # Create temporary file for the cut video with proper extension
+            temp_path = f"{path}.tmp.webm"
+            
+            # ffmpeg command to cut video
+            cmd = [
+                "ffmpeg",
+                "-y",  # Overwrite output file
+                "-i", path,  # Input file
+                "-ss", str(start_sec),  # Start time
+                "-t", str(duration),  # Duration
+                "-c", "copy",  # Copy streams without re-encoding
+                "-f", "webm",  # Explicitly specify output format
+                temp_path
+            ]
+            
+            logger.info("Running ffmpeg command: %s", " ".join(cmd))
+            
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                logger.error(
+                    "ffmpeg cut failed for %s (return code %d): %s",
+                    path, result.returncode, result.stderr[-1000:]
+                )
+                return False
+            
+            logger.info("ffmpeg cut successful for %s", path)
+            
+            # Replace original file with cut version
+            Path(temp_path).replace(path)
+            logger.info("Replaced original file with cut version: %s", path)
+            return True
+            
+        except Exception as e:
+            logger.exception("Failed to cut video fragment %s", path)
+            return False
+
     def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
         elapsed_ms = int((time.monotonic() - self.connection_started_monotonic) * 1000)
         self.audio_marker_timings.append(elapsed_ms)
         logger.info(
-            "Audio ready marker received for interview %s at %d ms",
+            "Audio ready marker received for interview %s at %d ms (total markers: %d)",
             self.interview_id,
             elapsed_ms,
+            len(self.audio_marker_timings)
         )
 
-        self.save_interview_video(f".{self.fragment_index}")
+        fragment_path = self.save_interview_video(f".{self.fragment_index}")
         self.fragment_index += 1
+        
+        if fragment_path:
+            # Get the two latest markers
+            start_ms, end_ms = self.get_latest_markers()
+            logger.info(
+                "Using markers for cutting: start=%dms, end=%dms (all markers: %s)",
+                start_ms, end_ms, self.audio_marker_timings
+            )
+            
+            # Cut the fragment video to only include time between markers
+            if self.cut_fragment_video(fragment_path, start_ms, end_ms):
+                logger.info("Fragment cut successfully: %s", fragment_path)
+            else:
+                logger.warning("Failed to cut fragment: %s", fragment_path)
+
     
     def add_video_chunk(self, chunk: bytes) -> None:
         """Add a video chunk to the buffer."""
@@ -54,15 +136,15 @@ class InterviewWebsocketService:
         self.received_chunks.append(chunk)
         self.total_bytes += len(chunk)
     
-    def save_interview_video(self, suffix: str = "") -> None:
-        """Save buffered video chunks to file."""
+    def save_interview_video(self, suffix: str = "") -> str | None:
+        """Save buffered video chunks to file and return the path to the saved file."""
         try:
             if self.total_bytes == 0:
                 logger.warning(
                     "No video chunks received for interview %s; nothing to save",
                     self.interview_id,
                 )
-                return
+                return None
             
             # Generate file paths with suffix
             temp_file_path = RECORDINGS_DIR / f"{self.base_filename}{suffix}.raw.webm"
@@ -112,6 +194,7 @@ class InterviewWebsocketService:
                         self.interview_id,
                         result2.stderr[-1000:],
                     )
+                    return None
             
             # Cleanup temp file
             try:
@@ -119,11 +202,14 @@ class InterviewWebsocketService:
                     temp_file_path.unlink()
             except Exception:
                 pass
+            
+            return str(final_file_path)
                 
         except Exception:
             logger.exception(
                 "Failed to save buffered video for interview %s", self.interview_id
             )
+            return None
     
     def cleanup(self) -> None:
         """Clean up resources and save video."""
