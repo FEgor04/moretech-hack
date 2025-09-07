@@ -30,7 +30,9 @@ class Vacancy(Base):
     responsibilities: Mapped[str | None] = mapped_column(Text, nullable=True)
     domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
     education: Mapped[str | None] = mapped_column(Text, nullable=True)
-    minor_skills: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON list[str]
+    minor_skills: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )  # JSON list[str]
     company_info: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(default=func.now())

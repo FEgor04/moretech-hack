@@ -102,16 +102,16 @@ class PDFParserService:
             name = parsed_data.get("name")
             if not name or name == "нет информации":
                 name = "Unknown Candidate"
-            
+
             position = parsed_data.get("position")
             if not position or position == "нет информации":
                 position = "Unknown Position"
-            
+
             # Truncate employment_type if too long
             employment_type = parsed_data.get("employment_type")
             if employment_type and len(employment_type) > 255:
                 employment_type = employment_type[:252] + "..."
-            
+
             candidate = CandidateCreate(
                 name=name,
                 email=clean_email,

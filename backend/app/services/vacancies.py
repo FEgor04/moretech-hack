@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.vacancy import Vacancy
 from app.models.note import Note
 from app.schemas.common import VacancyCreate, VacancyUpdate, NoteCreate, NoteUpdate
-from app.schemas.common import VacancyCreate, VacancyUpdate
 import json
 from app.services.exceptions import NotFoundError
 
@@ -18,7 +17,9 @@ async def create_vacancy(session: AsyncSession, payload: VacancyCreate) -> Vacan
         data["minor_skills"] = json.dumps(data["minor_skills"], ensure_ascii=False)
     if "responsibilities" in data and data["responsibilities"] is not None:
         if isinstance(data["responsibilities"], list):
-            data["responsibilities"] = json.dumps(data["responsibilities"], ensure_ascii=False)
+            data["responsibilities"] = json.dumps(
+                data["responsibilities"], ensure_ascii=False
+            )
     vacancy = Vacancy(**data)
     session.add(vacancy)
     await session.commit()
@@ -51,7 +52,9 @@ async def update_vacancy(
         data["minor_skills"] = json.dumps(data["minor_skills"], ensure_ascii=False)
     if "responsibilities" in data and data["responsibilities"] is not None:
         if isinstance(data["responsibilities"], list):
-            data["responsibilities"] = json.dumps(data["responsibilities"], ensure_ascii=False)
+            data["responsibilities"] = json.dumps(
+                data["responsibilities"], ensure_ascii=False
+            )
     for key, value in data.items():
         setattr(vacancy, key, value)
     await session.commit()

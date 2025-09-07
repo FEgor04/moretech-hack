@@ -45,5 +45,3 @@ def downgrade() -> None:
     # Can't recover data for positions; add column back for compatibility
     with op.batch_alter_table("candidate") as batch_op:
         batch_op.add_column(sa.Column("positions", sa.Text(), nullable=True))
-
-

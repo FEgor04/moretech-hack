@@ -22,9 +22,7 @@ export type BodyUploadVacancyPdfVacanciesUploadPdfPost = {
 
 /**
  * CandidateCreate
- * CandidateCreate
  */
-export type CandidateCreate = {
 export type CandidateCreate = {
     /**
      * Name
@@ -79,17 +77,7 @@ export type CandidateCreate = {
 
 /**
  * CandidateRead
- * CandidateRead
  */
-export type CandidateRead = {
-    /**
-     * Created At
-     */
-    created_at?: string | null;
-    /**
-     * Updated At
-     */
-    updated_at?: string | null;
 export type CandidateRead = {
     /**
      * Created At
@@ -103,7 +91,6 @@ export type CandidateRead = {
      * Name
      */
     name: string;
-    name: string;
     /**
      * Email
      */
@@ -111,7 +98,6 @@ export type CandidateRead = {
     /**
      * Position
      */
-    position: string;
     position: string;
     /**
      * Experience
@@ -129,7 +115,7 @@ export type CandidateRead = {
      */
     gigachat_file_id?: string | null;
     /**
-     * Gigachat File Id
+     * Skills
      */
     skills?: Array<string> | string | null;
     /**
@@ -469,7 +455,6 @@ export type VacancyCreate = {
     description?: string | null;
     /**
      * Status
-     * Status
      */
     status?: string | null;
     /**
@@ -481,7 +466,7 @@ export type VacancyCreate = {
      */
     company?: string | null;
     /**
-     * Salary Min
+     * Location
      */
     location?: string | null;
     /**
@@ -564,7 +549,6 @@ export type VacancyRead = {
     description?: string | null;
     /**
      * Status
-     * Status
      */
     status?: string | null;
     /**
@@ -576,7 +560,7 @@ export type VacancyRead = {
      */
     company?: string | null;
     /**
-     * Remote Work
+     * Location
      */
     location?: string | null;
     /**
@@ -662,7 +646,6 @@ export type VacancyUpdate = {
      */
     gigachat_file_id?: string | null;
     /**
-     * Company
      * Company
      */
     company?: string | null;
@@ -900,7 +883,6 @@ export type ListCandidatesCandidatesGetResponse = ListCandidatesCandidatesGetRes
 
 export type CreateCandidateCandidatesPostData = {
     body: CandidateCreate;
-    body: CandidateCreate;
     path?: never;
     query?: never;
     url: '/candidates/';
@@ -986,7 +968,6 @@ export type GetCandidateCandidatesCandidateIdGetResponse = GetCandidateCandidate
 
 export type UpdateCandidateCandidatesCandidateIdPatchData = {
     body: CandidateCreate;
-    body: CandidateCreate;
     path: {
         /**
          * Candidate Id
@@ -1039,6 +1020,106 @@ export type UploadCvCandidatesUploadCvPostResponses = {
 };
 
 export type UploadCvCandidatesUploadCvPostResponse = UploadCvCandidatesUploadCvPostResponses[keyof UploadCvCandidatesUploadCvPostResponses];
+
+export type ListVacanciesVacanciesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/vacancies/';
+};
+
+export type ListVacanciesVacanciesGetResponses = {
+    /**
+     * Response List Vacancies Vacancies  Get
+     * Successful Response
+     */
+    200: Array<VacancyRead>;
+};
+
+export type ListVacanciesVacanciesGetResponse = ListVacanciesVacanciesGetResponses[keyof ListVacanciesVacanciesGetResponses];
+
+export type CreateVacancyVacanciesPostData = {
+    body: VacancyCreate;
+    path?: never;
+    query?: never;
+    url: '/vacancies/';
+};
+
+export type CreateVacancyVacanciesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateVacancyVacanciesPostError = CreateVacancyVacanciesPostErrors[keyof CreateVacancyVacanciesPostErrors];
+
+export type CreateVacancyVacanciesPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: VacancyRead;
+};
+
+export type CreateVacancyVacanciesPostResponse = CreateVacancyVacanciesPostResponses[keyof CreateVacancyVacanciesPostResponses];
+
+export type DeleteVacancyVacanciesVacancyIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+    };
+    query?: never;
+    url: '/vacancies/{vacancy_id}';
+};
+
+export type DeleteVacancyVacanciesVacancyIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteVacancyVacanciesVacancyIdDeleteError = DeleteVacancyVacanciesVacancyIdDeleteErrors[keyof DeleteVacancyVacanciesVacancyIdDeleteErrors];
+
+export type DeleteVacancyVacanciesVacancyIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteVacancyVacanciesVacancyIdDeleteResponse = DeleteVacancyVacanciesVacancyIdDeleteResponses[keyof DeleteVacancyVacanciesVacancyIdDeleteResponses];
+
+export type GetVacancyVacanciesVacancyIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+    };
+    query?: never;
+    url: '/vacancies/{vacancy_id}';
+};
+
+export type GetVacancyVacanciesVacancyIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetVacancyVacanciesVacancyIdGetError = GetVacancyVacanciesVacancyIdGetErrors[keyof GetVacancyVacanciesVacancyIdGetErrors];
+
+export type GetVacancyVacanciesVacancyIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: VacancyRead;
+};
 
 export type GetVacancyVacanciesVacancyIdGetResponse = GetVacancyVacanciesVacancyIdGetResponses[keyof GetVacancyVacanciesVacancyIdGetResponses];
 
@@ -1176,8 +1257,8 @@ export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses = {
 
 export type DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponse = DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses[keyof DeleteVacancyNoteVacanciesVacancyIdNotesNoteIdDeleteResponses];
 
-export type UpdateVacancyVacanciesVacancyIdPatchData = {
-    body: VacancyUpdate;
+export type UpdateVacancyNoteVacanciesVacancyIdNotesNoteIdPatchData = {
+    body: NoteUpdate;
     path: {
         /**
          * Vacancy Id
