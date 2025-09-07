@@ -2,7 +2,8 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from typing import Union
 
 
 class CandidateStatus(str, Enum):
@@ -54,6 +55,22 @@ class CandidateBase(BaseModel):
     experience: int
     status: CandidateStatus = CandidateStatus.PENDING
     gigachat_file_id: str | None = None
+    skills: Union[list[str], str, None] = None  # Список навыков или JSON строка
+
+    @field_validator('skills', mode='before')
+    @classmethod
+    def validate_skills(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]  # Если не JSON, то считаем одной строкой
+        if isinstance(v, list):
+            return v
+        return None
 
 
 class CandidateCreate(CandidateBase):

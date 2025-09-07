@@ -7,10 +7,11 @@ import {
 } from "@tanstack/react-table";
 import type { VacancyRead } from "../../api/client";
 import { VacancyStatusBadge } from "./status-badge";
+import { VacancyStatsModal } from "./vacancy-stats-modal";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { Link } from "@tanstack/react-router";
 import { Button } from "../ui/button";
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, BarChart3Icon } from "lucide-react";
 import { useDeleteVacancy } from "../../api/mutations/vacancies";
 import { toast } from "sonner";
 import {
@@ -91,38 +92,50 @@ export function useVacanciesTable(data: VacancyRead[]) {
 				id: "actions",
 				header: "Действия",
 				cell: ({ row }) => (
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
+					<div className="flex items-center gap-2">
+						<VacancyStatsModal vacancy={row.original}>
 							<Button
 								variant="ghost"
 								size="sm"
-								className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+								className="h-8 w-8 p-0"
 							>
-								<Trash2Icon className="h-4 w-4" />
-								<span className="sr-only">Удалить вакансию</span>
+								<BarChart3Icon className="h-4 w-4" />
+								<span className="sr-only">Статистика вакансии</span>
 							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>Удалить вакансию</AlertDialogTitle>
-								<AlertDialogDescription>
-									Вы уверены, что хотите удалить вакансию "{row.original.title}"?
-									Это действие нельзя отменить.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>Отмена</AlertDialogCancel>
-								<AlertDialogAction
-									onClick={() =>
-										handleDelete(row.original.id, row.original.title)
-									}
-									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						</VacancyStatsModal>
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-8 w-8 p-0 text-destructive hover:text-destructive"
 								>
-									Удалить
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog>
+									<Trash2Icon className="h-4 w-4" />
+									<span className="sr-only">Удалить вакансию</span>
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>Удалить вакансию</AlertDialogTitle>
+									<AlertDialogDescription>
+										Вы уверены, что хотите удалить вакансию "{row.original.title}"?
+										Это действие нельзя отменить.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel>Отмена</AlertDialogCancel>
+									<AlertDialogAction
+										onClick={() =>
+											handleDelete(row.original.id, row.original.title)
+										}
+										className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+									>
+										Удалить
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
+					</div>
 				),
 			},
 		],
