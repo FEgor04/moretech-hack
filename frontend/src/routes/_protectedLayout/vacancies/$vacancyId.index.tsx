@@ -3,6 +3,9 @@ import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { VacancyRead } from "@/api/client/types.gen";
+import { vacancyNotesPageQueryOptions } from "@/api/queries/vacancies";
+import { useCreateVacancyNote } from "@/api/mutations/vacancies";
+import { useMemo, useState } from "react";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -32,6 +35,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useDeleteVacancyNote } from "@/api/mutations/vacancies";
 import {
 	Card,
 	CardContent,
@@ -50,6 +54,8 @@ import {
 	ClockIcon,
 	UsersIcon,
 	BarChart3Icon,
+	ChevronLeft,
+	ChevronRight,
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -87,6 +93,21 @@ function VacancyDetail() {
 	const vacancy = useSuspenseQuery(
 		vacancyQueryOptions(Number(params.vacancyId)),
 	);
+	const [notesLimit] = useState(10);
+	const [notesPageIndex, setNotesPageIndex] = useState(1);
+	const notesOffset = useMemo(
+		() => (notesPageIndex - 1) * notesLimit,
+		[notesPageIndex, notesLimit],
+	);
+	const notesPage = useSuspenseQuery(
+		vacancyNotesPageQueryOptions(
+			Number(params.vacancyId),
+			notesLimit,
+			notesOffset,
+		),
+	);
+	const createNote = useCreateVacancyNote(Number(params.vacancyId));
+	const deleteNote = useDeleteVacancyNote(Number(params.vacancyId));
 
 	const mutation = useUpdateVacancy(Number(params.vacancyId));
 	const v = vacancy.data as ExtendedVacancy;
@@ -311,10 +332,10 @@ function VacancyDetail() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="full-time">
+																<SelectItem value="full_time">
 																	Полная занятость
 																</SelectItem>
-																<SelectItem value="part-time">
+																<SelectItem value="part_time">
 																	Частичная занятость
 																</SelectItem>
 																<SelectItem value="contract">
@@ -482,7 +503,17 @@ function VacancyDetail() {
 										<span className="text-muted-foreground">
 											Тип занятости:
 										</span>
-										<span>{v.employment_type}</span>
+										<span>
+											{v.employment_type === "full_time"
+												? "Полная занятость"
+												: v.employment_type === "part_time"
+													? "Частичная занятость"
+													: v.employment_type === "contract"
+														? "Контракт"
+														: v.employment_type === "internship"
+															? "Стажировка"
+															: v.employment_type}
+										</span>
 									</div>
 								)}
 
@@ -493,6 +524,98 @@ function VacancyDetail() {
 										<span>{v.experience_level}</span>
 									</div>
 								)}
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Заметки</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<form
+									onSubmit={(e) => {
+										e.preventDefault();
+										const formEl = e.currentTarget as HTMLFormElement;
+										const input = formEl.elements.namedItem(
+											"noteText",
+										) as HTMLInputElement;
+										const value = input.value.trim();
+										if (!value) return;
+										createNote.mutate(value, {
+											onSuccess: () => {
+												input.value = "";
+												toast.success("Заметка добавлена");
+												setNotesPageIndex(1);
+											},
+											onError: (err) => {
+												toast.error("Не удалось добавить заметку", {
+													description: err.message,
+												});
+											},
+										});
+									}}
+									className="flex gap-2"
+								>
+									<Input
+										name="noteText"
+										placeholder="Оставить заметку..."
+										className="flex-1"
+									/>
+									<Button type="submit" disabled={createNote.isPending}>
+										{createNote.isPending ? "Добавление..." : "Добавить"}
+									</Button>
+								</form>
+
+								<div className="space-y-3 max-h-80 overflow-auto pr-1">
+									{notesPage.data?.length ? (
+										notesPage.data.map((n) => (
+											<div
+												key={n.id}
+												className="p-3 border rounded-md text-sm relative"
+											>
+												<Button
+													variant="ghost"
+													size="icon"
+													className="absolute top-1 right-1 h-6 w-6"
+													onClick={() => deleteNote.mutate(n.id)}
+												>
+													<span className="sr-only">Удалить</span>×
+												</Button>
+												<div className="text-muted-foreground text-xs mb-1 pr-6">
+													{n.created_at
+														? new Date(n.created_at).toLocaleString()
+														: ""}
+												</div>
+												<div className="whitespace-pre-wrap">{n.text}</div>
+											</div>
+										))
+									) : (
+										<div className="text-sm text-muted-foreground">
+											Заметок пока нет
+										</div>
+									)}
+								</div>
+								<div className="flex items-center justify-center gap-2">
+									<Button
+										variant="outline"
+										size="icon"
+										disabled={notesPageIndex <= 1}
+										onClick={() => setNotesPageIndex((p) => Math.max(1, p - 1))}
+									>
+										<ChevronLeft className="h-4 w-4" />
+									</Button>
+									<span className="text-xs text-muted-foreground min-w-[56px] text-center">
+										Стр. {notesPageIndex}
+									</span>
+									<Button
+										variant="outline"
+										size="icon"
+										disabled={(notesPage.data?.length ?? 0) < notesLimit}
+										onClick={() => setNotesPageIndex((p) => p + 1)}
+									>
+										<ChevronRight className="h-4 w-4" />
+									</Button>
+								</div>
 							</CardContent>
 						</Card>
 					</div>

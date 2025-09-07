@@ -1,8 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
-from app.schemas.common import VacancyCreate, VacancyRead, VacancyUpdate
+from app.schemas.common import (
+    VacancyCreate,
+    VacancyRead,
+    VacancyUpdate,
+    NoteCreate,
+    NoteRead,
+    NoteUpdate,
+)
 from app.services import vacancies as vacancies_service
 from app.services.exceptions import NotFoundError
 from app.services.pdf_parser import (
@@ -50,6 +57,62 @@ async def update_vacancy(
 async def delete_vacancy(vacancy_id: int, session: AsyncSession = Depends(get_session)):
     try:
         await vacancies_service.delete_vacancy(session, vacancy_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return None
+
+
+@router.get("/{vacancy_id}/notes", response_model=list[NoteRead])
+async def list_vacancy_notes(
+    vacancy_id: int,
+    session: AsyncSession = Depends(get_session),
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    try:
+        return await vacancies_service.list_notes(
+            session, vacancy_id, limit=limit, offset=offset
+        )
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post(
+    "/{vacancy_id}/notes", response_model=NoteRead, status_code=status.HTTP_201_CREATED
+)
+async def create_vacancy_note(
+    vacancy_id: int,
+    payload: NoteCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    # enforce consistency on vacancy_id
+    payload.vacancy_id = vacancy_id
+    try:
+        return await vacancies_service.create_note(session, payload)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.patch("/{vacancy_id}/notes/{note_id}", response_model=NoteRead)
+async def update_vacancy_note(
+    vacancy_id: int,
+    note_id: int,
+    payload: NoteUpdate,
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        # vacancy_id is not used here beyond route shape; note_id ensures targeting
+        return await vacancies_service.update_note(session, note_id, payload)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.delete("/{vacancy_id}/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_vacancy_note(
+    vacancy_id: int, note_id: int, session: AsyncSession = Depends(get_session)
+):
+    try:
+        await vacancies_service.delete_note(session, note_id)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return None

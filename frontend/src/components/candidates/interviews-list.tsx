@@ -10,6 +10,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { toast } from "sonner";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { useState } from "react";
+import { interviewNotesPageQueryOptions } from "@/api/queries/interviews";
+import { useCreateInterviewNote } from "@/api/mutations/interviews";
 
 interface InterviewsListProps {
 	candidateId: string;
@@ -88,14 +99,19 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 												Скопировать ссылку на собеседование
 											</TooltipContent>
 										</Tooltip>
-										<Tooltip>
-											<TooltipTrigger asChild>
+										<Dialog>
+											<DialogTrigger asChild>
 												<Button variant="outline" size="icon">
 													<NotebookIcon />
 												</Button>
-											</TooltipTrigger>
-											<TooltipContent>Оставить заметки</TooltipContent>
-										</Tooltip>
+											</DialogTrigger>
+											<DialogContent className="max-w-lg">
+												<DialogHeader>
+													<DialogTitle>Заметки для интервью</DialogTitle>
+												</DialogHeader>
+												<InterviewNotesPane interviewId={interview.id} />
+											</DialogContent>
+										</Dialog>
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<Button variant="outline" size="icon">
@@ -127,6 +143,67 @@ export function InterviewsList({ candidateId }: InterviewsListProps) {
 							</Card>
 						),
 				)}
+			</div>
+		</div>
+	);
+}
+
+function InterviewNotesPane({ interviewId }: { interviewId: string }) {
+	const [limit] = useState(10);
+	const [offset, setOffset] = useState(0);
+	const page = useSuspenseQuery(
+		interviewNotesPageQueryOptions(interviewId, limit, offset),
+	);
+	const create = useCreateInterviewNote(interviewId);
+
+	return (
+		<div className="space-y-3">
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					const formEl = e.currentTarget as HTMLFormElement;
+					const input = formEl.elements.namedItem(
+						"noteText",
+					) as HTMLInputElement;
+					const value = input.value.trim();
+					if (!value) return;
+					create.mutate(value, {
+						onSuccess: () => {
+							input.value = "";
+							setOffset(0); // refresh from first page
+						},
+					});
+				}}
+				className="flex gap-2"
+			>
+				<Input
+					name="noteText"
+					placeholder="Оставить заметку..."
+					className="flex-1"
+				/>
+				<Button type="submit" disabled={create.isPending}>
+					{create.isPending ? "Добавление..." : "Добавить"}
+				</Button>
+			</form>
+
+			<div className="space-y-2 max-h-80 overflow-auto pr-1">
+				{page.data?.length ? (
+					page.data.map((n) => (
+						<div key={n.id} className="p-2 border rounded text-sm">
+							<div className="text-muted-foreground text-xs mb-1">
+								{n.created_at ? new Date(n.created_at).toLocaleString() : ""}
+							</div>
+							<div>{n.text}</div>
+						</div>
+					))
+				) : (
+					<div className="text-sm text-muted-foreground">Заметок пока нет</div>
+				)}
+			</div>
+			<div className="flex justify-center">
+				<Button variant="outline" onClick={() => setOffset(offset + limit)}>
+					Показать ещё
+				</Button>
 			</div>
 		</div>
 	);
