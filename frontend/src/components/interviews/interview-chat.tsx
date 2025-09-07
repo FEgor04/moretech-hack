@@ -14,7 +14,6 @@ import {
 import { Message, MessageContent, MessageAvatar } from "../ai-elements/message";
 import { Badge } from "../ui/badge";
 import { Response } from "../ai-elements/response";
-import type Webcam from "react-webcam";
 import WebcamComponent from "react-webcam";
 import { Button } from "../ui/button";
 import { useWebcamStreaming } from "@/hooks/use-webcam-streaming";
