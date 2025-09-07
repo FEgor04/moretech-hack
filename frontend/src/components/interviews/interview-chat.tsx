@@ -23,6 +23,7 @@ import {
 import { Badge } from "../ui/badge";
 import { Response } from "../ai-elements/response";
 import type Webcam from "react-webcam";
+import WebcamComponent from "react-webcam";
 
 type Props = {
 	interviewId: string;
@@ -107,6 +108,15 @@ export function InterviewChat({ interviewId, webcamRef }: Props) {
 
 			{/* Chat Container */}
 			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] flex flex-col">
+				{/* Webcam */}
+				<div className="w-full p-4">
+					<WebcamComponent
+						ref={webcamRef}
+						audio={true}
+						muted
+						className="w-full rounded-md shadow aspect-video bg-black"
+					/>
+				</div>
 				{/* Messages */}
 				<Conversation className="flex-1">
 					<ConversationContent>
