@@ -10,6 +10,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
 from app.clients.yandex import get_yandex_speech_recognition_model, get_yandex_speech_synthesis_client
 from app.schemas.common import InterviewMessageRead
+from backend.app.core.config import settings
 
 
 logger = logging.getLogger("app")
@@ -289,7 +290,9 @@ class InterviewWebsocketService:
             latest_message[:100] if latest_message else "None"
         )
 
-        await self.send_message_to_user(latest_message)
+        # Не хочу использовать синтез в разработке, он сильно мешает и тратит кучу бабок
+        if settings.use_yandex_speech_synthesis:
+            await self.send_message_to_user(latest_message)
 
     async def send_message_to_user(self, message: str) -> None:
         """Synthesize message and send it to the user."""
@@ -297,8 +300,10 @@ class InterviewWebsocketService:
         model = get_yandex_speech_synthesis_client()
 
         result = model.synthesize(message)
+        result_mp3_file = result.export()
+        result_mp3_bytes = result_mp3_file.read()
 
-        await self.websocket.send_bytes(result)
+        await self.websocket.send_bytes(result_mp3_bytes)
 
     def add_video_chunk(self, chunk: bytes) -> None:
         """Add a video chunk to the buffer."""
