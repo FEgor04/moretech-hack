@@ -1,7 +1,7 @@
 """add extended fields to candidate and vacancy
 
-Revision ID: 000009
-Revises: 000008
+Revision ID: 000010
+Revises: 000009
 Create Date: 2025-09-07
 """
 
@@ -13,8 +13,8 @@ from sqlalchemy import inspect as sa_inspect, text
 
 
 # revision identifiers, used by Alembic.
-revision: str = "000009"
-down_revision: Union[str, None] = "3a7bf0979312"
+revision: str = "000010"
+down_revision: Union[str, None] = "000009"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

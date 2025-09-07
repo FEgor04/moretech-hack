@@ -1,7 +1,7 @@
 """increase employment_type column length
 
-Revision ID: 000011
-Revises: 000010
+Revision ID: 000015
+Revises: 000012
 Create Date: 2025-09-07
 """
 
@@ -11,8 +11,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "000011"
-down_revision: Union[str, None] = "000010"
+revision: str = "000015"
+down_revision: Union[str, None] = "000012"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

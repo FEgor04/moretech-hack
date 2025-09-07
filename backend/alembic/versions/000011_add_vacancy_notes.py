@@ -1,6 +1,6 @@
 """add vacancy notes
 
-Revision ID: 000009_add_vacancy_notes
+Revision ID: 000011
 Revises: 000008
 Create Date: 2025-09-07 00:00:00.000000
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "000009_add_vacancy_notes"
+revision: str = "000011"
 down_revision: Union[str, None] = "000008"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

@@ -1,16 +1,15 @@
-"""add_missing_candidate_and_vacancy_fields
+"""merge heads
 
-Revision ID: b53fc7c70f74
-Revises: 8749593b87a5
-Create Date: 2025-09-07 23:25:53.251107
+Revision ID: 000014
+Revises: 000011, 000009
+Create Date: 2025-09-07 14:46:19.168094
 
 """
 
 from typing import Sequence, Union
 
-
-revision: str = "000013"
-down_revision: Union[str, None] = "000012"
+revision: str = "000014"
+down_revision: Union[str, None] = ("000011", "000009")
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

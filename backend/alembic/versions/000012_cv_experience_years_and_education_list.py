@@ -1,7 +1,7 @@
 """cv experience years and education list, drop positions
 
-Revision ID: 000010
-Revises: 000009
+Revision ID: 000012
+Revises: 000010
 Create Date: 2025-09-07
 """
 
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy import inspect as sa_inspect, text
 
 
-revision: str = "000010"
-down_revision: Union[str, None] = "000009"
+revision: str = "000012"
+down_revision: Union[str, None] = "000010"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
