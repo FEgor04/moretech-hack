@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Union
 
 
@@ -199,8 +199,17 @@ class InterviewCreate(InterviewBase):
     pass
 
 
-class InterviewRead(InterviewBase, Timestamped):
+class InterviewRead(Timestamped):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
+    candidate_id: uuid.UUID
+    vacancy_id: int | None = None
+    transcript: str | None = None
+    recording_url: str | None = None
+    state: InterviewState
+    feedback: str | None = None
+    feedback_positive: bool | None = None
 
 
 class InterviewMessageType(str, Enum):
