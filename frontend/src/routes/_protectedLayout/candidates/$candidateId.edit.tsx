@@ -13,6 +13,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
 	Select,
 	SelectContent,
@@ -33,6 +34,7 @@ type CandidateFormData = {
 		| "accepted"
 		| "rejected"
 		| "on_hold";
+	skills?: string;
 };
 
 export const Route = createFileRoute(
@@ -63,10 +65,23 @@ function CandidateEdit() {
 			position: c.position,
 			experience: c.experience,
 			status: c.status,
+			skills: c.skills
+				? Array.isArray(c.skills)
+					? c.skills.join(", ")
+					: c.skills
+				: "",
 		},
 	});
 
 	const onSubmit = (data: CandidateFormData) => {
+		// Преобразуем строку навыков в массив
+		const skillsArray = data.skills
+			? data.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
 		mutation.mutate(
 			{
 				name: data.name,
@@ -74,6 +89,7 @@ function CandidateEdit() {
 				position: data.position,
 				experience: data.experience,
 				status: data.status,
+				skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
 			},
 			{
 				onSuccess: () => {
@@ -203,6 +219,23 @@ function CandidateEdit() {
 								)}
 							/>
 						</div>
+						<FormField
+							control={form.control}
+							name="skills"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Ключевые навыки</FormLabel>
+									<FormControl>
+										<Textarea
+											{...field}
+											placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
+											rows={3}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 					</div>
 
 					{/* Form actions */}
