@@ -22,8 +22,14 @@ import {
 } from "../ai-elements/prompt-input";
 import { Badge } from "../ui/badge";
 import { Response } from "../ai-elements/response";
+import type Webcam from "react-webcam";
 
-export function InterviewChat({ interviewId }: { interviewId: string }) {
+type Props = {
+	interviewId: string;
+	webcamRef: React.RefObject<Webcam | null>;
+}
+
+export function InterviewChat({ interviewId, webcamRef }: Props) {
 	const [message, setMessage] = useState("");
 
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));

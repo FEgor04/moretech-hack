@@ -3,6 +3,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { InterviewChat } from "@/components/interviews/interview-chat";
 import { StartInterview } from "@/components/interviews/start-interview";
+import { useRef } from "react";
+import type Webcam from "react-webcam";
 
 export const Route = createFileRoute("/interviews/$interviewId")({
 	component: RouteComponent,
@@ -13,10 +15,11 @@ function RouteComponent() {
 	const messages = useSuspenseQuery(
 		interviewMessagesQueryOptions(params.interviewId),
 	);
+	const webcamRef = useRef<Webcam | null>(null);
 
 	if (messages.data.length === 0) {
-		return <StartInterview interviewId={params.interviewId} />;
+		return <StartInterview webcamRef={webcamRef} interviewId={params.interviewId} />;
 	}
 
-	return <InterviewChat interviewId={params.interviewId} />;
+	return <InterviewChat webcamRef={webcamRef} interviewId={params.interviewId} />;
 }

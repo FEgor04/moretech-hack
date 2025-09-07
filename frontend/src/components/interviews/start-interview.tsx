@@ -16,7 +16,7 @@ import { Button } from "../ui/button";
 import Webcam from "react-webcam";
 import { Badge } from "../ui/badge";
 
-export function StartInterview({ interviewId }: { interviewId: string }) {
+export function StartInterview({ interviewId, webcamRef }: { interviewId: string, webcamRef: React.RefObject<Webcam | null> }) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
@@ -162,6 +162,9 @@ export function StartInterview({ interviewId }: { interviewId: string }) {
 							<CardContent className="flex flex-col justify-center h-full">
 								<div className="text-center space-y-4">
 									<Webcam
+									 ref={webcamRef}
+									 muted
+									 audio={true}
 										onUserMedia={(media) => {
 											console.log("User media", media);
 										}}
