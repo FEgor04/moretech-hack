@@ -117,7 +117,7 @@ class InterviewWebsocketService:
                 "-i", video_path,  # Input video file
                 "-vn",  # No video
                 "-acodec", "pcm_s16le",  # PCM 16-bit little-endian
-                "-ar", "48000",  # Sample rate 48kHz
+                "-ar", "16000",  # Sample rate 16kHz
                 "-ac", "1",  # Mono
                 audio_path
             ]
