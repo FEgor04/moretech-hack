@@ -4,6 +4,11 @@ import {
 	postInterviewMessageInterviewsInterviewIdMessagesPost,
 	initializeFirstMessageInterviewsInterviewIdMessagesFirstPost,
 } from "../client";
+import type {
+	InterviewMessageRead,
+	PostInterviewMessageInterviewsInterviewIdMessagesPostResponse,
+	InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse,
+} from "../client";
 
 export interface CreateInterviewData {
 	candidate_id: string;
@@ -41,7 +46,12 @@ export function useCreateInterviewMutation() {
 export function usePostInterviewMessageMutation() {
 	const queryClient = useQueryClient();
 
-	return useMutation({
+	return useMutation<
+		PostInterviewMessageInterviewsInterviewIdMessagesPostResponse,
+		unknown,
+		PostInterviewMessageData,
+		{ previousMessages: InterviewMessageRead[] | undefined; queryKey: ReadonlyArray<string | number> }
+	>({
 		mutationFn: async (data: PostInterviewMessageData) => {
 			const response =
 				await postInterviewMessageInterviewsInterviewIdMessagesPost<true>({
@@ -51,8 +61,48 @@ export function usePostInterviewMessageMutation() {
 				});
 			return response.data;
 		},
-		onSuccess: (_, variables) => {
-			// Invalidate and refetch interview messages for this specific interview
+		onMutate: async (variables: PostInterviewMessageData) => {
+			const queryKey = [
+				"interviews",
+				"messages",
+				variables.interviewId,
+			] as const;
+
+			await queryClient.cancelQueries({ queryKey });
+
+			const previousMessages = queryClient.getQueryData<
+				InterviewMessageRead[]
+			>(queryKey);
+
+			const lastIndex = previousMessages?.[previousMessages.length - 1]?.index ?? -1;
+			const optimisticMessage: InterviewMessageRead = {
+				interview_id: variables.interviewId,
+				index: lastIndex + 1,
+				text: variables.message.text,
+				type: "user",
+			};
+
+			queryClient.setQueryData<InterviewMessageRead[]>(queryKey, (old: InterviewMessageRead[] | undefined) => {
+				return [...(old ?? []), optimisticMessage];
+			});
+
+			return { previousMessages, queryKey };
+		},
+		onError: (
+			_error: unknown,
+			_variables: PostInterviewMessageData,
+			context?: { previousMessages: InterviewMessageRead[] | undefined; queryKey: ReadonlyArray<string | number> },
+		) => {
+			if (context?.previousMessages && context?.queryKey) {
+				queryClient.setQueryData(context.queryKey, context.previousMessages);
+			}
+		},
+		onSettled: (
+			_data: PostInterviewMessageInterviewsInterviewIdMessagesPostResponse | undefined,
+			_error: unknown,
+			variables: PostInterviewMessageData,
+		) => {
+			// Always refetch to sync with server state
 			queryClient.invalidateQueries({
 				queryKey: ["interviews", "messages", variables.interviewId],
 			});
@@ -63,7 +113,11 @@ export function usePostInterviewMessageMutation() {
 export function useInitializeFirstMessageMutation() {
 	const queryClient = useQueryClient();
 
-	return useMutation({
+	return useMutation<
+		InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse,
+		unknown,
+		string
+	>({
 		mutationFn: async (interviewId: string) => {
 			const response =
 				await initializeFirstMessageInterviewsInterviewIdMessagesFirstPost<true>(
@@ -74,7 +128,10 @@ export function useInitializeFirstMessageMutation() {
 				);
 			return response.data;
 		},
-		onSuccess: (_, interviewId) => {
+		onSuccess: (
+			_data: InitializeFirstMessageInterviewsInterviewIdMessagesFirstPostResponse,
+			interviewId: string,
+		) => {
 			// Invalidate and refetch interview messages for this specific interview
 			queryClient.invalidateQueries({
 				queryKey: ["interviews", "messages", interviewId],
