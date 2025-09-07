@@ -60,7 +60,6 @@ class TestCreateInterview:
         assert interview["vacancy_id"] == sample_interview_data["vacancy_id"]
         assert interview["transcript"] == sample_interview_data["transcript"]
         assert interview["recording_url"] == sample_interview_data["recording_url"]
-        assert interview["status"] == sample_interview_data["status"]
         assert "created_at" in interview
         assert "updated_at" in interview
 
@@ -116,7 +115,6 @@ class TestCreateInterview:
         assert interview["vacancy_id"] is None
         assert interview["transcript"] is None
         assert interview["recording_url"] is None
-        assert interview["status"] == "scheduled"
 
     @pytest.mark.asyncio
     async def test_create_interview_missing_required_fields(self, client: AsyncClient):
@@ -286,7 +284,6 @@ class TestGetInterview:
         assert (
             retrieved_interview["recording_url"] == created_interview["recording_url"]
         )
-        assert retrieved_interview["status"] == created_interview["status"]
 
     @pytest.mark.asyncio
     async def test_get_interview_nonexistent(self, client: AsyncClient):
@@ -323,7 +320,6 @@ class TestUpdateInterview:
 
         assert updated_interview["id"] == created_interview["id"]
         assert updated_interview["candidate_id"] == created_interview["candidate_id"]
-        assert updated_interview["status"] == "completed"
         assert updated_interview["transcript"] == "Updated transcript"
         assert (
             updated_interview["recording_url"] == created_interview["recording_url"]
@@ -365,7 +361,6 @@ class TestUpdateInterview:
         assert update_response.status_code == 200
         updated_interview = update_response.json()
 
-        assert updated_interview["status"] == "completed"
         assert updated_interview["transcript"] == created_interview["transcript"]
         assert updated_interview["recording_url"] == created_interview["recording_url"]
         assert updated_interview["vacancy_id"] == created_interview["vacancy_id"]

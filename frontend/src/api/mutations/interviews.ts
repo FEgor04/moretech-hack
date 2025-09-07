@@ -16,6 +16,7 @@ export interface CreateInterviewData {
 	candidate_id: string;
 	vacancy_id?: number;
 	status?: string;
+	state?: "initialized" | "in_progress" | "done";
 }
 
 export interface PostInterviewMessageData {

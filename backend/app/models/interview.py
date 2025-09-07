@@ -18,6 +18,7 @@ class Interview(Base):
     transcript: Mapped[str | None] = mapped_column(Text, nullable=True)
     recording_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     status: Mapped[str] = mapped_column(String(64), default="на собеседовании")
+    state: Mapped[str] = mapped_column(String(32), default="initialized")
     feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
     feedback_positive: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=func.now())

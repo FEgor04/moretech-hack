@@ -81,8 +81,18 @@ class InterviewMessagesService:
         if not interview:
             raise NotFoundError("Interview not found")
 
-        # Do not allow new messages if interview already completed
-        if interview.status == "completed":
+        # State-based restrictions
+        # If interview not started with first message, block posting user messages
+        if getattr(interview, "state", "initialized") == "initialized":
+            raise ConflictError(
+                "Interview not started. Initialize first message before chatting"
+            )
+
+        # Do not allow new messages if interview already completed/done
+        if (
+            getattr(interview, "state", None) == "done"
+            or interview.status == "completed"
+        ):
             raise ConflictError("Interview already completed")
 
         # Get next index for user message
@@ -230,6 +240,8 @@ class InterviewMessagesService:
                         raise NotFoundError("Interview not found")
 
                     interview.status = "completed"
+                    # Mark interview as done/read-only
+                    interview.state = "done"
                     interview.feedback = feedback
                     interview.feedback_positive = (
                         bool(positive) if positive is not None else None
@@ -270,6 +282,10 @@ class InterviewMessagesService:
         if not interview:
             raise NotFoundError("Interview not found")
 
+        # Allow initialization only for newly created interviews
+        if getattr(interview, "state", "initialized") != "initialized":
+            raise ConflictError("Interview already started or finished")
+
         # Check if conversation already exists
         existing = await session.scalar(
             select(func.count())
@@ -277,7 +293,7 @@ class InterviewMessagesService:
             .where(InterviewMessage.interview_id == interview_id)
         )
         if existing and int(existing) > 0:
-            raise ValueError("Conversation already initialized")
+            raise ConflictError("Conversation already initialized")
 
         # Get candidate and vacancy info
         candidate = await session.get(Candidate, interview.candidate_id)
@@ -329,6 +345,8 @@ class InterviewMessagesService:
             )
             session.add(initial_message)
 
+        # After first message, mark interview as in progress
+        interview.state = "in_progress"
         await session.commit()
 
         # Return all messages

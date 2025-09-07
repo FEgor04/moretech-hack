@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import type Webcam from "react-webcam";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
-export function useWebcamStreaming(interviewId: string) {
+export function useWebcamStreaming(
+	interviewId: string,
+	options?: { disabled?: boolean },
+) {
 	const webcamRef = useRef<Webcam | null>(null);
 	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const [isRecording, setIsRecording] = useState(false);
+	const isDisabled = options?.disabled === true;
 	const { sendMessage, readyState, lastMessage } = useWebSocket(
-		`/ws/${interviewId}/video`,
+		isDisabled ? null : `/ws/${interviewId}/video`,
 		{
 			onError: (error) => {
 				console.error("WebSocket error connecting to webcam stream:", error);
@@ -18,7 +22,9 @@ export function useWebcamStreaming(interviewId: string) {
 					"WebSocket connected to webcam stream for interview:",
 					interviewId,
 				);
-				startRecording();
+				if (!isDisabled) {
+					startRecording();
+				}
 			},
 		},
 	);

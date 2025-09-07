@@ -61,7 +61,7 @@ export function ScheduleInterviewDialog({
 			{
 				candidate_id: data.candidate_id,
 				vacancy_id: data.vacancy_id,
-				status: "на собеседовании",
+				state: "in_progress",
 			},
 			{
 				onSuccess: () => {
