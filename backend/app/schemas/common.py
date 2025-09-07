@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, field_serializer
 from typing import Union
 
 
@@ -32,6 +32,17 @@ class ExperienceLevel(str, Enum):
 class Timestamped(BaseModel):
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+    @field_serializer("created_at", "updated_at", when_used="json")
+    def _serialize_timestamp(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        dt_utc = (
+            value.replace(tzinfo=timezone.utc)
+            if value.tzinfo is None
+            else value.astimezone(timezone.utc)
+        )
+        return dt_utc.isoformat().replace("+00:00", "Z")
 
 
 class UserBase(BaseModel):
@@ -238,6 +249,17 @@ class NoteRead(NoteBase):
     id: int
     created_at: datetime | None = None
 
+    @field_serializer("created_at", when_used="json")
+    def _serialize_created_at(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        dt_utc = (
+            value.replace(tzinfo=timezone.utc)
+            if value.tzinfo is None
+            else value.astimezone(timezone.utc)
+        )
+        return dt_utc.isoformat().replace("+00:00", "Z")
+
 
 class InterviewNoteBase(BaseModel):
     interview_id: str
@@ -251,3 +273,14 @@ class InterviewNoteCreate(InterviewNoteBase):
 class InterviewNoteRead(InterviewNoteBase):
     id: int
     created_at: datetime | None = None
+
+    @field_serializer("created_at", when_used="json")
+    def _serialize_created_at(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        dt_utc = (
+            value.replace(tzinfo=timezone.utc)
+            if value.tzinfo is None
+            else value.astimezone(timezone.utc)
+        )
+        return dt_utc.isoformat().replace("+00:00", "Z")
