@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, PlainSerializer
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, PlainSerializer
 from typing import Union, Annotated
 
 
@@ -44,6 +44,12 @@ class ExperienceLevel(str, Enum):
     MIDDLE = "middle"
     SENIOR = "senior"
     LEAD = "lead"
+
+
+class InterviewState(str, Enum):
+    INITIALIZED = "initialized"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
 
 
 class Timestamped(BaseModel):
@@ -201,6 +207,7 @@ class InterviewBase(BaseModel):
     transcript: str | None = None
     recording_url: str | None = None
     status: str | None = None
+    state: InterviewState = InterviewState.INITIALIZED
     feedback: str | None = None
     feedback_positive: bool | None = None
 
@@ -209,8 +216,17 @@ class InterviewCreate(InterviewBase):
     pass
 
 
-class InterviewRead(InterviewBase, Timestamped):
+class InterviewRead(Timestamped):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
+    candidate_id: uuid.UUID
+    vacancy_id: int | None = None
+    transcript: str | None = None
+    recording_url: str | None = None
+    state: InterviewState
+    feedback: str | None = None
+    feedback_positive: bool | None = None
 
 
 class InterviewMessageType(str, Enum):
