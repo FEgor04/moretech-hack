@@ -109,10 +109,10 @@ export function VacancyStatsModal({
 	// Статистика по интервью
 	const totalInterviews = vacancyInterviews.length;
 	const completedInterviews = vacancyInterviews.filter(
-		(i) => i.status === "завершено",
+		(i) => i.state === "done",
 	).length;
 	const activeInterviews = vacancyInterviews.filter(
-		(i) => i.status === "на собеседовании",
+		(i) => i.state === "in_progress",
 	).length;
 	const positiveFeedback = vacancyInterviews.filter(
 		(i) => i.feedback_positive === true,

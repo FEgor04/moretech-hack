@@ -76,10 +76,10 @@ function Dashboard() {
 	// Подсчет статистики интервью
 	const totalInterviews = interviews.length;
 	const completedInterviews = interviews.filter(
-		(i) => i.status === "завершено",
+		(i) => i.state === "done",
 	).length;
 	const activeInterviews = interviews.filter(
-		(i) => i.status === "на собеседовании",
+		(i) => i.state === "in_progress",
 	).length;
 
 	// Статистика по зарплатам
