@@ -81,7 +81,12 @@ export const useCreateVacancyNote = (vacancy_id: number) => {
 				body: { vacancy_id, text },
 				throwOnError: true,
 			});
-			return res.data as { id: number; vacancy_id: number; text: string; created_at?: string | null };
+			return res.data as {
+				id: number;
+				vacancy_id: number;
+				text: string;
+				created_at?: string | null;
+			};
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ["vacancy", vacancy_id, "notes"] });
@@ -99,7 +104,12 @@ export const useUpdateVacancyNote = (vacancy_id: number) => {
 				body: { text: params.text },
 				throwOnError: true,
 			});
-			return res.data as { id: number; vacancy_id: number; text: string; created_at?: string | null };
+			return res.data as {
+				id: number;
+				vacancy_id: number;
+				text: string;
+				created_at?: string | null;
+			};
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ["vacancy", vacancy_id, "notes"] });

@@ -153,9 +153,11 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 	const [limit] = useState(10);
 	const [pageIndex, setPageIndex] = useState(1);
 	const offset = (pageIndex - 1) * limit;
-	const page = useSuspenseQuery(interviewNotesPageQueryOptions(interviewId, limit, offset));
+	const page = useSuspenseQuery(
+		interviewNotesPageQueryOptions(interviewId, limit, offset),
+	);
 	const create = useCreateInterviewNote(interviewId);
-  const remove = useDeleteInterviewNote(interviewId);
+	const remove = useDeleteInterviewNote(interviewId);
 
 	return (
 		<div className="space-y-3">
@@ -163,7 +165,9 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 				onSubmit={(e) => {
 					e.preventDefault();
 					const formEl = e.currentTarget as HTMLFormElement;
-					const input = formEl.elements.namedItem("noteText") as HTMLInputElement;
+					const input = formEl.elements.namedItem(
+						"noteText",
+					) as HTMLInputElement;
 					const value = input.value.trim();
 					if (!value) return;
 					create.mutate(value, {
@@ -175,7 +179,11 @@ function InterviewNotesPane({ interviewId }: { interviewId: string }) {
 				}}
 				className="flex gap-2"
 			>
-				<Input name="noteText" placeholder="Оставить заметку..." className="flex-1" />
+				<Input
+					name="noteText"
+					placeholder="Оставить заметку..."
+					className="flex-1"
+				/>
 				<Button type="submit" disabled={create.isPending}>
 					{create.isPending ? "Добавление..." : "Добавить"}
 				</Button>

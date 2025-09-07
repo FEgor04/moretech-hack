@@ -162,7 +162,12 @@ export const useCreateInterviewNote = (interviewId: string) => {
 				body: { interview_id: interviewId, text },
 				throwOnError: true,
 			});
-			return res.data as { id: number; interview_id: string; text: string; created_at?: string | null };
+			return res.data as {
+				id: number;
+				interview_id: string;
+				text: string;
+				created_at?: string | null;
+			};
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ["interview", interviewId, "notes"] });
