@@ -24,3 +24,5 @@ dev.db
 alembic/versions/__pycache__/
 
 
+recordings/
+.DS_Store
