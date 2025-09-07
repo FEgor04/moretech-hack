@@ -2,6 +2,15 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { VacancyRead } from "@/api/client/types.gen";
+
+// Расширенный тип для вакансии с дополнительными полями
+type ExtendedVacancy = VacancyRead & {
+	company?: string | null;
+	experience_level?: string | null;
+	remote_work?: boolean;
+	benefits?: string | null;
+};
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -77,7 +86,7 @@ function VacancyDetail() {
 	);
 
 	const mutation = useUpdateVacancy(Number(params.vacancyId));
-	const v = vacancy.data;
+	const v = vacancy.data as ExtendedVacancy;
 
 	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
@@ -85,15 +94,15 @@ function VacancyDetail() {
 			title: v.title,
 			description: v.description || "",
 			status: (v.status as "open" | "closed") || "open",
-			company: (v as any).company || "",
-			location: (v as any).location || "",
-			salary_min: (v as any).salary_min || undefined,
-			salary_max: (v as any).salary_max || undefined,
-			employment_type: (v as any).employment_type || undefined,
-			experience_level: (v as any).experience_level || undefined,
-			remote_work: (v as any).remote_work || false,
-			requirements: (v as any).requirements || "",
-			benefits: (v as any).benefits || "",
+			company: v.company || "",
+			location: v.location || "",
+			salary_min: v.salary_min || undefined,
+			salary_max: v.salary_max || undefined,
+			employment_type: v.employment_type || undefined,
+			experience_level: v.experience_level || undefined,
+			remote_work: v.remote_work || false,
+			requirements: v.requirements || "",
+			benefits: v.benefits || "",
 		},
 	});
 
@@ -149,10 +158,10 @@ function VacancyDetail() {
 									>
 										{getStatusBadge(v.status || "").label}
 									</Badge>
-									{(v as any).company && (
+									{v.company && (
 										<span className="text-sm text-muted-foreground flex items-center gap-1">
 											<BuildingIcon className="w-4 h-4" />
-											{(v as any).company}
+											{v.company}
 										</span>
 									)}
 								</div>
@@ -434,41 +443,41 @@ function VacancyDetail() {
 									</code>
 								</div>
 
-								{(v as any).salary_min && (v as any).salary_max && (
+								{v.salary_min && v.salary_max && (
 									<div className="flex items-center gap-2 text-sm">
 										<DollarSignIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-muted-foreground">Зарплата:</span>
 										<span>
-											{(v as any).salary_min} - {(v as any).salary_max} ₽
+											{v.salary_min} - {v.salary_max} ₽
 										</span>
 									</div>
 								)}
 
-								{(v as any).location && (
+								{v.location && (
 									<div className="flex items-center gap-2 text-sm">
 										<MapPinIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-muted-foreground">
 											Местоположение:
 										</span>
-										<span>{(v as any).location}</span>
+										<span>{v.location}</span>
 									</div>
 								)}
 
-								{(v as any).employment_type && (
+								{v.employment_type && (
 									<div className="flex items-center gap-2 text-sm">
 										<ClockIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-muted-foreground">
 											Тип занятости:
 										</span>
-										<span>{(v as any).employment_type}</span>
+										<span>{v.employment_type}</span>
 									</div>
 								)}
 
-								{(v as any).experience_level && (
+								{v.experience_level && (
 									<div className="flex items-center gap-2 text-sm">
 										<UsersIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-muted-foreground">Уровень:</span>
-										<span>{(v as any).experience_level}</span>
+										<span>{v.experience_level}</span>
 									</div>
 								)}
 							</CardContent>
