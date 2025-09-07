@@ -20,8 +20,18 @@ export function useWebcamStreaming(interviewId: string) {
     const isReady = readyState === ReadyState.OPEN;
 
     function handleDataAvailable(data: BlobEvent) {
-        console.log("Data available", data);
         sendMessage(data.data);
+    }
+
+    /**
+     * Функция, которую нужно вызывать, когда собеседуемый ответил на вопрос.
+     * В текущей реализации она вызывается когда собеседуемый нажал кнопку "Ответ готов" в чате.
+     * 
+     * В будущем ее нужно будет убрать и использовать voice activity detection
+     * https://huggingface.co/models?pipeline_tag=voice-activity-detection
+     */
+    function sendAudioReadyMarker() {
+        sendMessage("audio-ready");
     }
 
     function startRecording() {
@@ -56,5 +66,6 @@ export function useWebcamStreaming(interviewId: string) {
         isRecording,
         startRecording,
         handleStopRecording,
+        sendAudioReadyMarker,
     };
 }
