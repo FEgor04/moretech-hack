@@ -5,7 +5,6 @@ import {
 } from "@/api/queries/interviews";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import {
 	Conversation,
 	ConversationContent,
@@ -38,10 +37,6 @@ export function InterviewChat({ interviewId }: Props) {
 		...interviewMessagesQueryOptions(interviewId),
 		refetchInterval: 1000,
 	});
-
-	useEffect(() => {
-		// startRecording();
-	}, []);
 
 	if (messages.isLoading) {
 		return (
