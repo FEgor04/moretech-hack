@@ -104,6 +104,22 @@ class VacancyCreate(VacancyBase):
     pass
 
 
+class VacancyUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    status: str | None = None
+    gigachat_file_id: str | None = None
+    company: str | None = None
+    location: str | None = None
+    salary_min: int | None = None
+    salary_max: int | None = None
+    employment_type: EmploymentType | None = None
+    experience_level: ExperienceLevel | None = None
+    remote_work: bool | None = None
+    requirements: str | None = None
+    benefits: str | None = None
+
+
 class VacancyRead(VacancyBase, Timestamped):
     id: int
 

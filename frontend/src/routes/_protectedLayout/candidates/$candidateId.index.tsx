@@ -223,17 +223,17 @@ function CandidateDetail() {
 												Ключевые навыки
 											</Label>
 											<div className="flex flex-wrap gap-1 mt-1">
-											{Array.isArray(c.skills) ? (
-												c.skills.map((skill) => (
-													<Badge
-														key={skill}
-														variant="secondary"
-														className="text-xs"
-													>
-														{skill}
-													</Badge>
-												))
-											) : (
+												{Array.isArray(c.skills) ? (
+													c.skills.map((skill) => (
+														<Badge
+															key={skill}
+															variant="secondary"
+															className="text-xs"
+														>
+															{skill}
+														</Badge>
+													))
+												) : (
 													<Badge variant="secondary" className="text-xs">
 														{c.skills}
 													</Badge>
