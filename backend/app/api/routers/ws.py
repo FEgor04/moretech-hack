@@ -49,118 +49,108 @@ class InterviewWebsocketService:
 
     def cut_fragment_video(self, path: str, start_ms: int, end_ms: int) -> bool:
         """Cut video fragment to only include time between start_ms and end_ms using ffmpeg."""
-        try:
-            # Convert milliseconds to seconds for ffmpeg
-            start_sec = start_ms / 1000.0
-            end_sec = end_ms / 1000.0
-            duration = end_sec - start_sec
+        # Convert milliseconds to seconds for ffmpeg
+        start_sec = start_ms / 1000.0
+        end_sec = end_ms / 1000.0
+        duration = end_sec - start_sec
 
-            logger.debug(
-                "Cutting video %s: start=%dms (%.3fs), end=%dms (%.3fs), duration=%.3fs",
+        logger.debug(
+            "Cutting video %s: start=%dms (%.3fs), end=%dms (%.3fs), duration=%.3fs",
+            path,
+            start_ms,
+            start_sec,
+            end_ms,
+            end_sec,
+            duration,
+        )
+
+        if duration <= 0:
+            logger.warning(
+                "Invalid duration for cutting video %s: start=%dms, end=%dms",
                 path,
                 start_ms,
-                start_sec,
                 end_ms,
-                end_sec,
-                duration,
             )
-
-            if duration <= 0:
-                logger.warning(
-                    "Invalid duration for cutting video %s: start=%dms, end=%dms",
-                    path,
-                    start_ms,
-                    end_ms,
-                )
-                return False
-
-            # Create temporary file for the cut video with proper extension
-            temp_path = f"{path}.tmp.webm"
-
-            # ffmpeg command to cut video
-            cmd = [
-                "ffmpeg",
-                "-y",  # Overwrite output file
-                "-i",
-                path,  # Input file
-                "-ss",
-                str(start_sec),  # Start time
-                "-t",
-                str(duration),  # Duration
-                "-c",
-                "copy",  # Copy streams without re-encoding
-                "-f",
-                "webm",  # Explicitly specify output format
-                temp_path,
-            ]
-
-            logger.debug("Running ffmpeg command: %s", " ".join(cmd))
-
-            result = subprocess.run(cmd, capture_output=True, text=True)
-
-            if result.returncode != 0:
-                logger.error(
-                    "ffmpeg cut failed for %s (return code %d): %s",
-                    path,
-                    result.returncode,
-                    result.stderr[-1000:],
-                )
-                return False
-
-            logger.debug("ffmpeg cut successful for %s", path)
-
-            # Replace original file with cut version
-            Path(temp_path).replace(path)
-            logger.debug("Replaced original file with cut version: %s", path)
-            return True
-
-        except Exception:
-            logger.exception("Failed to cut video fragment %s", path)
             return False
+
+        # Create temporary file for the cut video with proper extension
+        temp_path = f"{path}.tmp.webm"
+
+        # ffmpeg command to cut video
+        cmd = [
+            "ffmpeg",
+            "-y",  # Overwrite output file
+            "-i",
+            path,  # Input file
+            "-ss",
+            str(start_sec),  # Start time
+            "-t",
+            str(duration),  # Duration
+            "-c",
+            "copy",  # Copy streams without re-encoding
+            "-f",
+            "webm",  # Explicitly specify output format
+            temp_path,
+        ]
+
+        logger.debug("Running ffmpeg command: %s", " ".join(cmd))
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            logger.error(
+                "ffmpeg cut failed for %s (return code %d): %s",
+                path,
+                result.returncode,
+                result.stderr[-1000:],
+            )
+            return False
+
+        logger.debug("ffmpeg cut successful for %s", path)
+
+        # Replace original file with cut version
+        Path(temp_path).replace(path)
+        logger.debug("Replaced original file with cut version: %s", path)
+        return True
 
     def extract_audio_from_video(self, video_path: str) -> str | None:
         """Extract audio from video file and save as WAV with same base filename."""
-        try:
-            # Generate audio file path with .wav extension
-            audio_path = video_path.replace(".webm", ".wav")
+        # Generate audio file path with .wav extension
+        audio_path = video_path.replace(".webm", ".wav")
 
-            logger.debug("Extracting audio from %s to %s", video_path, audio_path)
+        logger.debug("Extracting audio from %s to %s", video_path, audio_path)
 
-            # ffmpeg command to extract audio
-            cmd = [
-                "ffmpeg",
-                "-y",  # Overwrite output file
-                "-i",
-                video_path,  # Input video file
-                "-vn",  # No video
-                "-acodec",
-                "pcm_s16le",  # PCM 16-bit little-endian
-                "-ar",
-                "16000",  # Sample rate 16kHz
-                "-ac",
-                "1",  # Mono
-                audio_path,
-            ]
+        # ffmpeg command to extract audio
+        cmd = [
+            "ffmpeg",
+            "-y",  # Overwrite output file
+            "-i",
+            video_path,  # Input video file
+            "-vn",  # No video
+            "-acodec",
+            "pcm_s16le",  # PCM 16-bit little-endian
+            "-ar",
+            "16000",  # Sample rate 16kHz
+            "-ac",
+            "1",  # Mono
+            audio_path,
+        ]
 
-            logger.debug("Running ffmpeg audio extraction command: %s", " ".join(cmd))
+        logger.debug("Running ffmpeg audio extraction command: %s", " ".join(cmd))
 
-            result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
-            if result.returncode != 0:
-                logger.error(
-                    "ffmpeg audio extraction failed for %s (return code %d): %s",
-                    video_path,
-                    result.returncode,
-                    result.stderr[-1000:],
-                )
-                return None
-
-            logger.debug("Audio extraction successful: %s", audio_path)
-            return audio_path
-
-        except Exception:
-            logger.exception("Failed to extract audio from video %s", video_path)
+        if result.returncode != 0:
+            logger.error(
+                "ffmpeg audio extraction failed for %s (return code %d): %s",
+                video_path,
+                result.returncode,
+                result.stderr[-1000:],
+            )
             return None
+
+        logger.debug("Audio extraction successful: %s", audio_path)
+        return audio_path
 
     def recognize_user_answer(self, audio_path: str) -> str:
         """Recognize speech from audio file and return transcribed text."""
@@ -175,42 +165,35 @@ class InterviewWebsocketService:
 
     async def submit_user_answer(self, interview_id: str, text: str) -> bool:
         """Submit user answer to the interview messages endpoint."""
-        try:
-            logger.debug(
-                "Submitting user answer for interview %s: %s", interview_id, text
+        logger.debug(
+            "Submitting user answer for interview %s: %s", interview_id, text
+        )
+
+        # Prepare the request payload
+        payload = {"text": text}
+
+        # Make POST request to the interview messages endpoint
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"http://localhost:8000/interviews/{interview_id}/messages",
+                json=payload,
+                timeout=30.0,
             )
 
-            # Prepare the request payload
-            payload = {"text": text}
-
-            # Make POST request to the interview messages endpoint
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"http://localhost:8000/interviews/{interview_id}/messages",
-                    json=payload,
-                    timeout=30.0,
+            if response.status_code == 200:
+                logger.info(
+                    "Successfully submitted user answer for interview %s",
+                    interview_id,
                 )
-
-                if response.status_code == 200:
-                    logger.info(
-                        "Successfully submitted user answer for interview %s",
-                        interview_id,
-                    )
-                    return True
-                else:
-                    logger.error(
-                        "Failed to submit user answer for interview %s: status=%d, response=%s",
-                        interview_id,
-                        response.status_code,
-                        response.text,
-                    )
-                    return False
-
-        except Exception:
-            logger.exception(
-                "Failed to submit user answer for interview %s", interview_id
-            )
-            return False
+                return True
+            else:
+                logger.error(
+                    "Failed to submit user answer for interview %s: status=%d, response=%s",
+                    interview_id,
+                    response.status_code,
+                    response.text,
+                )
+                return False
 
     async def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
@@ -282,76 +265,69 @@ class InterviewWebsocketService:
 
     def save_interview_video(self, suffix: str = "") -> str | None:
         """Save buffered video chunks to file and return the path to the saved file."""
-        try:
-            if self.total_bytes == 0:
-                logger.warning(
-                    "No video chunks received for interview %s; nothing to save",
-                    self.interview_id,
-                )
-                return None
+        if self.total_bytes == 0:
+            logger.warning(
+                "No video chunks received for interview %s; nothing to save",
+                self.interview_id,
+            )
+            return None
 
-            # Generate file paths with suffix
-            temp_file_path = RECORDINGS_DIR / f"{self.base_filename}{suffix}.raw.webm"
-            final_file_path = RECORDINGS_DIR / f"{self.base_filename}{suffix}.webm"
+        # Generate file paths with suffix
+        temp_file_path = RECORDINGS_DIR / f"{self.base_filename}{suffix}.raw.webm"
+        final_file_path = RECORDINGS_DIR / f"{self.base_filename}{suffix}.webm"
 
-            # Write all chunks to temp file
-            with open(temp_file_path, "wb") as f:
-                for chunk in self.received_chunks:
-                    f.write(chunk)
+        # Write all chunks to temp file
+        with open(temp_file_path, "wb") as f:
+            for chunk in self.received_chunks:
+                f.write(chunk)
 
-            # Try remux (copy) first
-            cmd_copy = [
+        # Try remux (copy) first
+        cmd_copy = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(temp_file_path),
+            "-c",
+            "copy",
+            str(final_file_path),
+        ]
+        result = subprocess.run(cmd_copy, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            logger.warning(
+                "ffmpeg remux copy failed for interview %s: %s",
+                self.interview_id,
+                result.stderr[-1000:],
+            )
+            # Fallback to re-encode
+            cmd_reencode = [
                 "ffmpeg",
                 "-y",
                 "-i",
                 str(temp_file_path),
-                "-c",
-                "copy",
+                "-c:v",
+                "libvpx-vp9",
+                "-c:a",
+                "libopus",
                 str(final_file_path),
             ]
-            result = subprocess.run(cmd_copy, capture_output=True, text=True)
-
-            if result.returncode != 0:
-                logger.warning(
-                    "ffmpeg remux copy failed for interview %s: %s",
+            result2 = subprocess.run(cmd_reencode, capture_output=True, text=True)
+            if result2.returncode != 0:
+                logger.error(
+                    "ffmpeg re-encode failed for interview %s: %s",
                     self.interview_id,
-                    result.stderr[-1000:],
+                    result2.stderr[-1000:],
                 )
-                # Fallback to re-encode
-                cmd_reencode = [
-                    "ffmpeg",
-                    "-y",
-                    "-i",
-                    str(temp_file_path),
-                    "-c:v",
-                    "libvpx-vp9",
-                    "-c:a",
-                    "libopus",
-                    str(final_file_path),
-                ]
-                result2 = subprocess.run(cmd_reencode, capture_output=True, text=True)
-                if result2.returncode != 0:
-                    logger.error(
-                        "ffmpeg re-encode failed for interview %s: %s",
-                        self.interview_id,
-                        result2.stderr[-1000:],
-                    )
-                    return None
+                return None
 
-            # Cleanup temp file
-            try:
-                if temp_file_path.exists():
-                    temp_file_path.unlink()
-            except Exception:
-                pass
+        # Cleanup temp file
+        try:
+            if temp_file_path.exists():
+                temp_file_path.unlink()
+        except Exception as e:
+            logger.warning("Failed to cleanup temp file %s: %s", temp_file_path, e)
 
-            return str(final_file_path)
-
-        except Exception:
-            logger.exception(
-                "Failed to save buffered video for interview %s", self.interview_id
-            )
-            return None
+        return str(final_file_path)
 
     def cleanup(self) -> None:
         """Clean up resources and save video."""
