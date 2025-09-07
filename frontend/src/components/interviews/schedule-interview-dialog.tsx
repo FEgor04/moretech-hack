@@ -61,7 +61,7 @@ export function ScheduleInterviewDialog({
 			{
 				candidate_id: data.candidate_id,
 				vacancy_id: data.vacancy_id,
-				state: "in_progress",
+				state: "initialized",
 			},
 			{
 				onSuccess: () => {

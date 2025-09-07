@@ -25,7 +25,7 @@ type Props = {
 export function InterviewChat({ interviewId }: Props) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const isFinished = interview.data.state === ("done" as InterviewState);
-	const { webcamRef, sendAudioReadyMarker } = useWebcamStreaming(interviewId, {
+	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(interviewId, {
 		disabled: isFinished,
 	});
 	const candidate = useSuspenseQuery(
@@ -111,8 +111,9 @@ export function InterviewChat({ interviewId }: Props) {
 				{/* Message Input */}
 				{!isFinished && (
 					<div className="">
-						<Button onClick={sendAudioReadyMarker}>Ответ готов</Button>
+						<Button disabled={socketState !== "awaiting_user_answer"} onClick={sendAudioReadyMarker}>Ответ готов</Button>
 					</div>
+
 				)}
 			</div>
 		</div>
