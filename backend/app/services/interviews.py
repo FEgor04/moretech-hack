@@ -6,7 +6,12 @@ from app.models.interview import Interview
 from app.models.candidate import Candidate
 from app.models.vacancy import Vacancy
 from app.models.interview_message import InterviewMessage
-from app.schemas.common import InterviewCreate, InterviewMessageCreateRequest
+from app.models.interview_note import InterviewNote
+from app.schemas.common import (
+    InterviewCreate,
+    InterviewMessageCreateRequest,
+    InterviewNoteCreate,
+)
 from app.services.exceptions import NotFoundError
 from app.services.interview_messages import interview_messages_service
 
@@ -123,6 +128,40 @@ async def create_interview_message(
     return await interview_messages_service.create_message(
         session, interview_id, payload
     )
+
+
+# Interview notes
+async def list_notes(
+    session: AsyncSession, interview_id: str, *, limit: int = 10, offset: int = 0
+) -> list[InterviewNote]:
+    await get_interview(session, interview_id)
+    result = await session.scalars(
+        select(InterviewNote)
+        .where(InterviewNote.interview_id == interview_id)
+        .order_by(InterviewNote.id.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    return list(result)
+
+
+async def create_note(
+    session: AsyncSession, payload: InterviewNoteCreate
+) -> InterviewNote:
+    await get_interview(session, payload.interview_id)
+    note = InterviewNote(**payload.model_dump(exclude_unset=True))
+    session.add(note)
+    await session.commit()
+    await session.refresh(note)
+    return note
+
+
+async def delete_note(session: AsyncSession, note_id: int) -> None:
+    note = await session.get(InterviewNote, note_id)
+    if not note:
+        raise NotFoundError("Note not found")
+    await session.delete(note)
+    await session.commit()
 
 
 def get_system_prompt(candidate: Candidate, vacancy: Vacancy | None) -> str:

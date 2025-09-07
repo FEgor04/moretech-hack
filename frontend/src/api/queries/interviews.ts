@@ -3,7 +3,15 @@ import {
 	listInterviewsInterviewsGet,
 	getInterviewInterviewsInterviewIdGet,
 	getInterviewMessagesInterviewsInterviewIdMessagesGet,
+	listInterviewNotesInterviewsInterviewIdNotesGet,
 } from "../client";
+
+export type InterviewNoteDTO = {
+	id: number;
+	interview_id: string;
+	text: string;
+	created_at?: string | null;
+};
 
 export const interviewsQueryOptions = () =>
 	queryOptions({
@@ -52,5 +60,17 @@ export const interviewMessagesQueryOptions = (interviewId: string) =>
 					throwOnError: true,
 				});
 			return response.data;
+		},
+	});
+
+export const interviewNotesQueryOptions = (interviewId: string) =>
+	queryOptions({
+		queryKey: ["interview", interviewId, "notes"],
+		queryFn: async () => {
+			const res = await listInterviewNotesInterviewsInterviewIdNotesGet<true>({
+				path: { interview_id: interviewId },
+				throwOnError: true,
+			});
+			return res.data;
 		},
 	});
