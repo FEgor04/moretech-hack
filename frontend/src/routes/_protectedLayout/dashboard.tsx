@@ -41,7 +41,9 @@ export const Route = createFileRoute("/_protectedLayout/dashboard")({
 });
 
 function Dashboard() {
-	const { data: vacancies } = useSuspenseQuery(vacanciesQueryOptions()) as { data: ExtendedVacancy[] };
+	const { data: vacancies } = useSuspenseQuery(vacanciesQueryOptions()) as {
+		data: ExtendedVacancy[];
+	};
 	const { data: candidates } = useSuspenseQuery(candidatesQueryOptions());
 	const { data: interviews } = useSuspenseQuery(interviewsQueryOptions());
 
