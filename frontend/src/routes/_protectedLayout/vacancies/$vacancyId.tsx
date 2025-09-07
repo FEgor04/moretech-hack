@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_protectedLayout/vacancies/$vacancyId")({
 	component: VacancyDetail,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_protectedLayout/vacancies/$vacancyId")({
 
 function VacancyDetail() {
 	const params = Route.useParams();
+	const navigate = useNavigate();
 	const vacancy = useSuspenseQuery(
 		vacancyQueryOptions(Number(params.vacancyId)),
 	);
@@ -23,20 +25,40 @@ function VacancyDetail() {
 
 	const v = vacancy.data;
 
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		const fd = new FormData(e.currentTarget as HTMLFormElement);
+		const statusValue = String(fd.get("status") || v.status || "");
+		
+		mutation.mutate({
+			title: String(fd.get("title") || v.title),
+			description: String(fd.get("description") || v.description || ""),
+			status: statusValue || null,
+		}, {
+			onSuccess: () => {
+				toast.success("Вакансия обновлена");
+				navigate({ to: "/vacancies" });
+			},
+			onError: () => {
+				toast.error("Ошибка при обновлении вакансии");
+			},
+		});
+	};
+
 	return (
 		<div className="space-y-4">
-			<h1 className="text-xl font-semibold">{v.title}</h1>
+			<div className="flex items-center justify-between">
+				<h1 className="text-xl font-semibold">{v.title}</h1>
+				<button
+					onClick={() => navigate({ to: "/vacancies" })}
+					className="text-sm text-muted-foreground hover:text-foreground"
+				>
+					← Назад к списку
+				</button>
+			</div>
+			
 			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					const fd = new FormData(e.currentTarget as HTMLFormElement);
-					const statusValue = String(fd.get("status") || v.status || "");
-					mutation.mutate({
-						title: String(fd.get("title") || v.title),
-						description: String(fd.get("description") || v.description || ""),
-						status: statusValue || null,
-					});
-				}}
+				onSubmit={handleSubmit}
 				className="grid max-w-xl grid-cols-2 gap-2 rounded-md border p-3"
 			>
 				<label htmlFor="title" className="col-span-2 text-sm font-medium">
@@ -68,10 +90,8 @@ function VacancyDetail() {
 					className="col-span-2 rounded-md border px-2 py-1"
 				>
 					<option value="">Не выбран</option>
-					<option value="draft">Черновик</option>
-					<option value="published">Опубликована</option>
+					<option value="open">Открыта</option>
 					<option value="closed">Закрыта</option>
-					<option value="archived">Архив</option>
 				</select>
 
 				<button

@@ -13,6 +13,8 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as ProtectedLayoutRouteRouteImport } from './routes/_protectedLayout/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InterviewsInterviewIdRouteImport } from './routes/interviews.$interviewId'
+import { Route as CandidateCandidateIdRouteImport } from './routes/candidate.$candidateId'
+import { Route as ProtectedLayoutDashboardRouteImport } from './routes/_protectedLayout/dashboard'
 import { Route as ProtectedLayoutVacanciesIndexRouteImport } from './routes/_protectedLayout/vacancies/index'
 import { Route as ProtectedLayoutCandidatesIndexRouteImport } from './routes/_protectedLayout/candidates/index'
 import { Route as ProtectedLayoutVacanciesNewRouteImport } from './routes/_protectedLayout/vacancies/new'
@@ -40,6 +42,17 @@ const InterviewsInterviewIdRoute = InterviewsInterviewIdRouteImport.update({
   path: '/interviews/$interviewId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CandidateCandidateIdRoute = CandidateCandidateIdRouteImport.update({
+  id: '/candidate/$candidateId',
+  path: '/candidate/$candidateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedLayoutDashboardRoute =
+  ProtectedLayoutDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => ProtectedLayoutRouteRoute,
+  } as any)
 const ProtectedLayoutVacanciesIndexRoute =
   ProtectedLayoutVacanciesIndexRouteImport.update({
     id: '/vacancies/',
@@ -86,6 +99,8 @@ const ProtectedLayoutCandidatesCandidateIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/dashboard': typeof ProtectedLayoutDashboardRoute
+  '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
@@ -98,6 +113,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/dashboard': typeof ProtectedLayoutDashboardRoute
+  '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
@@ -112,6 +129,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protectedLayout': typeof ProtectedLayoutRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/_protectedLayout/dashboard': typeof ProtectedLayoutDashboardRoute
+  '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/_protectedLayout/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
   '/_protectedLayout/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
@@ -126,6 +145,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sign-in'
+    | '/dashboard'
+    | '/candidate/$candidateId'
     | '/interviews/$interviewId'
     | '/candidates/new'
     | '/vacancies/$vacancyId'
@@ -138,6 +159,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/sign-in'
+    | '/dashboard'
+    | '/candidate/$candidateId'
     | '/interviews/$interviewId'
     | '/candidates/new'
     | '/vacancies/$vacancyId'
@@ -151,6 +174,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_protectedLayout'
     | '/sign-in'
+    | '/_protectedLayout/dashboard'
+    | '/candidate/$candidateId'
     | '/interviews/$interviewId'
     | '/_protectedLayout/candidates/new'
     | '/_protectedLayout/vacancies/$vacancyId'
@@ -165,6 +190,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedLayoutRouteRoute: typeof ProtectedLayoutRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
+  CandidateCandidateIdRoute: typeof CandidateCandidateIdRoute
   InterviewsInterviewIdRoute: typeof InterviewsInterviewIdRoute
 }
 
@@ -197,6 +223,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/interviews/$interviewId'
       preLoaderRoute: typeof InterviewsInterviewIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/candidate/$candidateId': {
+      id: '/candidate/$candidateId'
+      path: '/candidate/$candidateId'
+      fullPath: '/candidate/$candidateId'
+      preLoaderRoute: typeof CandidateCandidateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_protectedLayout/dashboard': {
+      id: '/_protectedLayout/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof ProtectedLayoutDashboardRouteImport
+      parentRoute: typeof ProtectedLayoutRouteRoute
     }
     '/_protectedLayout/vacancies/': {
       id: '/_protectedLayout/vacancies/'
@@ -251,6 +291,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface ProtectedLayoutRouteRouteChildren {
+  ProtectedLayoutDashboardRoute: typeof ProtectedLayoutDashboardRoute
   ProtectedLayoutCandidatesNewRoute: typeof ProtectedLayoutCandidatesNewRoute
   ProtectedLayoutVacanciesVacancyIdRoute: typeof ProtectedLayoutVacanciesVacancyIdRoute
   ProtectedLayoutVacanciesNewRoute: typeof ProtectedLayoutVacanciesNewRoute
@@ -261,6 +302,7 @@ interface ProtectedLayoutRouteRouteChildren {
 }
 
 const ProtectedLayoutRouteRouteChildren: ProtectedLayoutRouteRouteChildren = {
+  ProtectedLayoutDashboardRoute: ProtectedLayoutDashboardRoute,
   ProtectedLayoutCandidatesNewRoute: ProtectedLayoutCandidatesNewRoute,
   ProtectedLayoutVacanciesVacancyIdRoute:
     ProtectedLayoutVacanciesVacancyIdRoute,
@@ -280,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedLayoutRouteRoute: ProtectedLayoutRouteRouteWithChildren,
   SignInRoute: SignInRoute,
+  CandidateCandidateIdRoute: CandidateCandidateIdRoute,
   InterviewsInterviewIdRoute: InterviewsInterviewIdRoute,
 }
 export const routeTree = rootRouteImport

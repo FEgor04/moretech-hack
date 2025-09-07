@@ -9,8 +9,36 @@ import type { VacancyRead } from "../../api/client";
 import { VacancyStatusBadge } from "./status-badge";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { Link } from "@tanstack/react-router";
+import { Button } from "../ui/button";
+import { Trash2Icon } from "lucide-react";
+import { useDeleteVacancy } from "../../api/mutations/vacancies";
+import { toast } from "sonner";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 export function useVacanciesTable(data: VacancyRead[]) {
+	const deleteMutation = useDeleteVacancy();
+
+	const handleDelete = (vacancyId: number, title: string) => {
+		deleteMutation.mutate(vacancyId, {
+			onSuccess: () => {
+				toast.success(`Вакансия "${title}" удалена`);
+			},
+			onError: () => {
+				toast.error("Ошибка при удалении вакансии");
+			},
+		});
+	};
+
 	const columns = useMemo<ColumnDef<VacancyRead>[]>(
 		() => [
 			{
@@ -20,7 +48,7 @@ export function useVacanciesTable(data: VacancyRead[]) {
 					<Link
 						to="/vacancies/$vacancyId"
 						params={{ vacancyId: row.original.id.toString() }}
-						className="font-medium"
+						className="font-medium hover:underline"
 					>
 						{row.original.title}
 					</Link>
@@ -54,8 +82,44 @@ export function useVacanciesTable(data: VacancyRead[]) {
 						<>&mdash;</>
 					),
 			},
+			{
+				id: "actions",
+				header: "Действия",
+				cell: ({ row }) => (
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+							>
+								<Trash2Icon className="h-4 w-4" />
+								<span className="sr-only">Удалить вакансию</span>
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>Удалить вакансию</AlertDialogTitle>
+								<AlertDialogDescription>
+									Вы уверены, что хотите удалить вакансию "{row.original.title}"? 
+									Это действие нельзя отменить.
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>Отмена</AlertDialogCancel>
+								<AlertDialogAction
+									onClick={() => handleDelete(row.original.id, row.original.title)}
+									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								>
+									Удалить
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				),
+			},
 		],
-		[],
+		[deleteMutation],
 	);
 
 	const [sorting, setSorting] = useState<SortingState>([]);

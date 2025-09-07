@@ -10,7 +10,7 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link } from "@tanstack/react-router";
-import { BriefcaseBusinessIcon, UsersIcon } from "lucide-react";
+import { BriefcaseBusinessIcon, UsersIcon, BarChart3Icon } from "lucide-react";
 
 export function AppSidebar() {
 	return (
@@ -22,6 +22,15 @@ export function AppSidebar() {
 				<SidebarGroup>
 					<SidebarGroupContent>
 						<SidebarMenu>
+							<SidebarMenuItem>
+								<SidebarMenuButton asChild>
+									<Link to="/dashboard">
+										<BarChart3Icon />
+										Дашборд
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+
 							<SidebarMenuItem>
 								<SidebarMenuButton asChild>
 									<Link to="/vacancies">
