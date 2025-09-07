@@ -89,7 +89,7 @@ function CandidateEdit() {
 				position: data.position,
 				experience: data.experience,
 				status: data.status,
-				skills: skillsArray,
+				skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
 			},
 			{
 				onSuccess: () => {

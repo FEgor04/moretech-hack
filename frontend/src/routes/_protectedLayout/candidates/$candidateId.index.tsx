@@ -28,11 +28,7 @@ import {
 	CheckCircleIcon,
 	XCircleIcon,
 	AlertCircleIcon,
-	TrendingUpIcon,
 	FileTextIcon,
-	PhoneIcon,
-	MapPinIcon,
-	BuildingIcon,
 	StarIcon,
 	ActivityIcon,
 } from "lucide-react";

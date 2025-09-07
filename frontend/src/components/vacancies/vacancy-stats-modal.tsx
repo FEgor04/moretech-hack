@@ -2,6 +2,15 @@ import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
+import type { VacancyRead } from "@/api/client/types.gen";
+
+// Расширенный тип для вакансии с дополнительными полями
+type ExtendedVacancy = VacancyRead & {
+	company?: string | null;
+	experience_level?: string | null;
+	remote_work?: boolean;
+	benefits?: string | null;
+};
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +19,6 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -37,23 +45,7 @@ import {
 } from "lucide-react";
 
 interface VacancyStatsModalProps {
-	vacancy: {
-		id: number;
-		title: string;
-		description?: string;
-		status?: string;
-		company?: string;
-		location?: string;
-		salary_min?: number;
-		salary_max?: number;
-		employment_type?: string;
-		experience_level?: string;
-		remote_work?: boolean;
-		requirements?: string;
-		benefits?: string;
-		created_at?: string;
-		updated_at?: string;
-	};
+	vacancy: ExtendedVacancy;
 	children: React.ReactNode;
 }
 

@@ -3,6 +3,15 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
+import type { VacancyRead } from "@/api/client/types.gen";
+
+// Расширенный тип для вакансии с дополнительными полями
+type ExtendedVacancy = VacancyRead & {
+	company?: string | null;
+	experience_level?: string | null;
+	remote_work?: boolean;
+	benefits?: string | null;
+};
 import {
 	Card,
 	CardContent,
@@ -32,7 +41,7 @@ export const Route = createFileRoute("/_protectedLayout/dashboard")({
 });
 
 function Dashboard() {
-	const { data: vacancies } = useSuspenseQuery(vacanciesQueryOptions());
+	const { data: vacancies } = useSuspenseQuery(vacanciesQueryOptions()) as { data: ExtendedVacancy[] };
 	const { data: candidates } = useSuspenseQuery(candidatesQueryOptions());
 	const { data: interviews } = useSuspenseQuery(interviewsQueryOptions());
 

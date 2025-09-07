@@ -52,7 +52,7 @@ export const Route = createFileRoute("/candidate/")({
 
 function CandidateSelfPage() {
 	const params = Route.useParams();
-	const candidateId = params.candidateId as string;
+	const candidateId = (params as { candidateId: string }).candidateId;
 	const { data: candidate } = useSuspenseQuery(
 		candidateQueryOptions(candidateId),
 	);

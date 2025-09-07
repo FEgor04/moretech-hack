@@ -33,8 +33,8 @@ const formSchema = z.object({
   status: z.enum(["open", "closed"]).optional(),
   company: z.string().optional(),
   location: z.string().optional(),
-  salary_min: z.coerce.number().min(0).optional(),
-  salary_max: z.coerce.number().min(0).optional(),
+  salary_min: z.number().min(0).optional(),
+  salary_max: z.number().min(0).optional(),
   employment_type: z.enum(["full_time", "part_time", "contract", "internship"]).optional(),
   experience_level: z.enum(["junior", "middle", "senior", "lead"]).optional(),
   remote_work: z.boolean().optional(),
@@ -237,7 +237,9 @@ function VacancyDetail() {
 									<Input
 										id="salary_min"
 										type="number"
-										{...form.register("salary_min")}
+										{...form.register("salary_min", {
+											valueAsNumber: true,
+										})}
 										placeholder="50000"
 									/>
 								</div>
@@ -246,7 +248,9 @@ function VacancyDetail() {
 									<Input
 										id="salary_max"
 										type="number"
-										{...form.register("salary_max")}
+										{...form.register("salary_max", {
+											valueAsNumber: true,
+										})}
 										placeholder="100000"
 									/>
 								</div>
