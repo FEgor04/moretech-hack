@@ -14,6 +14,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -31,7 +32,7 @@ const formSchema = z.object({
 	name: z.string().min(1, "Имя обязательно"),
 	email: z.string().email("Неверный формат email").optional().or(z.literal("")),
 	position: z.string().min(1, "Должность обязательна"),
-	experience: z.number().min(0, "Опыт не может быть отрицательным"),
+	experience_years: z.number().min(0, "Опыт не может быть отрицательным"),
 	status: z
 		.enum([
 			"pending",
@@ -42,6 +43,12 @@ const formSchema = z.object({
 			"on_hold",
 		])
 		.optional(),
+	skills: z.string().optional(),
+	tech: z.string().optional(),
+	education: z.string().optional(),
+	geo: z.string().optional(),
+	employment_type: z.string().optional(),
+	experience: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -63,13 +70,56 @@ function CandidateSelfPage() {
 			name: candidate.name,
 			email: candidate.email || "",
 			position: candidate.position,
-			experience: candidate.experience,
+			experience_years: candidate.experience_years ?? 0,
 			status: candidate.status,
+			skills: candidate.skills
+				? Array.isArray(candidate.skills)
+					? candidate.skills.join(", ")
+					: candidate.skills
+				: "",
+			tech: candidate.tech
+				? Array.isArray(candidate.tech)
+					? candidate.tech.join(", ")
+					: candidate.tech
+				: "",
+			education: candidate.education
+				? typeof candidate.education === 'string'
+					? candidate.education
+					: JSON.stringify(candidate.education, null, 2)
+				: "",
+			geo: candidate.geo || "",
+			employment_type: candidate.employment_type || "",
+			experience: candidate.experience
+				? typeof candidate.experience === 'string'
+					? candidate.experience
+					: JSON.stringify(candidate.experience, null, 2)
+				: "",
 		},
 	});
 
 	const onSubmit = (data: FormData) => {
-		updateMutation.mutate(data, {
+		// Преобразуем строки навыков и технологий в массивы
+		const skillsArray = data.skills
+			? data.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const techArray = data.tech
+			? data.tech
+					.split(",")
+					.map((tech) => tech.trim())
+					.filter((tech) => tech.length > 0)
+			: undefined;
+
+		const candidateData = {
+			...data,
+			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
+			tech: techArray ? JSON.stringify(techArray) : undefined,
+		};
+
+		updateMutation.mutate(candidateData, {
 			onSuccess: () => {
 				toast.success("Информация обновлена");
 			},
@@ -180,7 +230,7 @@ function CandidateSelfPage() {
 
 											<FormField
 												control={form.control}
-												name="experience"
+												name="experience_years"
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Опыт работы (лет)</FormLabel>
@@ -197,7 +247,111 @@ function CandidateSelfPage() {
 													</FormItem>
 												)}
 											/>
+											<FormField
+												control={form.control}
+												name="geo"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Местоположение</FormLabel>
+														<FormControl>
+															<Input
+																{...field}
+																placeholder="Москва, Россия"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+											<FormField
+												control={form.control}
+												name="employment_type"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Тип занятости</FormLabel>
+														<FormControl>
+															<Input
+																{...field}
+																placeholder="Полная занятость"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 										</div>
+
+										<FormField
+											control={form.control}
+											name="skills"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Ключевые навыки</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
+															rows={3}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="tech"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Технологии</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите технологии через запятую (например: JavaScript, TypeScript, Node.js, PostgreSQL)"
+															rows={3}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="education"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Образование</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите информацию об образовании (JSON формат или текст)"
+															rows={4}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="experience"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Детальный опыт работы</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите детальную информацию об опыте работы (JSON формат или текст)"
+															rows={6}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
 
 										<div className="flex gap-3">
 											<Button type="submit" disabled={updateMutation.isPending}>

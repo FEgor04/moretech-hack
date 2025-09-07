@@ -31,7 +31,7 @@ const formSchema = z.object({
 	name: z.string().min(1, "Имя обязательно"),
 	email: z.string().email("Неверный формат email").optional().or(z.literal("")),
 	position: z.string().min(1, "Должность обязательна"),
-	experience: z.number().min(0, "Опыт не может быть отрицательным"),
+	experience_years: z.number().min(0, "Опыт не может быть отрицательным"),
 	status: z
 		.enum([
 			"pending",
@@ -64,7 +64,7 @@ function CandidateSelfPage() {
 			name: candidate.name,
 			email: candidate.email || "",
 			position: candidate.position,
-			experience: candidate.experience,
+			experience_years: candidate.experience_years ?? 0,
 			status: candidate.status,
 		},
 	});
@@ -191,7 +191,7 @@ function CandidateSelfPage() {
 									/>
 									<FormField
 										control={form.control}
-										name="experience"
+										name="experience_years"
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Опыт работы (лет)</FormLabel>
@@ -257,7 +257,7 @@ function CandidateSelfPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Опыт работы</p>
-							<p className="font-medium">{candidate.experience} лет</p>
+							<p className="font-medium">{candidate.experience_years ?? 0} лет</p>
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Статус</p>

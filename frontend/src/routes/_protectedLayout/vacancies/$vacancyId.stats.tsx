@@ -68,13 +68,13 @@ function VacancyStatsPage() {
 	const relevantCandidates = candidates.filter((candidate) => {
 		const experienceMatch =
 			v.experience_level === "junior"
-				? candidate.experience <= 2
+				? (candidate.experience_years ?? 0) <= 2
 				: v.experience_level === "middle"
-					? candidate.experience >= 2 && candidate.experience <= 5
+					? (candidate.experience_years ?? 0) >= 2 && (candidate.experience_years ?? 0) <= 5
 					: v.experience_level === "senior"
-						? candidate.experience >= 5 && candidate.experience <= 8
+						? (candidate.experience_years ?? 0) >= 5 && (candidate.experience_years ?? 0) <= 8
 						: v.experience_level === "lead"
-							? candidate.experience >= 8
+							? (candidate.experience_years ?? 0) >= 8
 							: true;
 
 		const positionMatch =

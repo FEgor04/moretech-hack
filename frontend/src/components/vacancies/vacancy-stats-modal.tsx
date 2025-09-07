@@ -64,13 +64,13 @@ export function VacancyStatsModal({
 		// Простая логика: кандидаты с похожим опытом и позицией
 		const experienceMatch =
 			vacancy.experience_level === "junior"
-				? candidate.experience <= 2
+				? (candidate.experience_years ?? 0) <= 2
 				: vacancy.experience_level === "middle"
-					? candidate.experience >= 2 && candidate.experience <= 5
+					? (candidate.experience_years ?? 0) >= 2 && (candidate.experience_years ?? 0) <= 5
 					: vacancy.experience_level === "senior"
-						? candidate.experience >= 5 && candidate.experience <= 8
+						? (candidate.experience_years ?? 0) >= 5 && (candidate.experience_years ?? 0) <= 8
 						: vacancy.experience_level === "lead"
-							? candidate.experience >= 8
+							? (candidate.experience_years ?? 0) >= 8
 							: true;
 
 		const positionMatch =

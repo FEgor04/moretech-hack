@@ -47,14 +47,23 @@ class PDFParserService:
                     "messages": [
                         {
                             "role": "user",
-                            "content": """Проанализируй резюме и извлеки информацию в формате JSON:
+                            "content": """Проанализируй резюме и извлеки информацию в формате JSON строго по схеме:
 {
-    "name": "ФИО кандидата",
-    "email": "email адрес",
-    "position": "желаемая позиция",
-    "experience": число лет опыта
+  "name": "ФИО кандидата",
+  "email": "email адрес",
+  "position": "желаемая позиция",
+  "experience": [
+    {"company": "компания", "position": "должность", "years": число_лет}
+  ],
+  "experience_years": число лет общего опыта,
+  "tech": ["список технических навыков, языков программирования, инструментов"],
+  "education": [
+    {"organization": "образовательная организация", "speciality": "специальность", "type": "высшее|курсы"}
+  ],
+  "geo": "географические предпочтения",
+  "employment_type": "предпочтительный тип занятости (full_time | part_time | remote | contract | internship)"
 }
-Отвечай только JSON без дополнительных комментариев.""",
+Отвечай только корректным JSON без дополнительных комментариев. Если данных нет, ставь null или пустой массив.""",
                             "attachments": [file_id],
                         }
                     ],
@@ -85,13 +94,36 @@ class PDFParserService:
             else:
                 clean_email = None
 
+            # Normalize years to int to satisfy schema/DB integer column
+            years_val = parsed_data.get("experience_years")
+            if isinstance(years_val, float):
+                years_val = int(round(years_val))
+            # Handle null values from AI with fallbacks
+            name = parsed_data.get("name")
+            if not name or name == "нет информации":
+                name = "Unknown Candidate"
+            
+            position = parsed_data.get("position")
+            if not position or position == "нет информации":
+                position = "Unknown Position"
+            
+            # Truncate employment_type if too long
+            employment_type = parsed_data.get("employment_type")
+            if employment_type and len(employment_type) > 255:
+                employment_type = employment_type[:252] + "..."
+            
             candidate = CandidateCreate(
-                name=parsed_data.get("name", "Unknown"),
+                name=name,
                 email=clean_email,
-                position=parsed_data.get("position", "Unknown Position"),
-                experience=parsed_data.get("experience", 0),
+                position=position,
+                experience=parsed_data.get("experience"),
+                experience_years=years_val,
                 status="pending",
                 gigachat_file_id=file_id,
+                tech=parsed_data.get("tech"),
+                education=parsed_data.get("education"),
+                geo=parsed_data.get("geo"),
+                employment_type=employment_type,
             )
 
             logger.info(f"Successfully created candidate: {candidate}")
@@ -134,12 +166,19 @@ class PDFParserService:
                     "messages": [
                         {
                             "role": "user",
-                            "content": """Проанализируй описание вакансии и извлеки информацию в формате JSON:
+                            "content": """Проанализируй описание вакансии и извлеки информацию в формате JSON строго по схеме:
 {
-    "title": "название позиции",
-    "description": "описание вакансии"
+  "title": "название позиции",
+  "description": "описание вакансии",
+  "skills": ["основные, обязательные технические и софт навыки"],
+  "experience": "требуемый опыт (годы и тип)",
+  "responsibilities": "основные обязанности",
+  "domain": "сфера бизнеса",
+  "education": "требуемое образование и сертификаты",
+  "minor_skills": ["опциональные навыки"],
+  "company_info": "тип и размер организации"
 }
-Отвечай только JSON без дополнительных комментариев.""",
+Отвечай только корректным JSON без дополнительных комментариев. Если данных нет, ставь null или пустой массив.""",
                             "attachments": [file_id],
                         }
                     ],
@@ -160,6 +199,13 @@ class PDFParserService:
                 description=parsed_data.get("description", "No description available."),
                 status="open",
                 gigachat_file_id=file_id,
+                skills=parsed_data.get("skills"),
+                experience=parsed_data.get("experience"),
+                responsibilities=parsed_data.get("responsibilities"),
+                domain=parsed_data.get("domain"),
+                education=parsed_data.get("education"),
+                minor_skills=parsed_data.get("minor_skills"),
+                company_info=parsed_data.get("company_info"),
             )
 
             logger.info(f"Successfully created vacancy: {vacancy}")

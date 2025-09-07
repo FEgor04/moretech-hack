@@ -65,6 +65,13 @@ const formSchema = z.object({
 	remote_work: z.boolean().optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),
+	skills: z.string().optional(),
+	experience: z.string().optional(),
+	responsibilities: z.string().optional(),
+	domain: z.string().optional(),
+	education: z.string().optional(),
+	minor_skills: z.string().optional(),
+	company_info: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -106,11 +113,59 @@ function VacancyDetail() {
 			remote_work: v.remote_work || false,
 			requirements: v.requirements || "",
 			benefits: v.benefits || "",
+			skills: v.skills
+				? Array.isArray(v.skills)
+					? v.skills.join(", ")
+					: v.skills
+				: "",
+			experience: v.experience || "",
+			responsibilities: v.responsibilities
+				? Array.isArray(v.responsibilities)
+					? v.responsibilities.join(", ")
+					: v.responsibilities
+				: "",
+			domain: v.domain || "",
+			education: v.education || "",
+			minor_skills: v.minor_skills
+				? Array.isArray(v.minor_skills)
+					? v.minor_skills.join(", ")
+					: v.minor_skills
+				: "",
+			company_info: v.company_info || "",
 		},
 	});
 
 	const onSubmit = (data: FormData) => {
-		mutation.mutate(data, {
+		// Преобразуем строки навыков в массивы
+		const skillsArray = data.skills
+			? data.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const responsibilitiesArray = data.responsibilities
+			? data.responsibilities
+					.split(",")
+					.map((resp) => resp.trim())
+					.filter((resp) => resp.length > 0)
+			: undefined;
+
+		const minorSkillsArray = data.minor_skills
+			? data.minor_skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const vacancyData = {
+			...data,
+			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
+			responsibilities: responsibilitiesArray ? JSON.stringify(responsibilitiesArray) : undefined,
+			minor_skills: minorSkillsArray ? JSON.stringify(minorSkillsArray) : undefined,
+		};
+
+		mutation.mutate(vacancyData, {
 			onSuccess: () => {
 				toast.success("Вакансия обновлена", {
 					description: "Изменения успешно сохранены.",
@@ -419,6 +474,119 @@ function VacancyDetail() {
 													<FormLabel>Преимущества</FormLabel>
 													<FormControl>
 														<Textarea rows={3} {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="skills"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Требуемые навыки</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
+															rows={3}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="experience"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Требования к опыту</FormLabel>
+													<FormControl>
+														<Textarea rows={3} {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="responsibilities"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Обязанности</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите обязанности через запятую"
+															rows={4}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="domain"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Домен/Отрасль</FormLabel>
+													<FormControl>
+														<Input
+															{...field}
+															placeholder="IT, Финансы, Медицина и т.д."
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="education"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Требования к образованию</FormLabel>
+													<FormControl>
+														<Textarea rows={3} {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="minor_skills"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Дополнительные навыки</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите дополнительные навыки через запятую"
+															rows={3}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="company_info"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Информация о компании</FormLabel>
+													<FormControl>
+														<Textarea rows={4} {...field} />
 													</FormControl>
 													<FormMessage />
 												</FormItem>

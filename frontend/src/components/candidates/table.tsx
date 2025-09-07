@@ -64,9 +64,12 @@ export function useCandidatesTable(data: CandidateRead[]) {
 				cell: ({ row }) => row.original.position || <>&mdash;</>,
 			},
 			{
-				accessorKey: "experience",
-				header: "Опыт",
-				cell: ({ row }) => row.original.experience || <>&mdash;</>,
+				accessorKey: "experience_years",
+				header: "Опыт (лет)",
+				cell: ({ row }) => {
+					const years = row.original.experience_years;
+					return years ? `${years} лет` : <>&mdash;</>;
+				},
 			},
 			{
 				accessorKey: "status",

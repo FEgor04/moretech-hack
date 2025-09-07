@@ -52,10 +52,19 @@ class CandidateBase(BaseModel):
     name: str
     email: EmailStr | None = None
     position: str
-    experience: int
+    # List of experience entries: {company, position, years}
+    experience: Union[list[dict], str, None] = None
+    # Preserve legacy numeric years
+    experience_years: int | None = None
     status: CandidateStatus = CandidateStatus.PENDING
     gigachat_file_id: str | None = None
     skills: Union[list[str], str, None] = None  # Список навыков или JSON строка
+    # Extended CV fields
+    tech: Union[list[str], str, None] = None  # JSON string or list
+    # Education entries: list of {organization, speciality, type?}
+    education: Union[list[dict], str, None] = None
+    geo: str | None = None
+    employment_type: str | None = None
 
     @field_validator("skills", mode="before")
     @classmethod
@@ -73,6 +82,78 @@ class CandidateBase(BaseModel):
             return v
         return None
 
+    @field_validator("tech", mode="before")
+    @classmethod
+    def validate_tech(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]
+        if isinstance(v, list):
+            return v
+        return None
+
+    @field_validator("education", mode="before")
+    @classmethod
+    def validate_education(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return v
+        if isinstance(v, list):
+            return v
+        return v
+
+    @field_validator("experience", mode="before")
+    @classmethod
+    def validate_experience_list(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return v
+        # If list, normalize entries to include numeric years when provided as strings
+        if isinstance(v, list):
+            return v
+        return v
+
+    @field_validator("experience_years", mode="before")
+    @classmethod
+    def coerce_experience_years(cls, v):
+        if v is None:
+            return None
+        try:
+            # Handle floats and numeric strings
+            if isinstance(v, (int,)):
+                return v
+            if isinstance(v, float):
+                return int(round(v))
+            if isinstance(v, str):
+                v = v.strip()
+                if not v:
+                    return None
+                # Replace comma decimal separator if present
+                v_norm = v.replace(",", ".")
+                f = float(v_norm)
+                return int(round(f))
+        except Exception:
+            return None
+        return None
+
 
 class CandidateCreate(CandidateBase):
     pass
@@ -87,44 +168,76 @@ class VacancyBase(BaseModel):
     description: str | None = None
     status: str | None = None
     gigachat_file_id: str | None = None
-
-    # Новые поля
+    # Legacy/previous fields (retain)
     company: str | None = None
     location: str | None = None
     salary_min: int | None = None
     salary_max: int | None = None
-    employment_type: EmploymentType | None = None
-    experience_level: ExperienceLevel | None = None
+    employment_type: str | None = None
+    experience_level: str | None = None
     remote_work: bool = False
     requirements: str | None = None
     benefits: str | None = None
 
-    # Normalize enums that might come with dashes from DB or external sources
-    @field_validator("employment_type", mode="before")
-    @classmethod
-    def normalize_employment_type(cls, value):
-        if value is None:
-            return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
-            try:
-                return EmploymentType(normalized)
-            except Exception:
-                return normalized
-        return value
+    # New spec fields
+    skills: Union[list[str], str, None] = None
+    experience: str | None = None
+    responsibilities: Union[list[str], str, None] = None
+    domain: str | None = None
+    education: str | None = None
+    minor_skills: Union[list[str], str, None] = None
+    company_info: str | None = None
 
-    @field_validator("experience_level", mode="before")
+    @field_validator("skills", mode="before")
     @classmethod
-    def normalize_experience_level(cls, value):
-        if value is None:
+    def validate_skills_vacancy(cls, v):
+        if v is None:
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
+        if isinstance(v, str):
             try:
-                return ExperienceLevel(normalized)
-            except Exception:
-                return normalized
-        return value
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]
+        if isinstance(v, list):
+            return v
+        return None
+
+    @field_validator("minor_skills", mode="before")
+    @classmethod
+    def validate_minor_skills(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]
+        if isinstance(v, list):
+            return v
+        return None
+
+    @field_validator("responsibilities", mode="before")
+    @classmethod
+    def validate_responsibilities(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+
+                loaded = json.loads(v)
+                if isinstance(loaded, list):
+                    return loaded
+                return v
+            except json.JSONDecodeError:
+                return v
+        if isinstance(v, list):
+            return v
+        return None
 
 
 class VacancyCreate(VacancyBase):
@@ -136,42 +249,74 @@ class VacancyUpdate(BaseModel):
     description: str | None = None
     status: str | None = None
     gigachat_file_id: str | None = None
+    # Legacy/previous fields (retain)
     company: str | None = None
     location: str | None = None
     salary_min: int | None = None
     salary_max: int | None = None
-    employment_type: EmploymentType | None = None
-    experience_level: ExperienceLevel | None = None
+    employment_type: str | None = None
+    experience_level: str | None = None
     remote_work: bool | None = None
     requirements: str | None = None
     benefits: str | None = None
+    skills: Union[list[str], str, None] = None
+    experience: str | None = None
+    responsibilities: Union[list[str], str, None] = None
+    domain: str | None = None
+    education: str | None = None
+    minor_skills: Union[list[str], str, None] = None
+    company_info: str | None = None
 
-    # The update payload may also contain dashed enum values
-    @field_validator("employment_type", mode="before")
+    @field_validator("skills", mode="before")
     @classmethod
-    def normalize_employment_type_update(cls, value):
-        if value is None:
+    def validate_skills_update(cls, v):
+        if v is None:
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
+        if isinstance(v, str):
             try:
-                return EmploymentType(normalized)
-            except Exception:
-                return normalized
-        return value
+                import json
 
-    @field_validator("experience_level", mode="before")
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]
+        if isinstance(v, list):
+            return v
+        return None
+
+    @field_validator("minor_skills", mode="before")
     @classmethod
-    def normalize_experience_level_update(cls, value):
-        if value is None:
+    def validate_minor_skills_update(cls, v):
+        if v is None:
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
+        if isinstance(v, str):
             try:
-                return ExperienceLevel(normalized)
-            except Exception:
-                return normalized
-        return value
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return [v]
+        if isinstance(v, list):
+            return v
+        return None
+
+    @field_validator("responsibilities", mode="before")
+    @classmethod
+    def validate_responsibilities_update(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                import json
+
+                loaded = json.loads(v)
+                if isinstance(loaded, list):
+                    return loaded
+                return v
+            except json.JSONDecodeError:
+                return v
+        if isinstance(v, list):
+            return v
+        return None
 
 
 class VacancyRead(VacancyBase, Timestamped):

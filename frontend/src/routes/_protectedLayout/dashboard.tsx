@@ -105,7 +105,7 @@ function Dashboard() {
 	const avgExperience =
 		candidates.length > 0
 			? Math.round(
-					(candidates.reduce((sum, c) => sum + c.experience, 0) /
+					(candidates.reduce((sum, c) => sum + (c.experience_years ?? 0), 0) /
 						candidates.length) *
 						10,
 				) / 10
