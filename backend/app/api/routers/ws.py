@@ -13,7 +13,7 @@ from app.clients.yandex import (
     get_yandex_speech_synthesis_client,
 )
 from app.schemas.common import InterviewMessageRead
-from backend.app.core.config import settings
+from app.core.config import settings
 
 
 logger = logging.getLogger("app")
