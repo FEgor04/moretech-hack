@@ -5,9 +5,9 @@ import {
 	updateCandidateCandidatesCandidateIdPatch,
 	uploadCvCandidatesUploadCvPost,
 } from "../client";
-import type { CandidateUpdate, CandidateRead } from "../client";
+import type { CandidateCreate, CandidateRead } from "../client";
 
-export type CandidateBody = CandidateUpdate;
+export type CandidateBody = CandidateCreate;
 
 export const useCreateCandidate = () => {
 	const qc = useQueryClient();

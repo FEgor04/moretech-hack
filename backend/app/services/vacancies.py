@@ -2,7 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.vacancy import Vacancy
-from app.schemas.common import VacancyCreate, VacancyUpdate
+from app.models.note import Note
+from app.schemas.common import VacancyCreate, VacancyUpdate, NoteCreate, NoteUpdate
 from app.services.exceptions import NotFoundError
 
 
@@ -44,4 +45,46 @@ async def delete_vacancy(session: AsyncSession, vacancy_id: int) -> None:
     if not vacancy:
         raise NotFoundError("Vacancy not found")
     await session.delete(vacancy)
+    await session.commit()
+
+
+# Notes
+async def list_notes(
+    session: AsyncSession, vacancy_id: int, *, limit: int = 10, offset: int = 0
+) -> list[Note]:
+    await get_vacancy(session, vacancy_id)
+    result = await session.scalars(
+        select(Note)
+        .where(Note.vacancy_id == vacancy_id)
+        .order_by(Note.id.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    return list(result)
+
+
+async def create_note(session: AsyncSession, payload: NoteCreate) -> Note:
+    await get_vacancy(session, payload.vacancy_id)
+    note = Note(**payload.model_dump(exclude_unset=True))
+    session.add(note)
+    await session.commit()
+    await session.refresh(note)
+    return note
+
+
+async def update_note(session: AsyncSession, note_id: int, payload: NoteUpdate) -> Note:
+    note = await session.get(Note, note_id)
+    if not note:
+        raise NotFoundError("Note not found")
+    note.text = payload.text
+    await session.commit()
+    await session.refresh(note)
+    return note
+
+
+async def delete_note(session: AsyncSession, note_id: int) -> None:
+    note = await session.get(Note, note_id)
+    if not note:
+        raise NotFoundError("Note not found")
+    await session.delete(note)
     await session.commit()

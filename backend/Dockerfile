@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     netcat-openbsd \
     curl \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the project into `/app`
