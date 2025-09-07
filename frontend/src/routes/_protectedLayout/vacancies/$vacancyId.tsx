@@ -138,7 +138,7 @@ function VacancyDetail() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div>
 			<div className="bg-white border-b">
 				<div className="max-w-6xl mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
@@ -293,7 +293,7 @@ function VacancyDetail() {
 															defaultValue={field.value}
 														>
 															<FormControl>
-																<SelectTrigger>
+																<SelectTrigger className="w-full">
 																	<SelectValue placeholder="Выберите тип занятости" />
 																</SelectTrigger>
 															</FormControl>
@@ -328,7 +328,7 @@ function VacancyDetail() {
 															defaultValue={field.value}
 														>
 															<FormControl>
-																<SelectTrigger>
+																<SelectTrigger className="w-full">
 																	<SelectValue placeholder="Выберите уровень опыта" />
 																</SelectTrigger>
 															</FormControl>
@@ -355,7 +355,7 @@ function VacancyDetail() {
 															defaultValue={field.value}
 														>
 															<FormControl>
-																<SelectTrigger>
+																<SelectTrigger className="w-full">
 																	<SelectValue placeholder="Выберите статус" />
 																</SelectTrigger>
 															</FormControl>
