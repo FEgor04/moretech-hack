@@ -8,7 +8,10 @@ import httpx
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
-from app.clients.yandex import get_yandex_speech_recognition_model, get_yandex_speech_synthesis_client
+from app.clients.yandex import (
+    get_yandex_speech_recognition_model,
+    get_yandex_speech_synthesis_client,
+)
 from app.schemas.common import InterviewMessageRead
 from backend.app.core.config import settings
 
@@ -168,9 +171,7 @@ class InterviewWebsocketService:
 
     async def submit_user_answer(self, interview_id: str, text: str) -> str | None:
         """Submit user answer to the interview messages endpoint and return latest message text."""
-        logger.debug(
-            "Submitting user answer for interview %s: %s", interview_id, text
-        )
+        logger.debug("Submitting user answer for interview %s: %s", interview_id, text)
 
         # Prepare the request payload
         payload = {"text": text}
@@ -188,12 +189,12 @@ class InterviewWebsocketService:
                     "Successfully submitted user answer for interview %s",
                     interview_id,
                 )
-                
+
                 # Parse response with Pydantic
                 try:
                     messages_data = response.json()
                     messages = [InterviewMessageRead(**msg) for msg in messages_data]
-                    
+
                     # Get the latest message (highest index)
                     if messages:
                         latest_message = max(messages, key=lambda msg: msg.index)
@@ -206,9 +207,11 @@ class InterviewWebsocketService:
                         )
                         return latest_message.text
                     else:
-                        logger.warning("No messages returned for interview %s", interview_id)
+                        logger.warning(
+                            "No messages returned for interview %s", interview_id
+                        )
                         return None
-                        
+
                 except Exception as e:
                     logger.error(
                         "Failed to parse response for interview %s: %s",
@@ -277,7 +280,9 @@ class InterviewWebsocketService:
         logger.info("User said: %s", recognized_text)
 
         # Submit the recognized text to the interview messages endpoint
-        latest_message = await self.submit_user_answer(self.interview_id, recognized_text)
+        latest_message = await self.submit_user_answer(
+            self.interview_id, recognized_text
+        )
         if latest_message is None:
             logger.warning(
                 "Failed to submit user answer for interview %s", self.interview_id
@@ -285,9 +290,9 @@ class InterviewWebsocketService:
             return
 
         logger.info(
-            "User answer submitted successfully for interview %s. Latest message: %s", 
-            self.interview_id, 
-            latest_message[:100] if latest_message else "None"
+            "User answer submitted successfully for interview %s. Latest message: %s",
+            self.interview_id,
+            latest_message[:100] if latest_message else "None",
         )
 
         # Не хочу использовать синтез в разработке, он сильно мешает и тратит кучу бабок
