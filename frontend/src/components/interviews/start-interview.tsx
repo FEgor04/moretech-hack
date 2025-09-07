@@ -13,6 +13,7 @@ import {
 } from "../ui/card";
 import { Clock, FileText, MessageCircle, Play } from "lucide-react";
 import { Button } from "../ui/button";
+import Webcam from "react-webcam";
 import { Badge } from "../ui/badge";
 
 export function StartInterview({ interviewId }: { interviewId: string }) {
@@ -56,9 +57,9 @@ export function StartInterview({ interviewId }: { interviewId: string }) {
 				</div>
 
 				{/* Main Content */}
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 gap-6">
 					{/* Interview Info Card */}
-					<div className="lg:col-span-2">
+					<div className="">
 						<Card className="h-full">
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
@@ -160,9 +161,11 @@ export function StartInterview({ interviewId }: { interviewId: string }) {
 							</CardHeader>
 							<CardContent className="flex flex-col justify-center h-full">
 								<div className="text-center space-y-4">
-									<div className="bg-green-100 p-6 rounded-full w-24 h-24 mx-auto flex items-center justify-center">
-										<Play className="h-12 w-12 text-green-600" />
-									</div>
+									<Webcam
+										onUserMedia={(media) => {
+											console.log("User media", media);
+										}}
+									/>
 
 									<div>
 										<h3 className="font-semibold text-lg mb-2">Всё готово!</h3>
