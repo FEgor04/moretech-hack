@@ -40,7 +40,7 @@ export const Route = createFileRoute(
 	loader: async ({ params, context }) => {
 		const candidate = await context.queryClient.fetchQuery(
 			candidateQueryOptions(params.candidateId),
-		)
+		);
 		return { candidate };
 	},
 });
@@ -50,7 +50,7 @@ function CandidateDetail() {
 	const candidate = useSuspenseQuery(candidateQueryOptions(params.candidateId));
 	const interviews = useSuspenseQuery(
 		interviewsByCandidateQueryOptions(params.candidateId),
-	)
+	);
 
 	const c = candidate.data;
 	const candidateInterviews = interviews.data;
@@ -75,14 +75,14 @@ function CandidateDetail() {
 		? Math.floor(
 				(Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24),
 			)
-		: 0
+		: 0;
 
 	// Последнее обновление
 	const lastUpdated = c.updated_at
 		? Math.floor(
 				(Date.now() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24),
 			)
-		: 0
+		: 0;
 
 	return (
 		<div className="space-y-6">
@@ -122,9 +122,7 @@ function CandidateDetail() {
 						<Button variant="outline">Запланировать интервью</Button>
 					</ScheduleInterviewDialog>
 					<Button asChild>
-						<a href={`/candidates/${params.candidateId}/edit`}>
-							Редактировать
-						</a>
+						<a href={`/candidates/${params.candidateId}/edit`}>Редактировать</a>
 					</Button>
 				</div>
 			</div>
@@ -404,7 +402,7 @@ function CandidateDetail() {
 											if (typeof window !== "undefined") {
 												navigator.clipboard.writeText(
 													`${window.location.origin}/candidate/${params.candidateId}`,
-												)
+												);
 											}
 										}}
 									>
@@ -441,5 +439,5 @@ function CandidateDetail() {
 			{/* Список интервью */}
 			<InterviewsList candidateId={params.candidateId} />
 		</div>
-	)
+	);
 }
