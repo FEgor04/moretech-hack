@@ -19,6 +19,7 @@ export function useWebcamStreaming(interviewId: string) {
 	const isReady = readyState === ReadyState.OPEN;
 
 	function handleDataAvailable(data: BlobEvent) {
+  console.log("Data available", data);
 		sendMessage(data.data);
 	}
 
@@ -27,6 +28,8 @@ export function useWebcamStreaming(interviewId: string) {
 		if (!webcamRef.current) {
 			return;
 		}
+
+        console.log("Starting recording");
 
 		mediaRecorderRef.current = new MediaRecorder(webcamRef.current.stream!, {
 			mimeType: "video/webm",

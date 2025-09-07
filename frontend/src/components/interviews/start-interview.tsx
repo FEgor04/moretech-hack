@@ -19,7 +19,8 @@ import { Badge } from "../ui/badge";
 export function StartInterview({
 	interviewId,
 	webcamRef,
-}: { interviewId: string; webcamRef: React.RefObject<Webcam | null> }) {
+	startRecording,
+}: { interviewId: string; webcamRef: React.RefObject<Webcam | null>; startRecording: () => void }) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
@@ -31,6 +32,7 @@ export function StartInterview({
 	const initializeFirstMessageMutation = useInitializeFirstMessageMutation();
 
 	const handleStartInterview = () => {
+		startRecording();
 		initializeFirstMessageMutation.mutate(interviewId, {
 			onSuccess: () => {
 				toast.success("Собеседование началось!");

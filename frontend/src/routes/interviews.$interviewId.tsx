@@ -14,11 +14,11 @@ function RouteComponent() {
 	const messages = useSuspenseQuery(
 		interviewMessagesQueryOptions(params.interviewId),
 	);
-	const { webcamRef } = useWebcamStreaming(params.interviewId);
+	const { webcamRef, startRecording } = useWebcamStreaming(params.interviewId);
 
 	if (messages.data.length === 0) {
 		return (
-			<StartInterview webcamRef={webcamRef} interviewId={params.interviewId} />
+			<StartInterview webcamRef={webcamRef} interviewId={params.interviewId} startRecording={startRecording} />
 		);
 	}
 
