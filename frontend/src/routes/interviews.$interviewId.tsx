@@ -18,11 +18,11 @@ function RouteComponent() {
 
 	if (messages.data.length === 0) {
 		return (
-			<StartInterview webcamRef={webcamRef} interviewId={params.interviewId} startRecording={startRecording} />
+			<StartInterview webcamRef={webcamRef} interviewId={params.interviewId} />
 		);
 	}
 
 	return (
-		<InterviewChat webcamRef={webcamRef} interviewId={params.interviewId} />
+		<InterviewChat webcamRef={webcamRef} interviewId={params.interviewId} startRecording={startRecording} />
 	);
 }

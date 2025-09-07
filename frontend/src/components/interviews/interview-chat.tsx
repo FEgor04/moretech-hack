@@ -6,7 +6,7 @@ import {
 } from "@/api/queries/interviews";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
 	Conversation,
@@ -28,9 +28,10 @@ import WebcamComponent from "react-webcam";
 type Props = {
 	interviewId: string;
 	webcamRef: React.RefObject<Webcam | null>;
+	startRecording: () => void;
 };
 
-export function InterviewChat({ interviewId, webcamRef }: Props) {
+export function InterviewChat({ interviewId, webcamRef, startRecording }: Props) {
 	const [message, setMessage] = useState("");
 
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
@@ -48,6 +49,10 @@ export function InterviewChat({ interviewId, webcamRef }: Props) {
 	});
 
 	const postMessageMutation = usePostInterviewMessageMutation();
+
+	useEffect(() => {
+		// startRecording();
+	}, []);
 
 	const handleSendMessage = async () => {
 		if (!message.trim() || postMessageMutation.isPending) return;
