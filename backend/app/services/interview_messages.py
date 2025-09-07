@@ -101,6 +101,7 @@ class InterviewMessagesService:
             type=InterviewMessageType.USER,
         )
         session.add(user_message)
+        await session.commit()
         await session.flush()  # Flush to get the user message saved
 
         try:
