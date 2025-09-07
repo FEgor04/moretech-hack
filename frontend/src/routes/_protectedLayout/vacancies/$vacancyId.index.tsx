@@ -4,6 +4,7 @@ import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { VacancyRead } from "@/api/client/types.gen";
 
+// Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
 	company?: string | null;
 	experience_level?: string | null;
@@ -48,6 +49,7 @@ import {
 	DollarSignIcon,
 	ClockIcon,
 	UsersIcon,
+	BarChart3Icon,
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -67,19 +69,19 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export const Route = createFileRoute(
-	"/_protectedLayout/vacancies/$vacancyId/edit",
-)({
-	component: VacancyEdit,
-	loader: async ({ params, context }) => {
-		const vacancy = await context.queryClient.fetchQuery(
-			vacancyQueryOptions(Number(params.vacancyId)),
-		);
-		return { vacancy };
+export const Route = createFileRoute("/_protectedLayout/vacancies/$vacancyId/")(
+	{
+		component: VacancyDetail,
+		loader: async ({ params, context }) => {
+			const vacancy = await context.queryClient.fetchQuery(
+				vacancyQueryOptions(Number(params.vacancyId)),
+			);
+			return { vacancy };
+		},
 	},
-});
+);
 
-function VacancyEdit() {
+function VacancyDetail() {
 	const params = Route.useParams();
 	const navigate = useNavigate();
 	const vacancy = useSuspenseQuery(
@@ -168,12 +170,23 @@ function VacancyEdit() {
 								</div>
 							</div>
 						</div>
+						<div className="flex items-center gap-2">
+							<Button variant="outline" size="sm" asChild>
+								<Link
+									to="/vacancies/$vacancyId/stats"
+									params={{ vacancyId: params.vacancyId }}
+								>
+									<BarChart3Icon className="w-4 h-4 mr-1" /> Статистика
+								</Link>
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>
 
 			<div className="max-w-6xl mx-auto p-6">
 				<div className="grid gap-6 lg:grid-cols-3">
+					{/* Основная информация */}
 					<div className="lg:col-span-2 space-y-6">
 						<Card>
 							<CardHeader>
@@ -298,10 +311,10 @@ function VacancyEdit() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="full_time">
+																<SelectItem value="full-time">
 																	Полная занятость
 																</SelectItem>
-																<SelectItem value="part_time">
+																<SelectItem value="part-time">
 																	Частичная занятость
 																</SelectItem>
 																<SelectItem value="contract">
@@ -428,6 +441,7 @@ function VacancyEdit() {
 						</Card>
 					</div>
 
+					{/* Боковая панель с информацией */}
 					<div className="space-y-6">
 						<Card>
 							<CardHeader>

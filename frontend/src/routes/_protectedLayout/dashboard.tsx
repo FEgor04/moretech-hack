@@ -147,7 +147,9 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalVacancies}</div>
-						<p className="text-xs text-muted-foreground">{openVacancies} открытых, {closedVacancies} закрытых</p>
+						<p className="text-xs text-muted-foreground">
+							{openVacancies} открытых, {closedVacancies} закрытых
+						</p>
 					</CardContent>
 				</Card>
 
@@ -160,7 +162,9 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalCandidates}</div>
-						<p className="text-xs text-muted-foreground">{pendingCandidates} на рассмотрении</p>
+						<p className="text-xs text-muted-foreground">
+							{pendingCandidates} на рассмотрении
+						</p>
 					</CardContent>
 				</Card>
 
@@ -171,7 +175,9 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalInterviews}</div>
-						<p className="text-xs text-muted-foreground">{activeInterviews} активных</p>
+						<p className="text-xs text-muted-foreground">
+							{activeInterviews} активных
+						</p>
 					</CardContent>
 				</Card>
 
@@ -182,7 +188,9 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{conversionRate}%</div>
-						<p className="text-xs text-muted-foreground">{acceptedCandidates} принято</p>
+						<p className="text-xs text-muted-foreground">
+							{acceptedCandidates} принято
+						</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -283,9 +291,7 @@ function Dashboard() {
 								<UserCheckIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Принято</span>
 							</div>
-							<Badge variant="secondary">
-								{acceptedCandidates}
-							</Badge>
+							<Badge variant="secondary">{acceptedCandidates}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
@@ -320,9 +326,7 @@ function Dashboard() {
 								<CheckCircleIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Открытые</span>
 							</div>
-							<Badge variant="secondary">
-								{openVacancies}
-							</Badge>
+							<Badge variant="secondary">{openVacancies}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
@@ -355,9 +359,7 @@ function Dashboard() {
 								<CheckCircleIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Завершенные</span>
 							</div>
-							<Badge variant="secondary">
-								{completedInterviews}
-							</Badge>
+							<Badge variant="secondary">{completedInterviews}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
