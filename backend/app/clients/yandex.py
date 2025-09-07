@@ -4,6 +4,7 @@ from speechkit import configure_credentials, creds
 
 from app.core.config import settings
 
+
 def get_yandex_speech_client() -> RecognitionModel:
     configure_credentials(
         creds.YandexCredentials(
@@ -11,11 +12,10 @@ def get_yandex_speech_client() -> RecognitionModel:
         )
     )
 
-
     model = model_repository.recognition_model()
 
-    model.model = 'general'
-    model.language = 'ru-RU'
+    model.model = "general"
+    model.language = "ru-RU"
     model.audio_processing_type = AudioProcessingType.Full
 
     return model
