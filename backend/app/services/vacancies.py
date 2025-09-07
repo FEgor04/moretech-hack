@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.vacancy import Vacancy
-from app.schemas.common import VacancyCreate
+from app.schemas.common import VacancyCreate, VacancyUpdate
 from app.services.exceptions import NotFoundError
 
 
@@ -27,7 +27,7 @@ async def get_vacancy(session: AsyncSession, vacancy_id: int) -> Vacancy:
 
 
 async def update_vacancy(
-    session: AsyncSession, vacancy_id: int, payload: VacancyCreate
+    session: AsyncSession, vacancy_id: int, payload: VacancyUpdate
 ) -> Vacancy:
     vacancy = await session.get(Vacancy, vacancy_id)
     if not vacancy:

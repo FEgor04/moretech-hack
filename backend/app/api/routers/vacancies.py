@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
-from app.schemas.common import VacancyCreate, VacancyRead
+from app.schemas.common import VacancyCreate, VacancyRead, VacancyUpdate
 from app.services import vacancies as vacancies_service
 from app.services.exceptions import NotFoundError
 from app.services.pdf_parser import (
@@ -37,7 +37,7 @@ async def get_vacancy(vacancy_id: int, session: AsyncSession = Depends(get_sessi
 @router.patch("/{vacancy_id}", response_model=VacancyRead)
 async def update_vacancy(
     vacancy_id: int,
-    payload: VacancyCreate,
+    payload: VacancyUpdate,
     session: AsyncSession = Depends(get_session),
 ):
     try:
