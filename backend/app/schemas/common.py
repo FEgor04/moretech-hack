@@ -29,6 +29,12 @@ class ExperienceLevel(str, Enum):
     LEAD = "lead"
 
 
+class InterviewState(str, Enum):
+    INITIALIZED = "initialized"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+
+
 class Timestamped(BaseModel):
     created_at: datetime | None = None
     updated_at: datetime | None = None
@@ -184,6 +190,7 @@ class InterviewBase(BaseModel):
     transcript: str | None = None
     recording_url: str | None = None
     status: str | None = None
+    state: InterviewState = InterviewState.INITIALIZED
     feedback: str | None = None
     feedback_positive: bool | None = None
 

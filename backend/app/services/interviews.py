@@ -27,6 +27,7 @@ async def create_interview(
         transcript=payload.transcript,
         recording_url=payload.recording_url,
         status=payload.status,
+        state=payload.state.value,
         feedback=payload.feedback,
         feedback_positive=payload.feedback_positive,
     )
@@ -87,6 +88,8 @@ async def update_interview(
         interview.recording_url = payload.recording_url
     if payload.status is not None:
         interview.status = payload.status
+    if payload.state is not None:
+        interview.state = payload.state.value
     if payload.feedback is not None:
         interview.feedback = payload.feedback
     if payload.feedback_positive is not None:
