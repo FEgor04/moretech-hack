@@ -256,27 +256,19 @@ function CandidateDetail() {
 						<CardContent>
 							<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 								<div className="text-center">
-									<div className="text-2xl font-bold text-blue-600">
-										{totalInterviews}
-									</div>
-									<p className="text-xs text-muted-foreground">
-										Всего интервью
-									</p>
+									<div className="text-2xl font-bold">{totalInterviews}</div>
+									<p className="text-xs text-muted-foreground">Всего интервью</p>
 								</div>
 								<div className="text-center">
-									<div className="text-2xl font-bold text-orange-600">
-										{activeInterviews}
-									</div>
+									<div className="text-2xl font-bold">{activeInterviews}</div>
 									<p className="text-xs text-muted-foreground">Активных</p>
 								</div>
 								<div className="text-center">
-									<div className="text-2xl font-bold text-green-600">
-										{completedInterviews}
-									</div>
+									<div className="text-2xl font-bold">{completedInterviews}</div>
 									<p className="text-xs text-muted-foreground">Завершенных</p>
 								</div>
 								<div className="text-center">
-									<div className="text-2xl font-bold text-purple-600">
+									<div className="text-2xl font-bold">
 										{totalInterviews > 0
 											? Math.round(
 													(completedInterviews / totalInterviews) * 100,
@@ -305,36 +297,24 @@ function CandidateDetail() {
 									<div className="flex items-center gap-3">
 										<CheckCircleIcon className="h-5 w-5 text-green-500" />
 										<div>
-											<div className="text-lg font-semibold text-green-600">
-												{positiveFeedback}
-											</div>
-											<p className="text-xs text-muted-foreground">
-												Положительных
-											</p>
+											<div className="text-lg font-semibold">{positiveFeedback}</div>
+											<p className="text-xs text-muted-foreground">Положительных</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-3">
 										<XCircleIcon className="h-5 w-5 text-red-500" />
 										<div>
-											<div className="text-lg font-semibold text-red-600">
-												{negativeFeedback}
-											</div>
-											<p className="text-xs text-muted-foreground">
-												Отрицательных
-											</p>
+											<div className="text-lg font-semibold">{negativeFeedback}</div>
+											<p className="text-xs text-muted-foreground">Отрицательных</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-3">
 										<AlertCircleIcon className="h-5 w-5 text-gray-500" />
 										<div>
-											<div className="text-lg font-semibold text-gray-600">
-												{completedInterviews -
-													positiveFeedback -
-													negativeFeedback}
+											<div className="text-lg font-semibold">
+												{completedInterviews - positiveFeedback - negativeFeedback}
 											</div>
-											<p className="text-xs text-muted-foreground">
-												Без оценки
-											</p>
+											<p className="text-xs text-muted-foreground">Без оценки</p>
 										</div>
 									</div>
 								</div>

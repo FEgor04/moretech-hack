@@ -147,10 +147,7 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalVacancies}</div>
-						<p className="text-xs text-muted-foreground">
-							<span className="text-green-600">{openVacancies}</span> открытых,{" "}
-							<span className="text-gray-600">{closedVacancies}</span> закрытых
-						</p>
+						<p className="text-xs text-muted-foreground">{openVacancies} открытых, {closedVacancies} закрытых</p>
 					</CardContent>
 				</Card>
 
@@ -163,10 +160,7 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalCandidates}</div>
-						<p className="text-xs text-muted-foreground">
-							<span className="text-blue-600">{pendingCandidates}</span> на
-							рассмотрении
-						</p>
+						<p className="text-xs text-muted-foreground">{pendingCandidates} на рассмотрении</p>
 					</CardContent>
 				</Card>
 
@@ -177,10 +171,7 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalInterviews}</div>
-						<p className="text-xs text-muted-foreground">
-							<span className="text-orange-600">{activeInterviews}</span>{" "}
-							активных
-						</p>
+						<p className="text-xs text-muted-foreground">{activeInterviews} активных</p>
 					</CardContent>
 				</Card>
 
@@ -191,10 +182,7 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{conversionRate}%</div>
-						<p className="text-xs text-muted-foreground">
-							<span className="text-green-600">{acceptedCandidates}</span>{" "}
-							принято
-						</p>
+						<p className="text-xs text-muted-foreground">{acceptedCandidates} принято</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -281,21 +269,21 @@ function Dashboard() {
 								<ClockIcon className="h-4 w-4 text-blue-500" />
 								<span className="text-sm">На рассмотрении</span>
 							</div>
-							<Badge variant="default">{reviewingCandidates}</Badge>
+							<Badge variant="secondary">{reviewingCandidates}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<MessageSquareIcon className="h-4 w-4 text-orange-500" />
 								<span className="text-sm">На собеседовании</span>
 							</div>
-							<Badge variant="default">{interviewingCandidates}</Badge>
+							<Badge variant="secondary">{interviewingCandidates}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<UserCheckIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Принято</span>
 							</div>
-							<Badge variant="default" className="bg-green-100 text-green-800">
+							<Badge variant="secondary">
 								{acceptedCandidates}
 							</Badge>
 						</div>
@@ -304,7 +292,7 @@ function Dashboard() {
 								<UserXIcon className="h-4 w-4 text-red-500" />
 								<span className="text-sm">Отклонено</span>
 							</div>
-							<Badge variant="destructive">{rejectedCandidates}</Badge>
+							<Badge variant="secondary">{rejectedCandidates}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
@@ -332,7 +320,7 @@ function Dashboard() {
 								<CheckCircleIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Открытые</span>
 							</div>
-							<Badge variant="default" className="bg-green-100 text-green-800">
+							<Badge variant="secondary">
 								{openVacancies}
 							</Badge>
 						</div>
@@ -360,14 +348,14 @@ function Dashboard() {
 								<MessageSquareIcon className="h-4 w-4 text-orange-500" />
 								<span className="text-sm">Активные</span>
 							</div>
-							<Badge variant="default">{activeInterviews}</Badge>
+							<Badge variant="secondary">{activeInterviews}</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<CheckCircleIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Завершенные</span>
 							</div>
-							<Badge variant="default" className="bg-green-100 text-green-800">
+							<Badge variant="secondary">
 								{completedInterviews}
 							</Badge>
 						</div>
