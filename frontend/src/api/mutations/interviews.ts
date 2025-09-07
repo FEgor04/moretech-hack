@@ -50,7 +50,10 @@ export function usePostInterviewMessageMutation() {
 		PostInterviewMessageInterviewsInterviewIdMessagesPostResponse,
 		unknown,
 		PostInterviewMessageData,
-		{ previousMessages: InterviewMessageRead[] | undefined; queryKey: ReadonlyArray<string | number> }
+		{
+			previousMessages: InterviewMessageRead[] | undefined;
+			queryKey: ReadonlyArray<string | number>;
+		}
 	>({
 		mutationFn: async (data: PostInterviewMessageData) => {
 			const response =
@@ -70,11 +73,11 @@ export function usePostInterviewMessageMutation() {
 
 			await queryClient.cancelQueries({ queryKey });
 
-			const previousMessages = queryClient.getQueryData<
-				InterviewMessageRead[]
-			>(queryKey);
+			const previousMessages =
+				queryClient.getQueryData<InterviewMessageRead[]>(queryKey);
 
-			const lastIndex = previousMessages?.[previousMessages.length - 1]?.index ?? -1;
+			const lastIndex =
+				previousMessages?.[previousMessages.length - 1]?.index ?? -1;
 			const optimisticMessage: InterviewMessageRead = {
 				interview_id: variables.interviewId,
 				index: lastIndex + 1,
@@ -82,23 +85,31 @@ export function usePostInterviewMessageMutation() {
 				type: "user",
 			};
 
-			queryClient.setQueryData<InterviewMessageRead[]>(queryKey, (old: InterviewMessageRead[] | undefined) => {
-				return [...(old ?? []), optimisticMessage];
-			});
+			queryClient.setQueryData<InterviewMessageRead[]>(
+				queryKey,
+				(old: InterviewMessageRead[] | undefined) => {
+					return [...(old ?? []), optimisticMessage];
+				},
+			);
 
 			return { previousMessages, queryKey };
 		},
 		onError: (
 			_error: unknown,
 			_variables: PostInterviewMessageData,
-			context?: { previousMessages: InterviewMessageRead[] | undefined; queryKey: ReadonlyArray<string | number> },
+			context?: {
+				previousMessages: InterviewMessageRead[] | undefined;
+				queryKey: ReadonlyArray<string | number>;
+			},
 		) => {
 			if (context?.previousMessages && context?.queryKey) {
 				queryClient.setQueryData(context.queryKey, context.previousMessages);
 			}
 		},
 		onSettled: (
-			_data: PostInterviewMessageInterviewsInterviewIdMessagesPostResponse | undefined,
+			_data:
+				| PostInterviewMessageInterviewsInterviewIdMessagesPostResponse
+				| undefined,
 			_error: unknown,
 			variables: PostInterviewMessageData,
 		) => {
