@@ -1,5 +1,5 @@
 import asyncio
-from enum import Enum, StrEnum, auto
+from enum import StrEnum, auto
 import logging
 import subprocess
 from pathlib import Path
@@ -26,7 +26,7 @@ RECORDINGS_DIR = Path("recordings")
 RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-class InterviewSocketState(Enum, StrEnum):
+class InterviewSocketState(StrEnum):
     AWAITING_USER_ANSWER = auto()
     SPEECH_RECOGNITION = auto()
     GENERATING_RESPONSE = auto()
