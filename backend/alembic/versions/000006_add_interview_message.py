@@ -1,7 +1,7 @@
 """add interview_message table
 
-Revision ID: 20250906_02
-Revises: 20250906_01
+Revision ID: 000006
+Revises: 000005
 Create Date: 2025-09-06
 """
 
