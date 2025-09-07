@@ -11,9 +11,15 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
 	BarChart3Icon,
 	UsersIcon,
 	MessageSquareIcon,
@@ -27,7 +33,7 @@ import {
 	CalendarIcon,
 	UserCheckIcon,
 	UserXIcon,
-	AlertCircleIcon
+	AlertCircleIcon,
 } from "lucide-react";
 
 interface VacancyStatsModalProps {
@@ -51,62 +57,96 @@ interface VacancyStatsModalProps {
 	children: React.ReactNode;
 }
 
-export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps) {
+export function VacancyStatsModal({
+	vacancy,
+	children,
+}: VacancyStatsModalProps) {
 	const [open, setOpen] = useState(false);
-	
+
 	const { data: candidates } = useSuspenseQuery(candidatesQueryOptions());
 	const { data: interviews } = useSuspenseQuery(interviewsQueryOptions());
 
 	// Фильтруем кандидатов, которые подходят под эту вакансию
 	// (в реальном приложении это было бы более сложная логика сопоставления)
-	const relevantCandidates = candidates.filter(candidate => {
+	const relevantCandidates = candidates.filter((candidate) => {
 		// Простая логика: кандидаты с похожим опытом и позицией
-		const experienceMatch = vacancy.experience_level === 'junior' ? candidate.experience <= 2 :
-			vacancy.experience_level === 'middle' ? candidate.experience >= 2 && candidate.experience <= 5 :
-			vacancy.experience_level === 'senior' ? candidate.experience >= 5 && candidate.experience <= 8 :
-			vacancy.experience_level === 'lead' ? candidate.experience >= 8 : true;
-		
-		const positionMatch = candidate.position.toLowerCase().includes(vacancy.title.toLowerCase()) ||
+		const experienceMatch =
+			vacancy.experience_level === "junior"
+				? candidate.experience <= 2
+				: vacancy.experience_level === "middle"
+					? candidate.experience >= 2 && candidate.experience <= 5
+					: vacancy.experience_level === "senior"
+						? candidate.experience >= 5 && candidate.experience <= 8
+						: vacancy.experience_level === "lead"
+							? candidate.experience >= 8
+							: true;
+
+		const positionMatch =
+			candidate.position.toLowerCase().includes(vacancy.title.toLowerCase()) ||
 			vacancy.title.toLowerCase().includes(candidate.position.toLowerCase());
-		
+
 		return experienceMatch || positionMatch;
 	});
 
 	// Интервью для этой вакансии
-	const vacancyInterviews = interviews.filter(interview => interview.vacancy_id === vacancy.id);
+	const vacancyInterviews = interviews.filter(
+		(interview) => interview.vacancy_id === vacancy.id,
+	);
 
 	// Статистика по кандидатам
 	const totalCandidates = relevantCandidates.length;
-	const pendingCandidates = relevantCandidates.filter(c => c.status === "pending").length;
-	const reviewingCandidates = relevantCandidates.filter(c => c.status === "reviewing").length;
-	const interviewingCandidates = relevantCandidates.filter(c => c.status === "interviewing").length;
-	const acceptedCandidates = relevantCandidates.filter(c => c.status === "accepted").length;
-	const rejectedCandidates = relevantCandidates.filter(c => c.status === "rejected").length;
-	const onHoldCandidates = relevantCandidates.filter(c => c.status === "on_hold").length;
+	const pendingCandidates = relevantCandidates.filter(
+		(c) => c.status === "pending",
+	).length;
+	const reviewingCandidates = relevantCandidates.filter(
+		(c) => c.status === "reviewing",
+	).length;
+	const interviewingCandidates = relevantCandidates.filter(
+		(c) => c.status === "interviewing",
+	).length;
+	const acceptedCandidates = relevantCandidates.filter(
+		(c) => c.status === "accepted",
+	).length;
+	const rejectedCandidates = relevantCandidates.filter(
+		(c) => c.status === "rejected",
+	).length;
+	const onHoldCandidates = relevantCandidates.filter(
+		(c) => c.status === "on_hold",
+	).length;
 
 	// Статистика по интервью
 	const totalInterviews = vacancyInterviews.length;
-	const completedInterviews = vacancyInterviews.filter(i => i.status === "завершено").length;
-	const activeInterviews = vacancyInterviews.filter(i => i.status === "на собеседовании").length;
-	const positiveFeedback = vacancyInterviews.filter(i => i.feedback_positive === true).length;
-	const negativeFeedback = vacancyInterviews.filter(i => i.feedback_positive === false).length;
+	const completedInterviews = vacancyInterviews.filter(
+		(i) => i.status === "завершено",
+	).length;
+	const activeInterviews = vacancyInterviews.filter(
+		(i) => i.status === "на собеседовании",
+	).length;
+	const positiveFeedback = vacancyInterviews.filter(
+		(i) => i.feedback_positive === true,
+	).length;
+	const negativeFeedback = vacancyInterviews.filter(
+		(i) => i.feedback_positive === false,
+	).length;
 
 	// Конверсия
-	const conversionRate = totalCandidates > 0 
-		? Math.round((acceptedCandidates / totalCandidates) * 100)
-		: 0;
+	const conversionRate =
+		totalCandidates > 0
+			? Math.round((acceptedCandidates / totalCandidates) * 100)
+			: 0;
 
 	// Время открытия вакансии
-	const daysOpen = vacancy.created_at 
-		? Math.floor((Date.now() - new Date(vacancy.created_at).getTime()) / (1000 * 60 * 60 * 24))
+	const daysOpen = vacancy.created_at
+		? Math.floor(
+				(Date.now() - new Date(vacancy.created_at).getTime()) /
+					(1000 * 60 * 60 * 24),
+			)
 		: 0;
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				{children}
-			</DialogTrigger>
-			<DialogContent className="max-w-10xl w-[vw] max-h-[90vh] overflow-y-auto">
+			<DialogTrigger asChild>{children}</DialogTrigger>
+			<DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<BarChart3Icon className="h-5 w-5" />
@@ -132,14 +172,18 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 									<BuildingIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
 										<p className="text-xs text-muted-foreground">Компания</p>
-										<p className="text-sm font-medium">{vacancy.company || "Не указана"}</p>
+										<p className="text-sm font-medium">
+											{vacancy.company || "Не указана"}
+										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<MapPinIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
 										<p className="text-xs text-muted-foreground">Локация</p>
-										<p className="text-sm font-medium">{vacancy.location || "Не указана"}</p>
+										<p className="text-sm font-medium">
+											{vacancy.location || "Не указана"}
+										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
@@ -147,25 +191,30 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 									<div>
 										<p className="text-xs text-muted-foreground">Зарплата</p>
 										<p className="text-sm font-medium">
-											{vacancy.salary_min && vacancy.salary_max 
+											{vacancy.salary_min && vacancy.salary_max
 												? `${Math.round(vacancy.salary_min / 1000)}k - ${Math.round(vacancy.salary_max / 1000)}k ₽`
-												: "Не указана"
-											}
+												: "Не указана"}
 										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<ClockIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<p className="text-xs text-muted-foreground">Тип занятости</p>
-										<p className="text-sm font-medium">{vacancy.employment_type || "Не указан"}</p>
+										<p className="text-xs text-muted-foreground">
+											Тип занятости
+										</p>
+										<p className="text-sm font-medium">
+											{vacancy.employment_type || "Не указан"}
+										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
 										<p className="text-xs text-muted-foreground">Уровень</p>
-										<p className="text-sm font-medium">{vacancy.experience_level || "Не указан"}</p>
+										<p className="text-sm font-medium">
+											{vacancy.experience_level || "Не указан"}
+										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
@@ -183,13 +232,16 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 						<Card>
 							<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-								<CardTitle className="text-sm font-medium">Подходящие кандидаты</CardTitle>
+								<CardTitle className="text-sm font-medium">
+									Подходящие кандидаты
+								</CardTitle>
 								<UsersIcon className="h-4 w-4 text-muted-foreground" />
 							</CardHeader>
 							<CardContent>
 								<div className="text-2xl font-bold">{totalCandidates}</div>
 								<p className="text-xs text-muted-foreground">
-									<span className="text-blue-600">{pendingCandidates}</span> на рассмотрении
+									<span className="text-blue-600">{pendingCandidates}</span> на
+									рассмотрении
 								</p>
 							</CardContent>
 						</Card>
@@ -202,7 +254,8 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 							<CardContent>
 								<div className="text-2xl font-bold">{totalInterviews}</div>
 								<p className="text-xs text-muted-foreground">
-									<span className="text-orange-600">{activeInterviews}</span> активных
+									<span className="text-orange-600">{activeInterviews}</span>{" "}
+									активных
 								</p>
 							</CardContent>
 						</Card>
@@ -215,7 +268,8 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 							<CardContent>
 								<div className="text-2xl font-bold">{conversionRate}%</div>
 								<p className="text-xs text-muted-foreground">
-									<span className="text-green-600">{acceptedCandidates}</span> принято
+									<span className="text-green-600">{acceptedCandidates}</span>{" "}
+									принято
 								</p>
 							</CardContent>
 						</Card>
@@ -227,9 +281,15 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 							</CardHeader>
 							<CardContent>
 								<div className="text-2xl font-bold">
-									<Badge 
-										variant={vacancy.status === "open" ? "default" : "secondary"}
-										className={vacancy.status === "open" ? "bg-green-100 text-green-800" : ""}
+									<Badge
+										variant={
+											vacancy.status === "open" ? "default" : "secondary"
+										}
+										className={
+											vacancy.status === "open"
+												? "bg-green-100 text-green-800"
+												: ""
+										}
 									>
 										{vacancy.status === "open" ? "Открыта" : "Закрыта"}
 									</Badge>
@@ -280,7 +340,12 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 										<UserCheckIcon className="h-4 w-4 text-green-500" />
 										<span className="text-sm">Принято</span>
 									</div>
-									<Badge variant="default" className="bg-green-100 text-green-800">{acceptedCandidates}</Badge>
+									<Badge
+										variant="default"
+										className="bg-green-100 text-green-800"
+									>
+										{acceptedCandidates}
+									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
@@ -305,9 +370,7 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 									<MessageSquareIcon className="h-5 w-5" />
 									Результаты интервью
 								</CardTitle>
-								<CardDescription>
-									Обратная связь по интервью
-								</CardDescription>
+								<CardDescription>Обратная связь по интервью</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-3">
 								<div className="flex items-center justify-between">
@@ -322,14 +385,24 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 										<CheckCircleIcon className="h-4 w-4 text-green-500" />
 										<span className="text-sm">Завершенные</span>
 									</div>
-									<Badge variant="default" className="bg-green-100 text-green-800">{completedInterviews}</Badge>
+									<Badge
+										variant="default"
+										className="bg-green-100 text-green-800"
+									>
+										{completedInterviews}
+									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
 										<CheckCircleIcon className="h-4 w-4 text-green-500" />
 										<span className="text-sm">Положительные</span>
 									</div>
-									<Badge variant="default" className="bg-green-100 text-green-800">{positiveFeedback}</Badge>
+									<Badge
+										variant="default"
+										className="bg-green-100 text-green-800"
+									>
+										{positiveFeedback}
+									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
@@ -350,7 +423,9 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 					</div>
 
 					{/* Описание и требования */}
-					{(vacancy.description || vacancy.requirements || vacancy.benefits) && (
+					{(vacancy.description ||
+						vacancy.requirements ||
+						vacancy.benefits) && (
 						<div className="grid gap-4 md:grid-cols-3">
 							{vacancy.description && (
 								<Card>
@@ -358,7 +433,9 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 										<CardTitle className="text-lg">Описание</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-muted-foreground">{vacancy.description}</p>
+										<p className="text-sm text-muted-foreground">
+											{vacancy.description}
+										</p>
 									</CardContent>
 								</Card>
 							)}
@@ -368,7 +445,9 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 										<CardTitle className="text-lg">Требования</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-muted-foreground">{vacancy.requirements}</p>
+										<p className="text-sm text-muted-foreground">
+											{vacancy.requirements}
+										</p>
 									</CardContent>
 								</Card>
 							)}
@@ -378,7 +457,9 @@ export function VacancyStatsModal({ vacancy, children }: VacancyStatsModalProps)
 										<CardTitle className="text-lg">Преимущества</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-muted-foreground">{vacancy.benefits}</p>
+										<p className="text-sm text-muted-foreground">
+											{vacancy.benefits}
+										</p>
 									</CardContent>
 								</Card>
 							)}

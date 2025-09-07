@@ -3,12 +3,18 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-	BriefcaseBusinessIcon, 
-	UsersIcon, 
-	MessageSquareIcon, 
+import {
+	BriefcaseBusinessIcon,
+	UsersIcon,
+	MessageSquareIcon,
 	CheckCircleIcon,
 	TrendingUpIcon,
 	ClockIcon,
@@ -18,7 +24,7 @@ import {
 	CalendarIcon,
 	UserCheckIcon,
 	UserXIcon,
-	AlertCircleIcon
+	AlertCircleIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_protectedLayout/dashboard")({
@@ -32,47 +38,83 @@ function Dashboard() {
 
 	// Подсчет статистики вакансий
 	const totalVacancies = vacancies.length;
-	const openVacancies = vacancies.filter(v => v.status === "open").length;
-	const closedVacancies = vacancies.filter(v => v.status === "closed").length;
+	const openVacancies = vacancies.filter((v) => v.status === "open").length;
+	const closedVacancies = vacancies.filter((v) => v.status === "closed").length;
 
 	// Подсчет статистики кандидатов
 	const totalCandidates = candidates.length;
-	const pendingCandidates = candidates.filter(c => c.status === "pending").length;
-	const reviewingCandidates = candidates.filter(c => c.status === "reviewing").length;
-	const interviewingCandidates = candidates.filter(c => c.status === "interviewing").length;
-	const acceptedCandidates = candidates.filter(c => c.status === "accepted").length;
-	const rejectedCandidates = candidates.filter(c => c.status === "rejected").length;
-	const onHoldCandidates = candidates.filter(c => c.status === "on_hold").length;
+	const pendingCandidates = candidates.filter(
+		(c) => c.status === "pending",
+	).length;
+	const reviewingCandidates = candidates.filter(
+		(c) => c.status === "reviewing",
+	).length;
+	const interviewingCandidates = candidates.filter(
+		(c) => c.status === "interviewing",
+	).length;
+	const acceptedCandidates = candidates.filter(
+		(c) => c.status === "accepted",
+	).length;
+	const rejectedCandidates = candidates.filter(
+		(c) => c.status === "rejected",
+	).length;
+	const onHoldCandidates = candidates.filter(
+		(c) => c.status === "on_hold",
+	).length;
 
 	// Подсчет статистики интервью
 	const totalInterviews = interviews.length;
-	const completedInterviews = interviews.filter(i => i.status === "завершено").length;
-	const activeInterviews = interviews.filter(i => i.status === "на собеседовании").length;
+	const completedInterviews = interviews.filter(
+		(i) => i.status === "завершено",
+	).length;
+	const activeInterviews = interviews.filter(
+		(i) => i.status === "на собеседовании",
+	).length;
 
 	// Статистика по зарплатам
-	const vacanciesWithSalary = vacancies.filter(v => v.salary_min && v.salary_max);
-	const avgSalaryMin = vacanciesWithSalary.length > 0 
-		? Math.round(vacanciesWithSalary.reduce((sum, v) => sum + (v.salary_min || 0), 0) / vacanciesWithSalary.length)
-		: 0;
-	const avgSalaryMax = vacanciesWithSalary.length > 0 
-		? Math.round(vacanciesWithSalary.reduce((sum, v) => sum + (v.salary_max || 0), 0) / vacanciesWithSalary.length)
-		: 0;
+	const vacanciesWithSalary = vacancies.filter(
+		(v) => v.salary_min && v.salary_max,
+	);
+	const avgSalaryMin =
+		vacanciesWithSalary.length > 0
+			? Math.round(
+					vacanciesWithSalary.reduce((sum, v) => sum + (v.salary_min || 0), 0) /
+						vacanciesWithSalary.length,
+				)
+			: 0;
+	const avgSalaryMax =
+		vacanciesWithSalary.length > 0
+			? Math.round(
+					vacanciesWithSalary.reduce((sum, v) => sum + (v.salary_max || 0), 0) /
+						vacanciesWithSalary.length,
+				)
+			: 0;
 
 	// Статистика по опыту кандидатов
-	const avgExperience = candidates.length > 0 
-		? Math.round(candidates.reduce((sum, c) => sum + c.experience, 0) / candidates.length * 10) / 10
-		: 0;
+	const avgExperience =
+		candidates.length > 0
+			? Math.round(
+					(candidates.reduce((sum, c) => sum + c.experience, 0) /
+						candidates.length) *
+						10,
+				) / 10
+			: 0;
 
 	// Статистика по компаниям
-	const uniqueCompanies = new Set(vacancies.map(v => v.company).filter(Boolean)).size;
+	const uniqueCompanies = new Set(
+		vacancies.map((v) => v.company).filter(Boolean),
+	).size;
 
 	// Статистика по местоположениям
-	const uniqueLocations = new Set(vacancies.map(v => v.location).filter(Boolean)).size;
+	const uniqueLocations = new Set(
+		vacancies.map((v) => v.location).filter(Boolean),
+	).size;
 
 	// Конверсия (принятые / общее количество кандидатов)
-	const conversionRate = totalCandidates > 0 
-		? Math.round((acceptedCandidates / totalCandidates) * 100)
-		: 0;
+	const conversionRate =
+		totalCandidates > 0
+			? Math.round((acceptedCandidates / totalCandidates) * 100)
+			: 0;
 
 	return (
 		<div className="space-y-6">
@@ -87,7 +129,9 @@ function Dashboard() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Всего вакансий</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							Всего вакансий
+						</CardTitle>
 						<BriefcaseBusinessIcon className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -101,13 +145,16 @@ function Dashboard() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Всего кандидатов</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							Всего кандидатов
+						</CardTitle>
 						<UsersIcon className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalCandidates}</div>
 						<p className="text-xs text-muted-foreground">
-							<span className="text-blue-600">{pendingCandidates}</span> на рассмотрении
+							<span className="text-blue-600">{pendingCandidates}</span> на
+							рассмотрении
 						</p>
 					</CardContent>
 				</Card>
@@ -120,7 +167,8 @@ function Dashboard() {
 					<CardContent>
 						<div className="text-2xl font-bold">{totalInterviews}</div>
 						<p className="text-xs text-muted-foreground">
-							<span className="text-orange-600">{activeInterviews}</span> активных
+							<span className="text-orange-600">{activeInterviews}</span>{" "}
+							активных
 						</p>
 					</CardContent>
 				</Card>
@@ -133,7 +181,8 @@ function Dashboard() {
 					<CardContent>
 						<div className="text-2xl font-bold">{conversionRate}%</div>
 						<p className="text-xs text-muted-foreground">
-							<span className="text-green-600">{acceptedCandidates}</span> принято
+							<span className="text-green-600">{acceptedCandidates}</span>{" "}
+							принято
 						</p>
 					</CardContent>
 				</Card>
@@ -143,12 +192,16 @@ function Dashboard() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Средняя зарплата</CardTitle>
+						<CardTitle className="text-sm font-medium">
+							Средняя зарплата
+						</CardTitle>
 						<DollarSignIcon className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							{avgSalaryMin > 0 ? `${Math.round(avgSalaryMin / 1000)}k - ${Math.round(avgSalaryMax / 1000)}k` : "—"}
+							{avgSalaryMin > 0
+								? `${Math.round(avgSalaryMin / 1000)}k - ${Math.round(avgSalaryMax / 1000)}k`
+								: "—"}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							{vacanciesWithSalary.length} вакансий с зарплатой
@@ -176,9 +229,7 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{uniqueCompanies}</div>
-						<p className="text-xs text-muted-foreground">
-							Уникальных компаний
-						</p>
+						<p className="text-xs text-muted-foreground">Уникальных компаний</p>
 					</CardContent>
 				</Card>
 
@@ -189,9 +240,7 @@ function Dashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{uniqueLocations}</div>
-						<p className="text-xs text-muted-foreground">
-							Уникальных локаций
-						</p>
+						<p className="text-xs text-muted-foreground">Уникальных локаций</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -235,7 +284,9 @@ function Dashboard() {
 								<UserCheckIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Принято</span>
 							</div>
-							<Badge variant="default" className="bg-green-100 text-green-800">{acceptedCandidates}</Badge>
+							<Badge variant="default" className="bg-green-100 text-green-800">
+								{acceptedCandidates}
+							</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
@@ -270,7 +321,9 @@ function Dashboard() {
 								<CheckCircleIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Открытые</span>
 							</div>
-							<Badge variant="default" className="bg-green-100 text-green-800">{openVacancies}</Badge>
+							<Badge variant="default" className="bg-green-100 text-green-800">
+								{openVacancies}
+							</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
@@ -288,9 +341,7 @@ function Dashboard() {
 							<CalendarIcon className="h-5 w-5" />
 							Интервью
 						</CardTitle>
-						<CardDescription>
-							Статистика по интервью
-						</CardDescription>
+						<CardDescription>Статистика по интервью</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						<div className="flex items-center justify-between">
@@ -305,7 +356,9 @@ function Dashboard() {
 								<CheckCircleIcon className="h-4 w-4 text-green-500" />
 								<span className="text-sm">Завершенные</span>
 							</div>
-							<Badge variant="default" className="bg-green-100 text-green-800">{completedInterviews}</Badge>
+							<Badge variant="default" className="bg-green-100 text-green-800">
+								{completedInterviews}
+							</Badge>
 						</div>
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">

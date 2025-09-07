@@ -6,41 +6,55 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeftIcon, BriefcaseIcon, BuildingIcon, MapPinIcon, DollarSignIcon, ClockIcon, UsersIcon } from "lucide-react";
+import {
+	ArrowLeftIcon,
+	BriefcaseIcon,
+	BuildingIcon,
+	MapPinIcon,
+	DollarSignIcon,
+	ClockIcon,
+	UsersIcon,
+} from "lucide-react";
 
 const formSchema = z.object({
-  title: z.string().min(1, "Название обязательно"),
-  description: z.string().optional(),
-  status: z.enum(["open", "closed"]).optional(),
-  company: z.string().optional(),
-  location: z.string().optional(),
-  salary_min: z.number().optional(),
-  salary_max: z.number().optional(),
-  employment_type: z.string().optional(),
-  experience_level: z.string().optional(),
-  remote_work: z.boolean().optional(),
-  requirements: z.string().optional(),
-  benefits: z.string().optional(),
+	title: z.string().min(1, "Название обязательно"),
+	description: z.string().optional(),
+	status: z.enum(["open", "closed"]).optional(),
+	company: z.string().optional(),
+	location: z.string().optional(),
+	salary_min: z.number().optional(),
+	salary_max: z.number().optional(),
+	employment_type: z.string().optional(),
+	experience_level: z.string().optional(),
+	remote_work: z.boolean().optional(),
+	requirements: z.string().optional(),
+	benefits: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -102,7 +116,11 @@ function VacancyDetail() {
 	const getStatusBadge = (status: string) => {
 		switch (status) {
 			case "open":
-				return { label: "Открыта", variant: "default" as const, className: "bg-green-500 hover:bg-green-500" };
+				return {
+					label: "Открыта",
+					variant: "default" as const,
+					className: "bg-green-500 hover:bg-green-500",
+				};
 			case "closed":
 				return { label: "Закрыта", variant: "destructive" as const };
 			default:
@@ -125,7 +143,7 @@ function VacancyDetail() {
 							<div>
 								<h1 className="text-2xl font-bold">{v.title}</h1>
 								<div className="flex items-center gap-2 mt-1">
-									<Badge 
+									<Badge
 										variant={getStatusBadge(v.status || "").variant}
 										className={getStatusBadge(v.status || "").className || ""}
 									>
@@ -160,7 +178,10 @@ function VacancyDetail() {
 							</CardHeader>
 							<CardContent>
 								<Form {...form}>
-									<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+									<form
+										onSubmit={form.handleSubmit(onSubmit)}
+										className="space-y-6"
+									>
 										<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 											<FormField
 												control={form.control}
@@ -211,10 +232,16 @@ function VacancyDetail() {
 													<FormItem>
 														<FormLabel>Минимальная зарплата</FormLabel>
 														<FormControl>
-															<Input 
-																type="number" 
-																{...field} 
-																onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+															<Input
+																type="number"
+																{...field}
+																onChange={(e) =>
+																	field.onChange(
+																		e.target.value
+																			? Number(e.target.value)
+																			: undefined,
+																	)
+																}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -229,10 +256,16 @@ function VacancyDetail() {
 													<FormItem>
 														<FormLabel>Максимальная зарплата</FormLabel>
 														<FormControl>
-															<Input 
-																type="number" 
-																{...field} 
-																onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+															<Input
+																type="number"
+																{...field}
+																onChange={(e) =>
+																	field.onChange(
+																		e.target.value
+																			? Number(e.target.value)
+																			: undefined,
+																	)
+																}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -246,17 +279,28 @@ function VacancyDetail() {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Тип занятости</FormLabel>
-														<Select onValueChange={field.onChange} defaultValue={field.value}>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Выберите тип занятости" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="full-time">Полная занятость</SelectItem>
-																<SelectItem value="part-time">Частичная занятость</SelectItem>
-																<SelectItem value="contract">Контракт</SelectItem>
-																<SelectItem value="internship">Стажировка</SelectItem>
+																<SelectItem value="full-time">
+																	Полная занятость
+																</SelectItem>
+																<SelectItem value="part-time">
+																	Частичная занятость
+																</SelectItem>
+																<SelectItem value="contract">
+																	Контракт
+																</SelectItem>
+																<SelectItem value="internship">
+																	Стажировка
+																</SelectItem>
 															</SelectContent>
 														</Select>
 														<FormMessage />
@@ -270,7 +314,10 @@ function VacancyDetail() {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Уровень опыта</FormLabel>
-														<Select onValueChange={field.onChange} defaultValue={field.value}>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Выберите уровень опыта" />
@@ -294,7 +341,10 @@ function VacancyDetail() {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Статус</FormLabel>
-														<Select onValueChange={field.onChange} defaultValue={field.value}>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Выберите статус" />
@@ -355,7 +405,9 @@ function VacancyDetail() {
 
 										<div className="flex gap-3">
 											<Button type="submit" disabled={mutation.isPending}>
-												{mutation.isPending ? "Сохранение..." : "Сохранить изменения"}
+												{mutation.isPending
+													? "Сохранение..."
+													: "Сохранить изменения"}
 											</Button>
 											<Button type="button" variant="outline" asChild>
 												<Link to="/vacancies">Отмена</Link>
@@ -381,19 +433,23 @@ function VacancyDetail() {
 										{params.vacancyId}
 									</code>
 								</div>
-								
+
 								{(v as any).salary_min && (v as any).salary_max && (
 									<div className="flex items-center gap-2 text-sm">
 										<DollarSignIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-muted-foreground">Зарплата:</span>
-										<span>{(v as any).salary_min} - {(v as any).salary_max} ₽</span>
+										<span>
+											{(v as any).salary_min} - {(v as any).salary_max} ₽
+										</span>
 									</div>
 								)}
 
 								{(v as any).location && (
 									<div className="flex items-center gap-2 text-sm">
 										<MapPinIcon className="w-4 h-4 text-muted-foreground" />
-										<span className="text-muted-foreground">Местоположение:</span>
+										<span className="text-muted-foreground">
+											Местоположение:
+										</span>
 										<span>{(v as any).location}</span>
 									</div>
 								)}
@@ -401,7 +457,9 @@ function VacancyDetail() {
 								{(v as any).employment_type && (
 									<div className="flex items-center gap-2 text-sm">
 										<ClockIcon className="w-4 h-4 text-muted-foreground" />
-										<span className="text-muted-foreground">Тип занятости:</span>
+										<span className="text-muted-foreground">
+											Тип занятости:
+										</span>
 										<span>{(v as any).employment_type}</span>
 									</div>
 								)}

@@ -8,7 +8,13 @@ import {
 import { useCreateFromCV } from "@/api/mutations/candidates";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../ui/card";
 
 interface UploadCVProps {
 	onSuccess?: () => void;

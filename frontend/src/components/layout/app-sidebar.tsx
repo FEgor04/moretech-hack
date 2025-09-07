@@ -10,7 +10,12 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { BriefcaseBusinessIcon, UsersIcon, BarChart3Icon, LogOutIcon } from "lucide-react";
+import {
+	BriefcaseBusinessIcon,
+	UsersIcon,
+	BarChart3Icon,
+	LogOutIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { clearAccessToken } from "@/lib/auth";
 import { toast } from "sonner";
@@ -66,8 +71,8 @@ export function AppSidebar() {
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter className="p-4">
-				<Button 
-					variant="outline" 
+				<Button
+					variant="outline"
 					onClick={handleLogout}
 					className="w-full justify-start"
 				>

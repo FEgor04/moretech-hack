@@ -6,27 +6,42 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { UserIcon, BriefcaseIcon, ArrowLeftIcon } from "lucide-react";
 import { UploadCV } from "@/components/candidates/upload-cv";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Имя обязательно"),
-  email: z.string().email("Неверный формат email").optional().or(z.literal("")),
-  position: z.string().min(1, "Должность обязательна"),
-  experience: z.number().min(0, "Опыт не может быть отрицательным"),
-  status: z.enum(["pending", "reviewing", "interviewing", "accepted", "rejected", "on_hold"]).optional(),
+	name: z.string().min(1, "Имя обязательно"),
+	email: z.string().email("Неверный формат email").optional().or(z.literal("")),
+	position: z.string().min(1, "Должность обязательна"),
+	experience: z.number().min(0, "Опыт не может быть отрицательным"),
+	status: z
+		.enum([
+			"pending",
+			"reviewing",
+			"interviewing",
+			"accepted",
+			"rejected",
+			"on_hold",
+		])
+		.optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,7 +53,9 @@ export const Route = createFileRoute("/candidate/")({
 function CandidateSelfPage() {
 	const params = Route.useParams();
 	const candidateId = params.candidateId as string;
-	const { data: candidate } = useSuspenseQuery(candidateQueryOptions(candidateId));
+	const { data: candidate } = useSuspenseQuery(
+		candidateQueryOptions(candidateId),
+	);
 	const updateMutation = useUpdateCandidate(candidateId);
 
 	const form = useForm<FormData>({
@@ -50,22 +67,22 @@ function CandidateSelfPage() {
 			experience: candidate.experience,
 			status: candidate.status,
 		},
-	})
+	});
 
 	const onSubmit = (data: FormData) => {
 		updateMutation.mutate(data, {
 			onSuccess: () => {
 				toast.success("Профиль обновлен", {
 					description: "Ваш профиль был успешно обновлен.",
-				})
+				});
 			},
 			onError: (error) => {
 				toast.error("Ошибка обновления профиля", {
 					description: error.message,
-				})
+				});
 			},
-		})
-	}
+		});
+	};
 
 	const getStatusBadge = (status: string) => {
 		switch (status) {
@@ -76,7 +93,11 @@ function CandidateSelfPage() {
 			case "interviewing":
 				return { label: "На собеседовании", variant: "default" as const };
 			case "accepted":
-				return { label: "Принят", variant: "default" as const, className: "bg-green-500 hover:bg-green-500" };
+				return {
+					label: "Принят",
+					variant: "default" as const,
+					className: "bg-green-500 hover:bg-green-500",
+				};
 			case "rejected":
 				return { label: "Отклонен", variant: "destructive" as const };
 			case "on_hold":
@@ -84,7 +105,7 @@ function CandidateSelfPage() {
 			default:
 				return { label: "Неизвестно", variant: "secondary" as const };
 		}
-	}
+	};
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -117,7 +138,10 @@ function CandidateSelfPage() {
 					</CardHeader>
 					<CardContent>
 						<Form {...form}>
-							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className="space-y-6"
+							>
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<FormField
 										control={form.control}
@@ -139,7 +163,11 @@ function CandidateSelfPage() {
 											<FormItem>
 												<FormLabel>Email</FormLabel>
 												<FormControl>
-													<Input type="email" placeholder="Ваш email" {...field} />
+													<Input
+														type="email"
+														placeholder="Ваш email"
+														{...field}
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -152,7 +180,10 @@ function CandidateSelfPage() {
 											<FormItem>
 												<FormLabel>Желаемая позиция</FormLabel>
 												<FormControl>
-													<Input placeholder="Например, Frontend Developer" {...field} />
+													<Input
+														placeholder="Например, Frontend Developer"
+														{...field}
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -165,7 +196,11 @@ function CandidateSelfPage() {
 											<FormItem>
 												<FormLabel>Опыт работы (лет)</FormLabel>
 												<FormControl>
-													<Input type="number" placeholder="Опыт в годах" {...field} />
+													<Input
+														type="number"
+														placeholder="Опыт в годах"
+														{...field}
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -173,7 +208,9 @@ function CandidateSelfPage() {
 									/>
 								</div>
 								<Button type="submit" disabled={updateMutation.isPending}>
-									{updateMutation.isPending ? "Сохранение..." : "Сохранить изменения"}
+									{updateMutation.isPending
+										? "Сохранение..."
+										: "Сохранить изменения"}
 								</Button>
 							</form>
 						</Form>
@@ -224,9 +261,11 @@ function CandidateSelfPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Статус</p>
-							<Badge 
-								variant={getStatusBadge(candidate.status || "").variant} 
-								className={getStatusBadge(candidate.status || "").className || ""}
+							<Badge
+								variant={getStatusBadge(candidate.status || "").variant}
+								className={
+									getStatusBadge(candidate.status || "").className || ""
+								}
 							>
 								{getStatusBadge(candidate.status || "").label}
 							</Badge>
@@ -234,18 +273,24 @@ function CandidateSelfPage() {
 						<div>
 							<p className="text-sm text-muted-foreground">Дата создания</p>
 							<p className="font-medium">
-								{candidate.created_at ? new Date(candidate.created_at).toLocaleDateString('ru-RU') : 'Неизвестно'}
+								{candidate.created_at
+									? new Date(candidate.created_at).toLocaleDateString("ru-RU")
+									: "Неизвестно"}
 							</p>
 						</div>
 						<div>
-							<p className="text-sm text-muted-foreground">Последнее обновление</p>
+							<p className="text-sm text-muted-foreground">
+								Последнее обновление
+							</p>
 							<p className="font-medium">
-								{candidate.updated_at ? new Date(candidate.updated_at).toLocaleDateString('ru-RU') : 'Неизвестно'}
+								{candidate.updated_at
+									? new Date(candidate.updated_at).toLocaleDateString("ru-RU")
+									: "Неизвестно"}
 							</p>
 						</div>
 					</CardContent>
 				</Card>
 			</div>
 		</div>
-	)
+	);
 }

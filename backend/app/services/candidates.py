@@ -12,9 +12,9 @@ async def create_candidate(
 ) -> Candidate:
     data = payload.model_dump(exclude_unset=True)
     # Преобразуем список навыков в JSON строку
-    if 'skills' in data and data['skills'] is not None:
-        data['skills'] = json.dumps(data['skills'], ensure_ascii=False)
-    
+    if "skills" in data and data["skills"] is not None:
+        data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
+
     candidate = Candidate(**data)
     session.add(candidate)
     await session.commit()
@@ -40,12 +40,12 @@ async def update_candidate(
     candidate = await session.get(Candidate, candidate_id)
     if not candidate:
         raise NotFoundError("Candidate not found")
-    
+
     data = payload.model_dump(exclude_unset=True)
     # Преобразуем список навыков в JSON строку
-    if 'skills' in data and data['skills'] is not None:
-        data['skills'] = json.dumps(data['skills'], ensure_ascii=False)
-    
+    if "skills" in data and data["skills"] is not None:
+        data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
+
     for key, value in data.items():
         setattr(candidate, key, value)
     await session.commit()

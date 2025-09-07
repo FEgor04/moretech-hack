@@ -94,11 +94,7 @@ export function useVacanciesTable(data: VacancyRead[]) {
 				cell: ({ row }) => (
 					<div className="flex items-center gap-2">
 						<VacancyStatsModal vacancy={row.original}>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-8 w-8 p-0"
-							>
+							<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
 								<BarChart3Icon className="h-4 w-4" />
 								<span className="sr-only">Статистика вакансии</span>
 							</Button>
@@ -118,8 +114,8 @@ export function useVacanciesTable(data: VacancyRead[]) {
 								<AlertDialogHeader>
 									<AlertDialogTitle>Удалить вакансию</AlertDialogTitle>
 									<AlertDialogDescription>
-										Вы уверены, что хотите удалить вакансию "{row.original.title}"?
-										Это действие нельзя отменить.
+										Вы уверены, что хотите удалить вакансию "
+										{row.original.title}"? Это действие нельзя отменить.
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>

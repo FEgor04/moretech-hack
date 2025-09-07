@@ -8,11 +8,17 @@ import { ScheduleInterviewDialog } from "@/components/interviews/schedule-interv
 import { InterviewsList } from "@/components/candidates/interviews-list";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-	ExternalLinkIcon, 
-	UserIcon, 
+import {
+	ExternalLinkIcon,
+	UserIcon,
 	ArrowLeftIcon,
 	MailIcon,
 	BriefcaseIcon,
@@ -28,7 +34,7 @@ import {
 	MapPinIcon,
 	BuildingIcon,
 	StarIcon,
-	ActivityIcon
+	ActivityIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute(
@@ -46,26 +52,40 @@ export const Route = createFileRoute(
 function CandidateDetail() {
 	const params = Route.useParams();
 	const candidate = useSuspenseQuery(candidateQueryOptions(params.candidateId));
-	const interviews = useSuspenseQuery(interviewsByCandidateQueryOptions(params.candidateId));
+	const interviews = useSuspenseQuery(
+		interviewsByCandidateQueryOptions(params.candidateId),
+	);
 
 	const c = candidate.data;
 	const candidateInterviews = interviews.data;
 
 	// Статистика по интервью
 	const totalInterviews = candidateInterviews.length;
-	const completedInterviews = candidateInterviews.filter(i => i.status === "завершено").length;
-	const activeInterviews = candidateInterviews.filter(i => i.status === "на собеседовании").length;
-	const positiveFeedback = candidateInterviews.filter(i => i.feedback_positive === true).length;
-	const negativeFeedback = candidateInterviews.filter(i => i.feedback_positive === false).length;
+	const completedInterviews = candidateInterviews.filter(
+		(i) => i.status === "завершено",
+	).length;
+	const activeInterviews = candidateInterviews.filter(
+		(i) => i.status === "на собеседовании",
+	).length;
+	const positiveFeedback = candidateInterviews.filter(
+		(i) => i.feedback_positive === true,
+	).length;
+	const negativeFeedback = candidateInterviews.filter(
+		(i) => i.feedback_positive === false,
+	).length;
 
 	// Время в системе
-	const daysInSystem = c.created_at 
-		? Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24))
+	const daysInSystem = c.created_at
+		? Math.floor(
+				(Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24),
+			)
 		: 0;
 
 	// Последнее обновление
-	const lastUpdated = c.updated_at 
-		? Math.floor((Date.now() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24))
+	const lastUpdated = c.updated_at
+		? Math.floor(
+				(Date.now() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24),
+			)
 		: 0;
 
 	return (
@@ -93,7 +113,11 @@ function CandidateDetail() {
 				</div>
 				<div className="flex gap-2">
 					<Button variant="outline" asChild>
-						<a href={`/candidate/${params.candidateId}`} target="_blank" rel="noopener noreferrer">
+						<a
+							href={`/candidate/${params.candidateId}`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
 							<ExternalLinkIcon className="h-4 w-4 mr-2" />
 							Страница кандидата
 						</a>
@@ -128,46 +152,64 @@ function CandidateDetail() {
 								<div className="flex items-center gap-3">
 									<MailIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<Label className="text-xs text-muted-foreground">Email</Label>
-										<p className="text-sm font-medium">{c.email || "Не указан"}</p>
+										<Label className="text-xs text-muted-foreground">
+											Email
+										</Label>
+										<p className="text-sm font-medium">
+											{c.email || "Не указан"}
+										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<Label className="text-xs text-muted-foreground">Должность</Label>
+										<Label className="text-xs text-muted-foreground">
+											Должность
+										</Label>
 										<p className="text-sm font-medium">{c.position}</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<ClockIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<Label className="text-xs text-muted-foreground">Опыт работы</Label>
+										<Label className="text-xs text-muted-foreground">
+											Опыт работы
+										</Label>
 										<p className="text-sm font-medium">{c.experience} лет</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<CalendarIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<Label className="text-xs text-muted-foreground">Дата регистрации</Label>
+										<Label className="text-xs text-muted-foreground">
+											Дата регистрации
+										</Label>
 										<p className="text-sm font-medium">
-											{c.created_at ? new Date(c.created_at).toLocaleDateString('ru-RU') : "Не указана"}
+											{c.created_at
+												? new Date(c.created_at).toLocaleDateString("ru-RU")
+												: "Не указана"}
 										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<ActivityIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<Label className="text-xs text-muted-foreground">Последнее обновление</Label>
+										<Label className="text-xs text-muted-foreground">
+											Последнее обновление
+										</Label>
 										<p className="text-sm font-medium">
-											{lastUpdated === 0 ? "Сегодня" : `${lastUpdated} дн. назад`}
+											{lastUpdated === 0
+												? "Сегодня"
+												: `${lastUpdated} дн. назад`}
 										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
 									<FileTextIcon className="h-4 w-4 text-muted-foreground" />
 									<div>
-										<Label className="text-xs text-muted-foreground">ID кандидата</Label>
+										<Label className="text-xs text-muted-foreground">
+											ID кандидата
+										</Label>
 										<p className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
 											{params.candidateId}
 										</p>
@@ -177,11 +219,17 @@ function CandidateDetail() {
 									<div className="flex items-start gap-3 md:col-span-2">
 										<StarIcon className="h-4 w-4 text-muted-foreground mt-1" />
 										<div className="flex-1">
-											<Label className="text-xs text-muted-foreground">Ключевые навыки</Label>
+											<Label className="text-xs text-muted-foreground">
+												Ключевые навыки
+											</Label>
 											<div className="flex flex-wrap gap-1 mt-1">
 												{Array.isArray(c.skills) ? (
 													c.skills.map((skill, index) => (
-														<Badge key={index} variant="secondary" className="text-xs">
+														<Badge
+															key={index}
+															variant="secondary"
+															className="text-xs"
+														>
 															{skill}
 														</Badge>
 													))
@@ -212,20 +260,33 @@ function CandidateDetail() {
 						<CardContent>
 							<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 								<div className="text-center">
-									<div className="text-2xl font-bold text-blue-600">{totalInterviews}</div>
-									<p className="text-xs text-muted-foreground">Всего интервью</p>
+									<div className="text-2xl font-bold text-blue-600">
+										{totalInterviews}
+									</div>
+									<p className="text-xs text-muted-foreground">
+										Всего интервью
+									</p>
 								</div>
 								<div className="text-center">
-									<div className="text-2xl font-bold text-orange-600">{activeInterviews}</div>
+									<div className="text-2xl font-bold text-orange-600">
+										{activeInterviews}
+									</div>
 									<p className="text-xs text-muted-foreground">Активных</p>
 								</div>
 								<div className="text-center">
-									<div className="text-2xl font-bold text-green-600">{completedInterviews}</div>
+									<div className="text-2xl font-bold text-green-600">
+										{completedInterviews}
+									</div>
 									<p className="text-xs text-muted-foreground">Завершенных</p>
 								</div>
 								<div className="text-center">
 									<div className="text-2xl font-bold text-purple-600">
-										{totalInterviews > 0 ? Math.round((completedInterviews / totalInterviews) * 100) : 0}%
+										{totalInterviews > 0
+											? Math.round(
+													(completedInterviews / totalInterviews) * 100,
+												)
+											: 0}
+										%
 									</div>
 									<p className="text-xs text-muted-foreground">Завершено</p>
 								</div>
@@ -241,33 +302,43 @@ function CandidateDetail() {
 									<StarIcon className="h-5 w-5" />
 									Обратная связь
 								</CardTitle>
-								<CardDescription>
-									Результаты интервью
-								</CardDescription>
+								<CardDescription>Результаты интервью</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 									<div className="flex items-center gap-3">
 										<CheckCircleIcon className="h-5 w-5 text-green-500" />
 										<div>
-											<div className="text-lg font-semibold text-green-600">{positiveFeedback}</div>
-											<p className="text-xs text-muted-foreground">Положительных</p>
+											<div className="text-lg font-semibold text-green-600">
+												{positiveFeedback}
+											</div>
+											<p className="text-xs text-muted-foreground">
+												Положительных
+											</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-3">
 										<XCircleIcon className="h-5 w-5 text-red-500" />
 										<div>
-											<div className="text-lg font-semibold text-red-600">{negativeFeedback}</div>
-											<p className="text-xs text-muted-foreground">Отрицательных</p>
+											<div className="text-lg font-semibold text-red-600">
+												{negativeFeedback}
+											</div>
+											<p className="text-xs text-muted-foreground">
+												Отрицательных
+											</p>
 										</div>
 									</div>
 									<div className="flex items-center gap-3">
 										<AlertCircleIcon className="h-5 w-5 text-gray-500" />
 										<div>
 											<div className="text-lg font-semibold text-gray-600">
-												{completedInterviews - positiveFeedback - negativeFeedback}
+												{completedInterviews -
+													positiveFeedback -
+													negativeFeedback}
 											</div>
-											<p className="text-xs text-muted-foreground">Без оценки</p>
+											<p className="text-xs text-muted-foreground">
+												Без оценки
+											</p>
 										</div>
 									</div>
 								</div>
@@ -290,7 +361,11 @@ function CandidateDetail() {
 									Запланировать интервью
 								</Button>
 							</ScheduleInterviewDialog>
-							<Button asChild className="w-full justify-start" variant="outline">
+							<Button
+								asChild
+								className="w-full justify-start"
+								variant="outline"
+							>
 								<Link
 									to="/candidates/$candidateId/edit"
 									params={{ candidateId: params.candidateId }}
@@ -299,8 +374,16 @@ function CandidateDetail() {
 									Редактировать профиль
 								</Link>
 							</Button>
-							<Button asChild className="w-full justify-start" variant="outline">
-								<a href={`/candidate/${params.candidateId}`} target="_blank" rel="noopener noreferrer">
+							<Button
+								asChild
+								className="w-full justify-start"
+								variant="outline"
+							>
+								<a
+									href={`/candidate/${params.candidateId}`}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
 									<ExternalLinkIcon className="h-4 w-4 mr-2" />
 									Открыть страницу кандидата
 								</a>
@@ -315,9 +398,7 @@ function CandidateDetail() {
 								<UserIcon className="h-5 w-5" />
 								Самообслуживание
 							</CardTitle>
-							<CardDescription>
-								Ссылка для кандидата
-							</CardDescription>
+							<CardDescription>Ссылка для кандидата</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-3">
@@ -326,14 +407,18 @@ function CandidateDetail() {
 								</p>
 								<div className="flex items-center gap-2">
 									<code className="flex-1 text-xs bg-gray-100 px-2 py-1 rounded border break-all">
-										{typeof window !== 'undefined' ? `${window.location.origin}/candidate/${params.candidateId}` : `/candidate/${params.candidateId}`}
+										{typeof window !== "undefined"
+											? `${window.location.origin}/candidate/${params.candidateId}`
+											: `/candidate/${params.candidateId}`}
 									</code>
 									<Button
 										variant="outline"
 										size="sm"
 										onClick={() => {
-											if (typeof window !== 'undefined') {
-												navigator.clipboard.writeText(`${window.location.origin}/candidate/${params.candidateId}`);
+											if (typeof window !== "undefined") {
+												navigator.clipboard.writeText(
+													`${window.location.origin}/candidate/${params.candidateId}`,
+												);
 											}
 										}}
 									>

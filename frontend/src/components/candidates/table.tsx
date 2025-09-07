@@ -131,7 +131,8 @@ export function useCandidatesTable(data: CandidateRead[]) {
 											</AlertDialogTitle>
 											<AlertDialogDescription>
 												Это действие нельзя отменить. Кандидат &quot;
-												{candidate.name}&quot; будет безвозвратно удален вместе со всеми связанными данными.
+												{candidate.name}&quot; будет безвозвратно удален вместе
+												со всеми связанными данными.
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 										<AlertDialogFooter>

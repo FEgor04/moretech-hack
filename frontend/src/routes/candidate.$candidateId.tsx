@@ -6,27 +6,42 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { UserIcon, BriefcaseIcon } from "lucide-react";
 import { UploadCV } from "@/components/candidates/upload-cv";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Имя обязательно"),
-  email: z.string().email("Неверный формат email").optional().or(z.literal("")),
-  position: z.string().min(1, "Должность обязательна"),
-  experience: z.number().min(0, "Опыт не может быть отрицательным"),
-  status: z.enum(["pending", "reviewing", "interviewing", "accepted", "rejected", "on_hold"]).optional(),
+	name: z.string().min(1, "Имя обязательно"),
+	email: z.string().email("Неверный формат email").optional().or(z.literal("")),
+	position: z.string().min(1, "Должность обязательна"),
+	experience: z.number().min(0, "Опыт не может быть отрицательным"),
+	status: z
+		.enum([
+			"pending",
+			"reviewing",
+			"interviewing",
+			"accepted",
+			"rejected",
+			"on_hold",
+		])
+		.optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -37,7 +52,9 @@ export const Route = createFileRoute("/candidate/$candidateId")({
 
 function CandidateSelfPage() {
 	const { candidateId } = Route.useParams();
-	const { data: candidate } = useSuspenseQuery(candidateQueryOptions(candidateId));
+	const { data: candidate } = useSuspenseQuery(
+		candidateQueryOptions(candidateId),
+	);
 	const updateMutation = useUpdateCandidate(candidateId);
 
 	const form = useForm<FormData>({
@@ -67,13 +84,23 @@ function CandidateSelfPage() {
 			pending: { label: "На рассмотрении", variant: "secondary" as const },
 			reviewing: { label: "На рассмотрении", variant: "default" as const },
 			interviewing: { label: "На собеседовании", variant: "default" as const },
-			accepted: { label: "Принят", variant: "default" as const, className: "bg-green-100 text-green-800" },
+			accepted: {
+				label: "Принят",
+				variant: "default" as const,
+				className: "bg-green-100 text-green-800",
+			},
 			rejected: { label: "Отклонен", variant: "destructive" as const },
 			on_hold: { label: "На удержании", variant: "outline" as const },
 		};
-		const statusInfo = statusMap[status as keyof typeof statusMap] || { label: status, variant: "secondary" as const };
+		const statusInfo = statusMap[status as keyof typeof statusMap] || {
+			label: status,
+			variant: "secondary" as const,
+		};
 		return (
-			<Badge variant={statusInfo.variant} className={"className" in statusInfo ? statusInfo.className : ""}>
+			<Badge
+				variant={statusInfo.variant}
+				className={"className" in statusInfo ? statusInfo.className : ""}
+			>
 				{statusInfo.label}
 			</Badge>
 		);
@@ -104,7 +131,10 @@ function CandidateSelfPage() {
 							</CardHeader>
 							<CardContent>
 								<Form {...form}>
-									<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+									<form
+										onSubmit={form.handleSubmit(onSubmit)}
+										className="space-y-6"
+									>
 										<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 											<FormField
 												control={form.control}
@@ -155,7 +185,13 @@ function CandidateSelfPage() {
 													<FormItem>
 														<FormLabel>Опыт работы (лет)</FormLabel>
 														<FormControl>
-															<Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+															<Input
+																type="number"
+																{...field}
+																onChange={(e) =>
+																	field.onChange(Number(e.target.value))
+																}
+															/>
 														</FormControl>
 														<FormMessage />
 													</FormItem>
@@ -165,7 +201,9 @@ function CandidateSelfPage() {
 
 										<div className="flex gap-3">
 											<Button type="submit" disabled={updateMutation.isPending}>
-												{updateMutation.isPending ? "Сохранение..." : "Сохранить изменения"}
+												{updateMutation.isPending
+													? "Сохранение..."
+													: "Сохранить изменения"}
 											</Button>
 										</div>
 									</form>
@@ -174,7 +212,7 @@ function CandidateSelfPage() {
 						</Card>
 
 						{/* Загрузка резюме */}
-						<UploadCV 
+						<UploadCV
 							onSuccess={() => {
 								// Можно добавить логику обновления данных после загрузки
 							}}
@@ -199,13 +237,23 @@ function CandidateSelfPage() {
 									<div>
 										<p className="text-sm text-gray-600 mb-2">Дата создания</p>
 										<p className="text-sm font-medium">
-											{candidate.created_at ? new Date(candidate.created_at).toLocaleDateString('ru-RU') : "Не указана"}
+											{candidate.created_at
+												? new Date(candidate.created_at).toLocaleDateString(
+														"ru-RU",
+													)
+												: "Не указана"}
 										</p>
 									</div>
 									<div>
-										<p className="text-sm text-gray-600 mb-2">Последнее обновление</p>
+										<p className="text-sm text-gray-600 mb-2">
+											Последнее обновление
+										</p>
 										<p className="text-sm font-medium">
-											{candidate.updated_at ? new Date(candidate.updated_at).toLocaleDateString('ru-RU') : "Не указана"}
+											{candidate.updated_at
+												? new Date(candidate.updated_at).toLocaleDateString(
+														"ru-RU",
+													)
+												: "Не указана"}
 										</p>
 									</div>
 								</div>
@@ -226,7 +274,8 @@ function CandidateSelfPage() {
 										{candidateId}
 									</code>
 									<p className="text-xs text-gray-500 mt-2">
-										Поделитесь этим ID с работодателями для быстрого поиска вашего профиля
+										Поделитесь этим ID с работодателями для быстрого поиска
+										вашего профиля
 									</p>
 								</div>
 							</CardContent>

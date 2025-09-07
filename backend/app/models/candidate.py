@@ -20,7 +20,9 @@ class Candidate(Base):
         String(64), default=CandidateStatus.PENDING
     )
     gigachat_file_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    skills: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON строка с навыками
+    skills: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )  # JSON строка с навыками
     created_at: Mapped[datetime] = mapped_column(default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()

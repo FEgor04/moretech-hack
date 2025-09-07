@@ -57,7 +57,7 @@ class CandidateBase(BaseModel):
     gigachat_file_id: str | None = None
     skills: Union[list[str], str, None] = None  # Список навыков или JSON строка
 
-    @field_validator('skills', mode='before')
+    @field_validator("skills", mode="before")
     @classmethod
     def validate_skills(cls, v):
         if v is None:
@@ -65,6 +65,7 @@ class CandidateBase(BaseModel):
         if isinstance(v, str):
             try:
                 import json
+
                 return json.loads(v)
             except json.JSONDecodeError:
                 return [v]  # Если не JSON, то считаем одной строкой
@@ -86,7 +87,7 @@ class VacancyBase(BaseModel):
     description: str | None = None
     status: str | None = None
     gigachat_file_id: str | None = None
-    
+
     # Новые поля
     company: str | None = None
     location: str | None = None

@@ -65,14 +65,21 @@ function CandidateEdit() {
 			position: c.position,
 			experience: c.experience,
 			status: c.status,
-			skills: c.skills ? (Array.isArray(c.skills) ? c.skills.join(', ') : c.skills) : "",
+			skills: c.skills
+				? Array.isArray(c.skills)
+					? c.skills.join(", ")
+					: c.skills
+				: "",
 		},
 	});
 
 	const onSubmit = (data: CandidateFormData) => {
 		// Преобразуем строку навыков в массив
-		const skillsArray = data.skills 
-			? data.skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0)
+		const skillsArray = data.skills
+			? data.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
 			: undefined;
 
 		mutation.mutate(
