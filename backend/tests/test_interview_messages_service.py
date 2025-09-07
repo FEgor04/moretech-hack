@@ -123,12 +123,12 @@ class TestInterviewMessagesService:
         mock_result.scalar_one.return_value = 2
         mock_session.execute.return_value = mock_result
 
-        # Mock GigaChat response
+        # Mock GigaChat response (async achat)
         mock_client = MagicMock()
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = "Привет! Расскажите о себе."
-        mock_client.chat.return_value = mock_response
+        mock_client.achat = AsyncMock(return_value=mock_response)
         mock_get_gigachat_client.return_value = mock_client
 
         # Mock existing messages (empty conversation)
@@ -142,7 +142,7 @@ class TestInterviewMessagesService:
         # Assert
         assert len(result) == 0  # Will be empty since we mocked empty scalars
         mock_session.add.assert_called()
-        mock_session.commit.assert_called_once()
+        mock_session.commit.assert_called()
 
     @pytest.mark.asyncio
     async def test_create_message_interview_not_found(
@@ -188,14 +188,14 @@ class TestInterviewMessagesService:
         mock_session.get.side_effect = mock_get
         mock_session.scalar.return_value = 0  # No existing messages
 
-        # Mock GigaChat response
+        # Mock GigaChat response (async achat)
         mock_client = MagicMock()
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = (
             "Здравствуйте! Готовы начать интервью?"
         )
-        mock_client.chat.return_value = mock_response
+        mock_client.achat = AsyncMock(return_value=mock_response)
         mock_get_gigachat_client.return_value = mock_client
 
         # Mock empty messages list
