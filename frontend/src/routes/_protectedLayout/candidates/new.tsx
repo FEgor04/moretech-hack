@@ -247,10 +247,7 @@ function RouteComponent() {
 							<FormItem>
 								<FormLabel>Местоположение</FormLabel>
 								<FormControl>
-									<Input
-										{...field}
-										placeholder="Москва, Россия"
-									/>
+									<Input {...field} placeholder="Москва, Россия" />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -273,7 +270,9 @@ function RouteComponent() {
 									</FormControl>
 									<SelectContent>
 										<SelectItem value="full-time">Полная занятость</SelectItem>
-										<SelectItem value="part-time">Частичная занятость</SelectItem>
+										<SelectItem value="part-time">
+											Частичная занятость
+										</SelectItem>
 										<SelectItem value="contract">Контракт</SelectItem>
 										<SelectItem value="internship">Стажировка</SelectItem>
 										<SelectItem value="remote">Удаленная работа</SelectItem>

@@ -75,20 +75,16 @@ function CandidateEdit() {
 					? c.skills.join(", ")
 					: c.skills
 				: "",
-			tech: c.tech
-				? Array.isArray(c.tech)
-					? c.tech.join(", ")
-					: c.tech
-				: "",
+			tech: c.tech ? (Array.isArray(c.tech) ? c.tech.join(", ") : c.tech) : "",
 			education: c.education
-				? typeof c.education === 'string'
+				? typeof c.education === "string"
 					? c.education
 					: JSON.stringify(c.education, null, 2)
 				: "",
 			geo: c.geo ?? "",
 			employment_type: c.employment_type ?? "",
 			experience: c.experience
-				? typeof c.experience === 'string'
+				? typeof c.experience === "string"
 					? c.experience
 					: JSON.stringify(c.experience, null, 2)
 				: "",
@@ -294,10 +290,7 @@ function CandidateEdit() {
 								<FormItem>
 									<FormLabel>Местоположение</FormLabel>
 									<FormControl>
-										<Input
-											{...field}
-											placeholder="Москва, Россия"
-										/>
+										<Input {...field} placeholder="Москва, Россия" />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -319,8 +312,12 @@ function CandidateEdit() {
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="full-time">Полная занятость</SelectItem>
-											<SelectItem value="part-time">Частичная занятость</SelectItem>
+											<SelectItem value="full-time">
+												Полная занятость
+											</SelectItem>
+											<SelectItem value="part-time">
+												Частичная занятость
+											</SelectItem>
 											<SelectItem value="contract">Контракт</SelectItem>
 											<SelectItem value="internship">Стажировка</SelectItem>
 											<SelectItem value="remote">Удаленная работа</SelectItem>

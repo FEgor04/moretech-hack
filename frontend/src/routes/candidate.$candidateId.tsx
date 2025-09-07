@@ -83,14 +83,14 @@ function CandidateSelfPage() {
 					: candidate.tech
 				: "",
 			education: candidate.education
-				? typeof candidate.education === 'string'
+				? typeof candidate.education === "string"
 					? candidate.education
 					: JSON.stringify(candidate.education, null, 2)
 				: "",
 			geo: candidate.geo || "",
 			employment_type: candidate.employment_type || "",
 			experience: candidate.experience
-				? typeof candidate.experience === 'string'
+				? typeof candidate.experience === "string"
 					? candidate.experience
 					: JSON.stringify(candidate.experience, null, 2)
 				: "",
@@ -254,10 +254,7 @@ function CandidateSelfPage() {
 													<FormItem>
 														<FormLabel>Местоположение</FormLabel>
 														<FormControl>
-															<Input
-																{...field}
-																placeholder="Москва, Россия"
-															/>
+															<Input {...field} placeholder="Москва, Россия" />
 														</FormControl>
 														<FormMessage />
 													</FormItem>

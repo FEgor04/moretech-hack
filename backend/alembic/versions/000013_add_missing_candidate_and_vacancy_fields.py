@@ -9,7 +9,6 @@ Create Date: 2025-09-07 23:25:53.251107
 from typing import Sequence, Union
 
 
-
 revision: str = "000013"
 down_revision: Union[str, None] = "000012"
 branch_labels: Union[str, Sequence[str], None] = None

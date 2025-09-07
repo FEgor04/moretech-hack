@@ -115,8 +115,12 @@ function RouteComponent() {
 		const vacancyData = {
 			...values,
 			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-			responsibilities: responsibilitiesArray ? JSON.stringify(responsibilitiesArray) : undefined,
-			minor_skills: minorSkillsArray ? JSON.stringify(minorSkillsArray) : undefined,
+			responsibilities: responsibilitiesArray
+				? JSON.stringify(responsibilitiesArray)
+				: undefined,
+			minor_skills: minorSkillsArray
+				? JSON.stringify(minorSkillsArray)
+				: undefined,
 		};
 
 		await mutation.mutateAsync(vacancyData);

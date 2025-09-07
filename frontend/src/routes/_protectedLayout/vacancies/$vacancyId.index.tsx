@@ -139,8 +139,20 @@ function VacancyDetail() {
 			location: v.location || "",
 			salary_min: v.salary_min || undefined,
 			salary_max: v.salary_max || undefined,
-			employment_type: (v.employment_type as "full_time" | "part_time" | "contract" | "internship" | undefined) || undefined,
-			experience_level: (v.experience_level as "junior" | "middle" | "senior" | "lead" | undefined) || undefined,
+			employment_type:
+				(v.employment_type as
+					| "full_time"
+					| "part_time"
+					| "contract"
+					| "internship"
+					| undefined) || undefined,
+			experience_level:
+				(v.experience_level as
+					| "junior"
+					| "middle"
+					| "senior"
+					| "lead"
+					| undefined) || undefined,
 			remote_work: v.remote_work || false,
 			requirements: v.requirements || "",
 			benefits: v.benefits || "",
@@ -192,8 +204,12 @@ function VacancyDetail() {
 		const vacancyData = {
 			...data,
 			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-			responsibilities: responsibilitiesArray ? JSON.stringify(responsibilitiesArray) : undefined,
-			minor_skills: minorSkillsArray ? JSON.stringify(minorSkillsArray) : undefined,
+			responsibilities: responsibilitiesArray
+				? JSON.stringify(responsibilitiesArray)
+				: undefined,
+			minor_skills: minorSkillsArray
+				? JSON.stringify(minorSkillsArray)
+				: undefined,
 		};
 
 		mutation.mutate(vacancyData, {

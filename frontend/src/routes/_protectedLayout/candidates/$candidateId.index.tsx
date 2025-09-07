@@ -173,7 +173,9 @@ function CandidateDetail() {
 											Опыт работы
 										</Label>
 										<p className="text-sm font-medium">
-											{c.experience_years ? `${c.experience_years} лет` : "Не указан"}
+											{c.experience_years
+												? `${c.experience_years} лет`
+												: "Не указан"}
 										</p>
 									</div>
 								</div>
@@ -313,17 +315,21 @@ function CandidateDetail() {
 											<div className="mt-2 space-y-3">
 												{(() => {
 													try {
-														const educationData = typeof c.education === 'string' 
-															? JSON.parse(c.education) 
-															: c.education;
-														
+														const educationData =
+															typeof c.education === "string"
+																? JSON.parse(c.education)
+																: c.education;
+
 														if (Array.isArray(educationData)) {
 															return educationData.map((edu, index) => (
-																<div key={index} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+																<div
+																	key={index}
+																	className="p-3 bg-blue-50 rounded-lg border border-blue-200"
+																>
 																	<div className="flex items-start justify-between">
 																		<div className="flex-1">
 																			<h4 className="font-medium text-blue-900">
-																				{edu.organization || 'Не указано'}
+																				{edu.organization || "Не указано"}
 																			</h4>
 																			{edu.speciality && (
 																				<p className="text-sm text-blue-700 mt-1">
@@ -331,29 +337,31 @@ function CandidateDetail() {
 																				</p>
 																			)}
 																		</div>
-																		<Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
-																			{edu.type || 'Не указано'}
+																		<Badge
+																			variant="outline"
+																			className="bg-blue-100 text-blue-800 border-blue-300"
+																		>
+																			{edu.type || "Не указано"}
 																		</Badge>
 																	</div>
 																</div>
 															));
-														} else {
+														}
 															return (
 																<div className="p-3 bg-gray-50 rounded-lg">
 																	<pre className="text-sm whitespace-pre-wrap">
-																		{typeof c.education === 'string' 
-																			? c.education 
+																		{typeof c.education === "string"
+																			? c.education
 																			: JSON.stringify(c.education, null, 2)}
 																	</pre>
 																</div>
 															);
-														}
 													} catch {
 														return (
 															<div className="p-3 bg-gray-50 rounded-lg">
 																<pre className="text-sm whitespace-pre-wrap">
-																	{typeof c.education === 'string' 
-																		? c.education 
+																	{typeof c.education === "string"
+																		? c.education
 																		: JSON.stringify(c.education, null, 2)}
 																</pre>
 															</div>
@@ -371,47 +379,58 @@ function CandidateDetail() {
 											<div className="mt-2 space-y-3">
 												{(() => {
 													try {
-														const experienceData = typeof c.experience === 'string' 
-															? JSON.parse(c.experience) 
-															: c.experience;
-														
+														const experienceData =
+															typeof c.experience === "string"
+																? JSON.parse(c.experience)
+																: c.experience;
+
 														if (Array.isArray(experienceData)) {
 															return experienceData.map((exp, index) => (
-																<div key={index} className="p-3 bg-green-50 rounded-lg border border-green-200">
+																<div
+																	key={index}
+																	className="p-3 bg-green-50 rounded-lg border border-green-200"
+																>
 																	<div className="flex items-start justify-between">
 																		<div className="flex-1">
 																			<h4 className="font-medium text-green-900">
-																				{exp.company || 'Не указано'}
+																				{exp.company || "Не указано"}
 																			</h4>
 																			<p className="text-sm text-green-700 mt-1">
-																				{exp.position || 'Не указано'}
+																				{exp.position || "Не указано"}
 																			</p>
 																		</div>
 																		{exp.years && (
-																			<Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-																				{exp.years} {exp.years === 1 ? 'год' : exp.years < 5 ? 'года' : 'лет'}
+																			<Badge
+																				variant="outline"
+																				className="bg-green-100 text-green-800 border-green-300"
+																			>
+																				{exp.years}{" "}
+																				{exp.years === 1
+																					? "год"
+																					: exp.years < 5
+																						? "года"
+																						: "лет"}
 																			</Badge>
 																		)}
 																	</div>
 																</div>
 															));
-														} else {
+														}
 															return (
 																<div className="p-3 bg-gray-50 rounded-lg">
 																	<pre className="text-sm whitespace-pre-wrap">
-																		{typeof c.experience === 'string' 
-																			? c.experience 
+																		{typeof c.experience === "string"
+																			? c.experience
 																			: JSON.stringify(c.experience, null, 2)}
 																	</pre>
 																</div>
 															);
-														}
 													} catch {
 														return (
 															<div className="p-3 bg-gray-50 rounded-lg">
 																<pre className="text-sm whitespace-pre-wrap">
-																	{typeof c.experience === 'string' 
-																		? c.experience 
+																	{typeof c.experience === "string"
+																		? c.experience
 																		: JSON.stringify(c.experience, null, 2)}
 																</pre>
 															</div>
@@ -622,7 +641,9 @@ function CandidateDetail() {
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">Опыт</span>
 								<Badge variant="secondary">
-									{c.experience_years ? `${c.experience_years} лет` : "Не указан"}
+									{c.experience_years
+										? `${c.experience_years} лет`
+										: "Не указан"}
 								</Badge>
 							</div>
 						</CardContent>

@@ -70,9 +70,11 @@ function VacancyStatsPage() {
 			v.experience_level === "junior"
 				? (candidate.experience_years ?? 0) <= 2
 				: v.experience_level === "middle"
-					? (candidate.experience_years ?? 0) >= 2 && (candidate.experience_years ?? 0) <= 5
+					? (candidate.experience_years ?? 0) >= 2 &&
+						(candidate.experience_years ?? 0) <= 5
 					: v.experience_level === "senior"
-						? (candidate.experience_years ?? 0) >= 5 && (candidate.experience_years ?? 0) <= 8
+						? (candidate.experience_years ?? 0) >= 5 &&
+							(candidate.experience_years ?? 0) <= 8
 						: v.experience_level === "lead"
 							? (candidate.experience_years ?? 0) >= 8
 							: true;

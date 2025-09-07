@@ -257,7 +257,9 @@ function CandidateSelfPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Опыт работы</p>
-							<p className="font-medium">{candidate.experience_years ?? 0} лет</p>
+							<p className="font-medium">
+								{candidate.experience_years ?? 0} лет
+							</p>
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Статус</p>

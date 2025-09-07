@@ -48,9 +48,7 @@ def upgrade() -> None:
 
     # Refresh columns after potential rename
     if inspector.has_table("candidate"):
-        {
-            col["name"]: col for col in inspector.get_columns("candidate")
-        }
+        {col["name"]: col for col in inspector.get_columns("candidate")}
 
     with op.batch_alter_table("candidate") as batch_op:
         # Add new columns (additive and non-destructive) only if missing
