@@ -9,6 +9,7 @@ import httpx
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
 from app.clients.yandex import get_yandex_speech_client
+from app.schemas.common import InterviewMessageRead
 
 
 logger = logging.getLogger("app")
@@ -23,8 +24,9 @@ RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
 class InterviewWebsocketService:
     """Service to manage WebSocket connections and state for a single interview."""
 
-    def __init__(self, interview_id: str, prefix: str = ""):
+    def __init__(self, interview_id: str, websocket: WebSocket, prefix: str = ""):
         self.interview_id = interview_id
+        self.websocket = websocket
         self.prefix = prefix
         self.connection_started_monotonic = time.monotonic()
         self.audio_marker_timings: List[int] = []
@@ -163,8 +165,8 @@ class InterviewWebsocketService:
         logger.info("Speech recognition text: %s", text)
         return text
 
-    async def submit_user_answer(self, interview_id: str, text: str) -> bool:
-        """Submit user answer to the interview messages endpoint."""
+    async def submit_user_answer(self, interview_id: str, text: str) -> str | None:
+        """Submit user answer to the interview messages endpoint and return latest message text."""
         logger.debug(
             "Submitting user answer for interview %s: %s", interview_id, text
         )
@@ -185,7 +187,34 @@ class InterviewWebsocketService:
                     "Successfully submitted user answer for interview %s",
                     interview_id,
                 )
-                return True
+                
+                # Parse response with Pydantic
+                try:
+                    messages_data = response.json()
+                    messages = [InterviewMessageRead(**msg) for msg in messages_data]
+                    
+                    # Get the latest message (highest index)
+                    if messages:
+                        latest_message = max(messages, key=lambda msg: msg.index)
+                        logger.debug(
+                            "Latest message for interview %s: index=%d, type=%s, text=%s",
+                            interview_id,
+                            latest_message.index,
+                            latest_message.type,
+                            latest_message.text[:100] if latest_message.text else None,
+                        )
+                        return latest_message.text
+                    else:
+                        logger.warning("No messages returned for interview %s", interview_id)
+                        return None
+                        
+                except Exception as e:
+                    logger.error(
+                        "Failed to parse response for interview %s: %s",
+                        interview_id,
+                        e,
+                    )
+                    return None
             else:
                 logger.error(
                     "Failed to submit user answer for interview %s: status=%d, response=%s",
@@ -193,7 +222,7 @@ class InterviewWebsocketService:
                     response.status_code,
                     response.text,
                 )
-                return False
+                return None
 
     async def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
@@ -247,15 +276,20 @@ class InterviewWebsocketService:
         logger.info("User said: %s", recognized_text)
 
         # Submit the recognized text to the interview messages endpoint
-        if not await self.submit_user_answer(self.interview_id, recognized_text):
+        latest_message = await self.submit_user_answer(self.interview_id, recognized_text)
+        if latest_message is None:
             logger.warning(
                 "Failed to submit user answer for interview %s", self.interview_id
             )
             return
 
         logger.info(
-            "User answer submitted successfully for interview %s", self.interview_id
+            "User answer submitted successfully for interview %s. Latest message: %s", 
+            self.interview_id, 
+            latest_message[:100] if latest_message else "None"
         )
+
+        
 
     def add_video_chunk(self, chunk: bytes) -> None:
         """Add a video chunk to the buffer."""
