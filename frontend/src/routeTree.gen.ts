@@ -22,6 +22,7 @@ import { Route as ProtectedLayoutVacanciesNewRouteImport } from './routes/_prote
 import { Route as ProtectedLayoutVacanciesVacancyIdRouteImport } from './routes/_protectedLayout/vacancies/$vacancyId'
 import { Route as ProtectedLayoutCandidatesNewRouteImport } from './routes/_protectedLayout/candidates/new'
 import { Route as ProtectedLayoutCandidatesCandidateIdIndexRouteImport } from './routes/_protectedLayout/candidates/$candidateId.index'
+import { Route as ProtectedLayoutVacanciesVacancyIdEditRouteImport } from './routes/_protectedLayout/vacancies/$vacancyId.edit'
 import { Route as ProtectedLayoutCandidatesCandidateIdEditRouteImport } from './routes/_protectedLayout/candidates/$candidateId.edit'
 
 const SignInRoute = SignInRouteImport.update({
@@ -95,6 +96,12 @@ const ProtectedLayoutCandidatesCandidateIdIndexRoute =
     path: '/candidates/$candidateId/',
     getParentRoute: () => ProtectedLayoutRouteRoute,
   } as any)
+const ProtectedLayoutVacanciesVacancyIdEditRoute =
+  ProtectedLayoutVacanciesVacancyIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => ProtectedLayoutVacanciesVacancyIdRoute,
+  } as any)
 const ProtectedLayoutCandidatesCandidateIdEditRoute =
   ProtectedLayoutCandidatesCandidateIdEditRouteImport.update({
     id: '/candidates/$candidateId/edit',
@@ -110,11 +117,12 @@ export interface FileRoutesByFullPath {
   '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
-  '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
+  '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRouteWithChildren
   '/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
   '/candidates': typeof ProtectedLayoutCandidatesIndexRoute
   '/vacancies': typeof ProtectedLayoutVacanciesIndexRoute
   '/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  '/vacancies/$vacancyId/edit': typeof ProtectedLayoutVacanciesVacancyIdEditRoute
   '/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -125,11 +133,12 @@ export interface FileRoutesByTo {
   '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
-  '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
+  '/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRouteWithChildren
   '/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
   '/candidates': typeof ProtectedLayoutCandidatesIndexRoute
   '/vacancies': typeof ProtectedLayoutVacanciesIndexRoute
   '/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  '/vacancies/$vacancyId/edit': typeof ProtectedLayoutVacanciesVacancyIdEditRoute
   '/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
 }
 export interface FileRoutesById {
@@ -142,11 +151,12 @@ export interface FileRoutesById {
   '/candidate/$candidateId': typeof CandidateCandidateIdRoute
   '/interviews/$interviewId': typeof InterviewsInterviewIdRoute
   '/_protectedLayout/candidates/new': typeof ProtectedLayoutCandidatesNewRoute
-  '/_protectedLayout/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRoute
+  '/_protectedLayout/vacancies/$vacancyId': typeof ProtectedLayoutVacanciesVacancyIdRouteWithChildren
   '/_protectedLayout/vacancies/new': typeof ProtectedLayoutVacanciesNewRoute
   '/_protectedLayout/candidates/': typeof ProtectedLayoutCandidatesIndexRoute
   '/_protectedLayout/vacancies/': typeof ProtectedLayoutVacanciesIndexRoute
   '/_protectedLayout/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  '/_protectedLayout/vacancies/$vacancyId/edit': typeof ProtectedLayoutVacanciesVacancyIdEditRoute
   '/_protectedLayout/candidates/$candidateId/': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/vacancies'
     | '/candidates/$candidateId/edit'
+    | '/vacancies/$vacancyId/edit'
     | '/candidates/$candidateId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/vacancies'
     | '/candidates/$candidateId/edit'
+    | '/vacancies/$vacancyId/edit'
     | '/candidates/$candidateId'
   id:
     | '__root__'
@@ -195,6 +207,7 @@ export interface FileRouteTypes {
     | '/_protectedLayout/candidates/'
     | '/_protectedLayout/vacancies/'
     | '/_protectedLayout/candidates/$candidateId/edit'
+    | '/_protectedLayout/vacancies/$vacancyId/edit'
     | '/_protectedLayout/candidates/$candidateId/'
   fileRoutesById: FileRoutesById
 }
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedLayoutCandidatesCandidateIdIndexRouteImport
       parentRoute: typeof ProtectedLayoutRouteRoute
     }
+    '/_protectedLayout/vacancies/$vacancyId/edit': {
+      id: '/_protectedLayout/vacancies/$vacancyId/edit'
+      path: '/edit'
+      fullPath: '/vacancies/$vacancyId/edit'
+      preLoaderRoute: typeof ProtectedLayoutVacanciesVacancyIdEditRouteImport
+      parentRoute: typeof ProtectedLayoutVacanciesVacancyIdRoute
+    }
     '/_protectedLayout/candidates/$candidateId/edit': {
       id: '/_protectedLayout/candidates/$candidateId/edit'
       path: '/candidates/$candidateId/edit'
@@ -310,10 +330,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProtectedLayoutVacanciesVacancyIdRouteChildren {
+  ProtectedLayoutVacanciesVacancyIdEditRoute: typeof ProtectedLayoutVacanciesVacancyIdEditRoute
+}
+
+const ProtectedLayoutVacanciesVacancyIdRouteChildren: ProtectedLayoutVacanciesVacancyIdRouteChildren =
+  {
+    ProtectedLayoutVacanciesVacancyIdEditRoute:
+      ProtectedLayoutVacanciesVacancyIdEditRoute,
+  }
+
+const ProtectedLayoutVacanciesVacancyIdRouteWithChildren =
+  ProtectedLayoutVacanciesVacancyIdRoute._addFileChildren(
+    ProtectedLayoutVacanciesVacancyIdRouteChildren,
+  )
+
 interface ProtectedLayoutRouteRouteChildren {
   ProtectedLayoutDashboardRoute: typeof ProtectedLayoutDashboardRoute
   ProtectedLayoutCandidatesNewRoute: typeof ProtectedLayoutCandidatesNewRoute
-  ProtectedLayoutVacanciesVacancyIdRoute: typeof ProtectedLayoutVacanciesVacancyIdRoute
+  ProtectedLayoutVacanciesVacancyIdRoute: typeof ProtectedLayoutVacanciesVacancyIdRouteWithChildren
   ProtectedLayoutVacanciesNewRoute: typeof ProtectedLayoutVacanciesNewRoute
   ProtectedLayoutCandidatesIndexRoute: typeof ProtectedLayoutCandidatesIndexRoute
   ProtectedLayoutVacanciesIndexRoute: typeof ProtectedLayoutVacanciesIndexRoute
@@ -325,7 +360,7 @@ const ProtectedLayoutRouteRouteChildren: ProtectedLayoutRouteRouteChildren = {
   ProtectedLayoutDashboardRoute: ProtectedLayoutDashboardRoute,
   ProtectedLayoutCandidatesNewRoute: ProtectedLayoutCandidatesNewRoute,
   ProtectedLayoutVacanciesVacancyIdRoute:
-    ProtectedLayoutVacanciesVacancyIdRoute,
+    ProtectedLayoutVacanciesVacancyIdRouteWithChildren,
   ProtectedLayoutVacanciesNewRoute: ProtectedLayoutVacanciesNewRoute,
   ProtectedLayoutCandidatesIndexRoute: ProtectedLayoutCandidatesIndexRoute,
   ProtectedLayoutVacanciesIndexRoute: ProtectedLayoutVacanciesIndexRoute,
