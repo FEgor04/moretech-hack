@@ -69,9 +69,6 @@ export function ScheduleInterviewDialog({
 					toast.success("Интервью создано", {
 						action: {
 							label: "Скопировать ссылку",
-							actionButtonStyle: {
-								background: "var(--primary)",
-							},
 							onClick: () => {
 								navigator.clipboard.writeText(
 									`${window.location.origin}/interviews/${data.id}`,
