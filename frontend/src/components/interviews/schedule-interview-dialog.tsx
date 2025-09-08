@@ -29,7 +29,7 @@ import { Skeleton } from "../ui/skeleton";
 
 const formSchema = z.object({
 	candidate_id: z.string().min(1, "Выберите кандидата"),
-	vacancy_id: z.coerce.number().optional(),
+	vacancy_id: z.coerce.number({ error: "Выберите вакансию" }),
 });
 
 type FormData = z.infer<typeof formSchema>;
