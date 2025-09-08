@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { useWebcamStreaming } from "@/hooks/use-webcam-streaming";
 import { InterviewStatusBadge } from "../candidates/interview-status-badge";
 import type { InterviewState } from "@/api/client";
+import { CheckIcon, Loader2Icon } from "lucide-react";
 
 type Props = {
 	interviewId: string;
@@ -24,7 +25,7 @@ type Props = {
 
 export function InterviewChat({ interviewId }: Props) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
-	const isFinished = interview.data.state === ("done" as InterviewState);
+	const isFinished = interview.data.state === "done";
 	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(interviewId, {
 		disabled: isFinished,
 	});
@@ -51,6 +52,12 @@ export function InterviewChat({ interviewId }: Props) {
 			</div>
 		);
 	}
+
+	const isAwaiting = socketState === "awaiting_user_answer";
+	const isSTT = socketState === "speech_recognition";
+	const isLLM = socketState === "generating_response";
+	const isTTS = socketState === "speech_synthesis";
+
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -104,16 +111,56 @@ export function InterviewChat({ interviewId }: Props) {
 								/>
 							</Message>
 						))}
+						{/* Typing indicator for LLM generation */}
+						{!isFinished && isLLM && (
+							<Message from="assistant">
+								<MessageContent>
+									<div className="flex items-center gap-2 text-muted-foreground">
+										<span className="inline-flex items-center gap-1">
+											<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.3s]" />
+											<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.15s]" />
+											<span className="size-2 rounded-full bg-current animate-bounce" />
+										</span>
+										<span>Печатает...</span>
+									</div>
+								</MessageContent>
+								<MessageAvatar src="" name="AI" />
+							</Message>
+						)}
+						{/* Recording indicator for TTS synthesis */}
+						{!isFinished && isTTS && (
+							<Message from="assistant">
+								<MessageContent>
+									<div className="flex items-center gap-2 text-muted-foreground">
+										<Loader2Icon className="size-4 animate-spin" />
+										<span>Recording audio...</span>
+									</div>
+								</MessageContent>
+								<MessageAvatar src="" name="AI" />
+							</Message>
+						)}
 					</ConversationContent>
 					<ConversationScrollButton />
 				</Conversation>
-
 				{/* Message Input */}
 				{!isFinished && (
-					<div className="">
-						<Button disabled={socketState !== "awaiting_user_answer"} onClick={sendAudioReadyMarker}>Ответ готов</Button>
+					<div className="flex justify-center py-4">
+						{isAwaiting ? (
+							<Button
+								onClick={sendAudioReadyMarker}
+								className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
+							>
+								<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
+								<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
+									<CheckIcon />
+								</span>
+							</Button>
+						) : isSTT ? (
+							<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">
+								<Loader2Icon className="size-6 animate-spin" />
+							</div>
+						) : null}
 					</div>
-
 				)}
 			</div>
 		</div>
