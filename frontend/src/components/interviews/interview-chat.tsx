@@ -85,91 +85,95 @@ export function InterviewChat({ interviewId }: Props) {
 			</div>
 
 			{/* Chat Container */}
-			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] flex flex-col">
-				{/* Webcam */}
-				{!isFinished && (
-					<div className="w-full p-4">
-						<WebcamComponent
-							ref={webcamRef}
-							audio={true}
-							muted
-							className="w-full rounded-md shadow aspect-video bg-black"
-						/>
+			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] p-4">
+				<div className="h-full grid grid-cols-1 md:grid-cols-2 gap-4">
+					{/* Left: Webcam */}
+					<div className="flex flex-col">
+						{!isFinished && (
+							<WebcamComponent
+								ref={webcamRef}
+								audio={true}
+								muted
+								className="w-full rounded-md shadow aspect-video bg-black"
+							/>
+						)}
 					</div>
-				)}
-				{/* Messages */}
-				<Conversation className="flex-1">
-					<ConversationContent>
-						{messages.data?.map((msg) => (
-							<Message
-								key={`${msg.interview_id}-${msg.index}`}
-								from={msg.type as "user" | "assistant"}
-							>
-								<MessageContent>
-									<Response>{msg.text}</Response>
-								</MessageContent>
-								<MessageAvatar
-									src={msg.type === "user" ? "" : ""}
-									name={msg.type === "user" ? candidate.data.name : "AI"}
-								/>
-							</Message>
-						))}
-						{/* Typing indicator for LLM generation */}
-						{!isFinished && isLLM && (
-							<Message from="assistant">
-								<MessageContent>
-									<div className="flex items-center gap-2 text-muted-foreground">
-										<span className="inline-flex items-center gap-1">
-											<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.3s]" />
-											<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.15s]" />
-											<span className="size-2 rounded-full bg-current animate-bounce" />
-										</span>
-										<span>Печатает...</span>
-									</div>
-								</MessageContent>
-								<MessageAvatar src="" name="AI" />
-							</Message>
-						)}
-						{/* Recording indicator for TTS synthesis */}
-						{!isFinished && isTTS && (
-							<Message from="assistant">
-								<MessageContent>
-									<div className="flex items-center gap-2 text-muted-foreground">
-										<Loader2Icon className="size-4 animate-spin" />
-										<span>Recording audio...</span>
-									</div>
-								</MessageContent>
-								<MessageAvatar src="" name="AI" />
-							</Message>
-						)}
-					</ConversationContent>
-					<ConversationScrollButton />
-				</Conversation>
-				{/* Message Input */}
-				{!isFinished && (
-					<div className="flex justify-center py-4">
-						{isAwaiting ? (
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										onClick={sendAudioReadyMarker}
-										className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
+					{/* Right: Chat */}
+					<div className="flex flex-col min-h-0">
+						<Conversation className="flex-1 min-h-0">
+							<ConversationContent>
+								{messages.data?.map((msg) => (
+									<Message
+										key={`${msg.interview_id}-${msg.index}`}
+										from={msg.type as "user" | "assistant"}
 									>
-										<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
-										<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
-											<CheckIcon />
-										</span>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Ответ готов</TooltipContent>
-							</Tooltip>
-						) : isSTT ? (
-							<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">
-								<Loader2Icon className="size-6 animate-spin" />
+										<MessageContent>
+											<Response>{msg.text}</Response>
+										</MessageContent>
+										<MessageAvatar
+											src={msg.type === "user" ? "" : ""}
+											name={msg.type === "user" ? candidate.data.name : "AI"}
+										/>
+									</Message>
+								))}
+								{/* Typing indicator for LLM generation */}
+								{!isFinished && isLLM && (
+									<Message from="assistant">
+										<MessageContent>
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<span className="inline-flex items-center gap-1">
+													<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.3s]" />
+													<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.15s]" />
+													<span className="size-2 rounded-full bg-current animate-bounce" />
+												</span>
+												<span>Печатает...</span>
+											</div>
+										</MessageContent>
+										<MessageAvatar src="" name="AI" />
+									</Message>
+								)}
+								{/* Recording indicator for TTS synthesis */}
+								{!isFinished && isTTS && (
+									<Message from="assistant">
+										<MessageContent>
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<Loader2Icon className="size-4 animate-spin" />
+												<span>Recording audio...</span>
+											</div>
+										</MessageContent>
+										<MessageAvatar src="" name="AI" />
+									</Message>
+								)}
+							</ConversationContent>
+							<ConversationScrollButton />
+						</Conversation>
+						{/* Message Input */}
+						{!isFinished && (
+							<div className="flex justify-center py-4">
+								{isAwaiting ? (
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												onClick={sendAudioReadyMarker}
+												className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
+											>
+												<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
+												<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
+													<CheckIcon />
+												</span>
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>Ответ готов</TooltipContent>
+									</Tooltip>
+								) : isSTT ? (
+									<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">
+										<Loader2Icon className="size-6 animate-spin" />
+									</div>
+								) : null}
 							</div>
-						) : null}
+						)}
 					</div>
-				)}
+				</div>
 			</div>
 		</div>
 	);

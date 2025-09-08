@@ -209,6 +209,7 @@ export function useWebcamStreaming(
 	function sendAudioReadyMarker() {
 		console.log("Sending audio-ready marker");
 		sendMessage("audio-ready");
+		setSocketState("speech_recognition");
 	}
 
 	function startRecording() {
