@@ -20,13 +20,11 @@ class Vacancy(Base):
     salary_max: Mapped[int | None] = mapped_column(Integer, nullable=True)
     employment_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     experience_level: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    remote_work: Mapped[bool] = mapped_column(default=False)
     requirements: Mapped[str | None] = mapped_column(Text, nullable=True)
     benefits: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Vacancy extended fields per new spec (additive)
     skills: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON list[str]
-    experience: Mapped[str | None] = mapped_column(Text, nullable=True)
     responsibilities: Mapped[str | None] = mapped_column(Text, nullable=True)
     domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
     education: Mapped[str | None] = mapped_column(Text, nullable=True)

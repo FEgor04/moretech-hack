@@ -10,6 +10,15 @@ from app.services.exceptions import NotFoundError
 
 async def create_vacancy(session: AsyncSession, payload: VacancyCreate) -> Vacancy:
     data = payload.model_dump(exclude_unset=True)
+
+    # Convert enum objects to their string values
+    if "employment_type" in data and data["employment_type"] is not None:
+        if hasattr(data["employment_type"], "value"):
+            data["employment_type"] = data["employment_type"].value
+    if "experience_level" in data and data["experience_level"] is not None:
+        if hasattr(data["experience_level"], "value"):
+            data["experience_level"] = data["experience_level"].value
+
     # Serialize list fields
     if "skills" in data and data["skills"] is not None:
         data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
@@ -46,6 +55,15 @@ async def update_vacancy(
     if not vacancy:
         raise NotFoundError("Vacancy not found")
     data = payload.model_dump(exclude_unset=True)
+
+    # Convert enum objects to their string values
+    if "employment_type" in data and data["employment_type"] is not None:
+        if hasattr(data["employment_type"], "value"):
+            data["employment_type"] = data["employment_type"].value
+    if "experience_level" in data and data["experience_level"] is not None:
+        if hasattr(data["experience_level"], "value"):
+            data["experience_level"] = data["experience_level"].value
+
     if "skills" in data and data["skills"] is not None:
         data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
     if "minor_skills" in data and data["minor_skills"] is not None:

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import { interviewsByCandidateQueryOptions } from "@/api/queries/interviews";
+import type { ExperienceItem } from "@/api/client/types.gen";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { CandidateAvatar } from "@/components/candidates/candidate-avatar";
 import { CandidateStatusBadge } from "@/components/candidates/status-badge";
@@ -168,8 +169,10 @@ function CandidateDetail() {
 											Опыт работы
 										</Label>
 										<p className="text-sm font-medium">
-											{c.experience_years
-												? `${c.experience_years} лет`
+											{c.experience &&
+											Array.isArray(c.experience) &&
+											c.experience.length > 0
+												? `${c.experience.reduce((sum: number, exp: ExperienceItem) => sum + (exp.years || 0), 0)} лет`
 												: "Не указан"}
 										</p>
 									</div>
@@ -633,8 +636,10 @@ function CandidateDetail() {
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">Опыт</span>
 								<Badge variant="secondary">
-									{c.experience_years
-										? `${c.experience_years} лет`
+									{c.experience &&
+									Array.isArray(c.experience) &&
+									c.experience.length > 0
+										? `${c.experience.reduce((sum: number, exp: ExperienceItem) => sum + (exp.years || 0), 0)} лет`
 										: "Не указан"}
 								</Badge>
 							</div>

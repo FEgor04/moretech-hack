@@ -2,13 +2,12 @@ import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
-import type { VacancyRead } from "@/api/client/types.gen";
+import type { VacancyRead, ExperienceItem } from "@/api/client/types.gen";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
 	company?: string | null;
 	experience_level?: string | null;
-	remote_work?: boolean;
 	benefits?: string | null;
 };
 import {
@@ -62,17 +61,23 @@ export function VacancyStatsModal({
 	// (в реальном приложении это было бы более сложная логика сопоставления)
 	const relevantCandidates = candidates.filter((candidate) => {
 		// Простая логика: кандидаты с похожим опытом и позицией
+		const candidateTotalYears =
+			candidate.experience && Array.isArray(candidate.experience)
+				? candidate.experience.reduce(
+                                                (sum: number, exp: ExperienceItem) => sum + (exp.years || 0),
+						0,
+					)
+				: 0;
+
 		const experienceMatch =
-			vacancy.experience_level === "junior"
-				? (candidate.experience_years ?? 0) <= 2
-				: vacancy.experience_level === "middle"
-					? (candidate.experience_years ?? 0) >= 2 &&
-						(candidate.experience_years ?? 0) <= 5
-					: vacancy.experience_level === "senior"
-						? (candidate.experience_years ?? 0) >= 5 &&
-							(candidate.experience_years ?? 0) <= 8
-						: vacancy.experience_level === "lead"
-							? (candidate.experience_years ?? 0) >= 8
+			vacancy.experience_level === "младший"
+				? candidateTotalYears <= 2
+				: vacancy.experience_level === "средний"
+					? candidateTotalYears >= 2 && candidateTotalYears <= 5
+					: vacancy.experience_level === "старший"
+						? candidateTotalYears >= 5 && candidateTotalYears <= 8
+						: vacancy.experience_level === "ведущий"
+							? candidateTotalYears >= 8
 							: true;
 
 		const positionMatch =

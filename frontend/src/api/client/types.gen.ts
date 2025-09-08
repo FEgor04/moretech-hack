@@ -39,13 +39,7 @@ export type CandidateCreate = {
     /**
      * Experience
      */
-    experience?: Array<{
-        [key: string]: unknown;
-    }> | string | null;
-    /**
-     * Experience Years
-     */
-    experience_years?: number | null;
+    experience?: Array<ExperienceItem> | null;
     status?: CandidateStatus;
     /**
      * Gigachat File Id
@@ -54,25 +48,20 @@ export type CandidateCreate = {
     /**
      * Skills
      */
-    skills?: Array<string> | string | null;
+    skills?: Array<string> | null;
     /**
      * Tech
      */
-    tech?: Array<string> | string | null;
+    tech?: Array<string> | null;
     /**
      * Education
      */
-    education?: Array<{
-        [key: string]: unknown;
-    }> | string | null;
+    education?: Array<EducationItem> | null;
     /**
      * Geo
      */
     geo?: string | null;
-    /**
-     * Employment Type
-     */
-    employment_type?: string | null;
+    employment_type?: EmploymentType | null;
 };
 
 /**
@@ -102,13 +91,7 @@ export type CandidateRead = {
     /**
      * Experience
      */
-    experience?: Array<{
-        [key: string]: unknown;
-    }> | string | null;
-    /**
-     * Experience Years
-     */
-    experience_years?: number | null;
+    experience?: Array<ExperienceItem> | null;
     status?: CandidateStatus;
     /**
      * Gigachat File Id
@@ -117,25 +100,20 @@ export type CandidateRead = {
     /**
      * Skills
      */
-    skills?: Array<string> | string | null;
+    skills?: Array<string> | null;
     /**
      * Tech
      */
-    tech?: Array<string> | string | null;
+    tech?: Array<string> | null;
     /**
      * Education
      */
-    education?: Array<{
-        [key: string]: unknown;
-    }> | string | null;
+    education?: Array<EducationItem> | null;
     /**
      * Geo
      */
     geo?: string | null;
-    /**
-     * Employment Type
-     */
-    employment_type?: string | null;
+    employment_type?: EmploymentType | null;
     /**
      * Id
      */
@@ -146,6 +124,52 @@ export type CandidateRead = {
  * CandidateStatus
  */
 export type CandidateStatus = 'pending' | 'reviewing' | 'interviewing' | 'accepted' | 'rejected' | 'on_hold';
+
+/**
+ * EducationItem
+ */
+export type EducationItem = {
+    /**
+     * Organization
+     */
+    organization: string;
+    /**
+     * Speciality
+     */
+    speciality: string;
+    /**
+     * Type
+     */
+    type?: string | null;
+};
+
+/**
+ * EmploymentType
+ */
+export type EmploymentType = 'полная занятость' | 'частичная занятость' | 'контракт' | 'стажировка';
+
+/**
+ * ExperienceItem
+ */
+export type ExperienceItem = {
+    /**
+     * Company
+     */
+    company: string;
+    /**
+     * Position
+     */
+    position: string;
+    /**
+     * Years
+     */
+    years: number;
+};
+
+/**
+ * ExperienceLevel
+ */
+export type ExperienceLevel = 'младший' | 'средний' | 'старший' | 'ведущий';
 
 /**
  * HTTPValidationError
@@ -479,18 +503,8 @@ export type VacancyCreate = {
      * Salary Max
      */
     salary_max?: number | null;
-    /**
-     * Employment Type
-     */
-    employment_type?: string | null;
-    /**
-     * Experience Level
-     */
-    experience_level?: string | null;
-    /**
-     * Remote Work
-     */
-    remote_work?: boolean;
+    employment_type?: EmploymentType | null;
+    experience_level?: ExperienceLevel | null;
     /**
      * Requirements
      */
@@ -502,15 +516,11 @@ export type VacancyCreate = {
     /**
      * Skills
      */
-    skills?: Array<string> | string | null;
-    /**
-     * Experience
-     */
-    experience?: string | null;
+    skills?: Array<string> | null;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | string | null;
+    responsibilities?: Array<string> | null;
     /**
      * Domain
      */
@@ -522,7 +532,7 @@ export type VacancyCreate = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | string | null;
+    minor_skills?: Array<string> | null;
     /**
      * Company Info
      */
@@ -573,18 +583,8 @@ export type VacancyRead = {
      * Salary Max
      */
     salary_max?: number | null;
-    /**
-     * Employment Type
-     */
-    employment_type?: string | null;
-    /**
-     * Experience Level
-     */
-    experience_level?: string | null;
-    /**
-     * Remote Work
-     */
-    remote_work?: boolean;
+    employment_type?: EmploymentType | null;
+    experience_level?: ExperienceLevel | null;
     /**
      * Requirements
      */
@@ -596,15 +596,11 @@ export type VacancyRead = {
     /**
      * Skills
      */
-    skills?: Array<string> | string | null;
-    /**
-     * Experience
-     */
-    experience?: string | null;
+    skills?: Array<string> | null;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | string | null;
+    responsibilities?: Array<string> | null;
     /**
      * Domain
      */
@@ -616,7 +612,7 @@ export type VacancyRead = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | string | null;
+    minor_skills?: Array<string> | null;
     /**
      * Company Info
      */
@@ -663,18 +659,8 @@ export type VacancyUpdate = {
      * Salary Max
      */
     salary_max?: number | null;
-    /**
-     * Employment Type
-     */
-    employment_type?: string | null;
-    /**
-     * Experience Level
-     */
-    experience_level?: string | null;
-    /**
-     * Remote Work
-     */
-    remote_work?: boolean | null;
+    employment_type?: EmploymentType | null;
+    experience_level?: ExperienceLevel | null;
     /**
      * Requirements
      */
@@ -686,15 +672,11 @@ export type VacancyUpdate = {
     /**
      * Skills
      */
-    skills?: Array<string> | string | null;
-    /**
-     * Experience
-     */
-    experience?: string | null;
+    skills?: Array<string> | null;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | string | null;
+    responsibilities?: Array<string> | null;
     /**
      * Domain
      */
@@ -706,7 +688,7 @@ export type VacancyUpdate = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | string | null;
+    minor_skills?: Array<string> | null;
     /**
      * Company Info
      */

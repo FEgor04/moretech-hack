@@ -26,7 +26,6 @@ type CandidateFormData = {
 	name: string;
 	email: string;
 	position: string;
-	experience_years: number;
 	status?:
 		| "pending"
 		| "reviewing"
@@ -68,7 +67,6 @@ function CandidateEdit() {
 			name: c.name,
 			email: c.email ?? "",
 			position: c.position,
-			experience_years: c.experience_years ?? 0,
 			status: c.status,
 			skills: c.skills
 				? Array.isArray(c.skills)
@@ -82,7 +80,7 @@ function CandidateEdit() {
 					: JSON.stringify(c.education, null, 2)
 				: "",
 			geo: c.geo ?? "",
-			employment_type: c.employment_type ?? "",
+			employment_type: c.employment_type ?? undefined,
 			experience: c.experience
 				? typeof c.experience === "string"
 					? c.experience
@@ -112,14 +110,18 @@ function CandidateEdit() {
 				name: data.name,
 				email: data.email,
 				position: data.position,
-				experience_years: data.experience_years,
 				status: data.status,
-				skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-				tech: techArray ? JSON.stringify(techArray) : undefined,
-				education: data.education || undefined,
+				skills: skillsArray || undefined,
+				tech: techArray || undefined,
+				education: data.education ? JSON.parse(data.education) : undefined,
 				geo: data.geo || undefined,
-				employment_type: data.employment_type || undefined,
-				experience: data.experience || undefined,
+				employment_type: data.employment_type as
+					| "полная занятость"
+					| "частичная занятость"
+					| "контракт"
+					| "стажировка"
+					| undefined,
+				experience: data.experience ? JSON.parse(data.experience) : undefined,
 			},
 			{
 				onSuccess: () => {
@@ -192,25 +194,6 @@ function CandidateEdit() {
 										<FormLabel>Должность</FormLabel>
 										<FormControl>
 											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="experience_years"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Опыт работы (лет)</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												min={0}
-												step={1}
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -312,15 +295,14 @@ function CandidateEdit() {
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="full-time">
+											<SelectItem value="полная занятость">
 												Полная занятость
 											</SelectItem>
-											<SelectItem value="part-time">
+											<SelectItem value="частичная занятость">
 												Частичная занятость
 											</SelectItem>
-											<SelectItem value="contract">Контракт</SelectItem>
-											<SelectItem value="internship">Стажировка</SelectItem>
-											<SelectItem value="remote">Удаленная работа</SelectItem>
+											<SelectItem value="контракт">Контракт</SelectItem>
+											<SelectItem value="стажировка">Стажировка</SelectItem>
 										</SelectContent>
 									</Select>
 									<FormMessage />

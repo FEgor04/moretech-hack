@@ -7,7 +7,6 @@ import type { VacancyRead } from "@/api/client/types.gen";
 type ExtendedVacancy = VacancyRead & {
 	company?: string | null;
 	experience_level?: string | null;
-	remote_work?: boolean;
 	benefits?: string | null;
 };
 import { useForm } from "react-hook-form";
@@ -59,14 +58,14 @@ const formSchema = z.object({
 	salary_min: z.number().optional(),
 	salary_max: z.number().optional(),
 	employment_type: z
-		.enum(["full_time", "part_time", "contract", "internship"])
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
 		.optional(),
-	experience_level: z.enum(["junior", "middle", "senior", "lead"]).optional(),
-	remote_work: z.boolean().optional(),
+	experience_level: z
+		.enum(["младший", "средний", "старший", "ведущий"])
+		.optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),
 	skills: z.string().optional(),
-	experience: z.string().optional(),
 	responsibilities: z.string().optional(),
 	domain: z.string().optional(),
 	education: z.string().optional(),
@@ -110,19 +109,18 @@ function VacancyEdit() {
 			salary_max: v.salary_max || undefined,
 			employment_type:
 				(v.employment_type as
-					| "full_time"
-					| "part_time"
-					| "contract"
-					| "internship"
+					| "полная занятость"
+					| "частичная занятость"
+					| "контракт"
+					| "стажировка"
 					| undefined) || undefined,
 			experience_level:
 				(v.experience_level as
-					| "junior"
-					| "middle"
-					| "senior"
-					| "lead"
+					| "младший"
+					| "средний"
+					| "старший"
+					| "ведущий"
 					| undefined) || undefined,
-			remote_work: v.remote_work || false,
 			requirements: v.requirements || "",
 			benefits: v.benefits || "",
 			skills: v.skills
@@ -130,7 +128,6 @@ function VacancyEdit() {
 					? v.skills.join(", ")
 					: v.skills
 				: "",
-			experience: v.experience || "",
 			responsibilities: v.responsibilities
 				? Array.isArray(v.responsibilities)
 					? v.responsibilities.join(", ")
@@ -172,13 +169,9 @@ function VacancyEdit() {
 
 		const vacancyData = {
 			...data,
-			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-			responsibilities: responsibilitiesArray
-				? JSON.stringify(responsibilitiesArray)
-				: undefined,
-			minor_skills: minorSkillsArray
-				? JSON.stringify(minorSkillsArray)
-				: undefined,
+			skills: skillsArray || undefined,
+			responsibilities: responsibilitiesArray || undefined,
+			minor_skills: minorSkillsArray || undefined,
 		};
 
 		mutation.mutate(vacancyData, {
@@ -200,14 +193,23 @@ function VacancyEdit() {
 		switch (status) {
 			case "open":
 				return {
-					label: "Открыта",
+					label: "🟢 Открыта",
 					variant: "default" as const,
-					className: "bg-green-500 hover:bg-green-500",
+					className:
+						"bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
 				};
 			case "closed":
-				return { label: "Закрыта", variant: "destructive" as const };
+				return {
+					label: "🔴 Закрыта",
+					variant: "secondary" as const,
+					className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200",
+				};
 			default:
-				return { label: "Неизвестно", variant: "secondary" as const };
+				return {
+					label: "❓ Неизвестно",
+					variant: "secondary" as const,
+					className: "bg-gray-100 text-gray-800 border-gray-200",
+				};
 		}
 	};
 
@@ -371,16 +373,16 @@ function VacancyEdit() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="full_time">
+																<SelectItem value="полная занятость">
 																	Полная занятость
 																</SelectItem>
-																<SelectItem value="part_time">
+																<SelectItem value="частичная занятость">
 																	Частичная занятость
 																</SelectItem>
-																<SelectItem value="contract">
+																<SelectItem value="контракт">
 																	Контракт
 																</SelectItem>
-																<SelectItem value="internship">
+																<SelectItem value="стажировка">
 																	Стажировка
 																</SelectItem>
 															</SelectContent>
@@ -406,10 +408,10 @@ function VacancyEdit() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="junior">Junior</SelectItem>
-																<SelectItem value="middle">Middle</SelectItem>
-																<SelectItem value="senior">Senior</SelectItem>
-																<SelectItem value="lead">Lead</SelectItem>
+																<SelectItem value="младший">Младший</SelectItem>
+																<SelectItem value="средний">Средний</SelectItem>
+																<SelectItem value="старший">Старший</SelectItem>
+																<SelectItem value="ведущий">Ведущий</SelectItem>
 															</SelectContent>
 														</Select>
 														<FormMessage />
@@ -497,20 +499,6 @@ function VacancyEdit() {
 															placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
 															rows={3}
 														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="experience"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Требования к опыту</FormLabel>
-													<FormControl>
-														<Textarea rows={3} {...field} />
 													</FormControl>
 													<FormMessage />
 												</FormItem>

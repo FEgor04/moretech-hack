@@ -2,7 +2,15 @@ import json
 import logging
 from typing import BinaryIO
 
-from app.schemas.common import CandidateCreate, VacancyCreate
+from app.schemas.common import (
+    CandidateCreate,
+    VacancyCreate,
+    ExperienceItem,
+    EducationItem,
+    EmploymentType,
+    ExperienceLevel,
+)
+from app.schemas.parsing import CVParsingSchema, VacancyParsingSchema
 from app.clients.gigachat import get_gigachat_client
 
 logger = logging.getLogger(__name__)
@@ -19,6 +27,16 @@ class PDFParserService:
 
     def __init__(self):
         self.gigachat_client = get_gigachat_client()
+
+    def _get_cv_json_schema(self) -> str:
+        """Generate JSON schema for CV parsing"""
+        schema = CVParsingSchema.model_json_schema()
+        return json.dumps(schema, ensure_ascii=False, indent=2)
+
+    def _get_vacancy_json_schema(self) -> str:
+        """Generate JSON schema for vacancy parsing"""
+        schema = VacancyParsingSchema.model_json_schema()
+        return json.dumps(schema, ensure_ascii=False, indent=2)
 
     async def parse_cv(
         self, pdf_file: BinaryIO, filename: str = "resume.pdf"
@@ -42,28 +60,26 @@ class PDFParserService:
 
             # Create chat completion with file attachment
             logger.info("Sending chat request to GigaChat...")
+
+            # Generate JSON schema for precise parsing
+            json_schema = self._get_cv_json_schema()
+
             result = self.gigachat_client.chat(
                 {
                     "messages": [
                         {
                             "role": "user",
-                            "content": """Проанализируй резюме и извлеки информацию в формате JSON строго по схеме:
-{
-  "name": "ФИО кандидата",
-  "email": "email адрес",
-  "position": "желаемая позиция",
-  "experience": [
-    {"company": "компания", "position": "должность", "years": число_лет}
-  ],
-  "experience_years": число лет общего опыта,
-  "tech": ["список технических навыков, языков программирования, инструментов"],
-  "education": [
-    {"organization": "образовательная организация", "speciality": "специальность", "type": "высшее|курсы"}
-  ],
-  "geo": "географические предпочтения",
-  "employment_type": "предпочтительный тип занятости (full_time | part_time | remote | contract | internship)"
-}
-Отвечай только корректным JSON без дополнительных комментариев. Если данных нет, ставь null или пустой массив.""",
+                            "content": f"""Проанализируй резюме и извлеки всю доступную информацию в точном соответствии с JSON схемой.
+
+ВАЖНО: 
+- Извлекай ВСЕ доступные данные, не оставляй поля пустыми без веской причины
+- Следуй инструкциям в описаниях полей JSON схемы
+- Если поле не найдено, используй null, но старайся найти максимум информации
+
+JSON схема с подробными инструкциями:
+{json_schema}
+
+Отвечай ТОЛЬКО валидным JSON без дополнительных комментариев или объяснений.""",
                             "attachments": [file_id],
                         }
                     ],
@@ -76,8 +92,23 @@ class PDFParserService:
             response_content = result.choices[0].message.content
             logger.info(f"GigaChat response: {response_content}")
 
-            parsed_data = json.loads(response_content)
+            # Clean JSON response from invisible Unicode characters
+            import re
+
+            cleaned_content = re.sub(r"[\u200b-\u200d\ufeff]", "", response_content)
+
+            # Parse and validate with Pydantic schema
+            parsed_data = json.loads(cleaned_content)
             logger.info(f"Parsed data: {parsed_data}")
+
+            # Validate with Pydantic schema
+            try:
+                validated_data = CVParsingSchema.model_validate(parsed_data)
+                logger.info(f"Validated data: {validated_data}")
+                # Use validated data for further processing
+                parsed_data = validated_data.model_dump()
+            except Exception as e:
+                logger.warning(f"Schema validation failed, using raw data: {e}")
 
             # Clean and validate email
             email = parsed_data.get("email", "")
@@ -94,10 +125,6 @@ class PDFParserService:
             else:
                 clean_email = None
 
-            # Normalize years to int to satisfy schema/DB integer column
-            years_val = parsed_data.get("experience_years")
-            if isinstance(years_val, float):
-                years_val = int(round(years_val))
             # Handle null values from AI with fallbacks
             name = parsed_data.get("name")
             if not name or name == "нет информации":
@@ -107,21 +134,79 @@ class PDFParserService:
             if not position or position == "нет информации":
                 position = "Unknown Position"
 
-            # Truncate employment_type if too long
-            employment_type = parsed_data.get("employment_type")
-            if employment_type and len(employment_type) > 255:
-                employment_type = employment_type[:252] + "..."
+            # Convert employment_type string to enum
+            employment_type = None
+            if parsed_data.get("employment_type"):
+                employment_type_str = parsed_data.get("employment_type").lower()
+                # Map to enum values
+                if employment_type_str == "полная занятость":
+                    employment_type = EmploymentType.FULL_TIME
+                elif employment_type_str == "частичная занятость":
+                    employment_type = EmploymentType.PART_TIME
+                elif employment_type_str == "контракт":
+                    employment_type = EmploymentType.CONTRACT
+                elif employment_type_str == "стажировка":
+                    employment_type = EmploymentType.INTERNSHIP
+
+            # Convert experience list to ExperienceItem objects
+            experience_list = parsed_data.get("experience", [])
+            if experience_list:
+                try:
+                    experience_items = []
+                    for exp in experience_list:
+                        if isinstance(exp, dict):
+                            # Normalize years to int
+                            years = exp.get("years", 0)
+                            if isinstance(years, float):
+                                years = int(round(years))
+                            experience_items.append(
+                                ExperienceItem(
+                                    company=exp.get("company", "Unknown Company"),
+                                    position=exp.get("position", "Unknown Position"),
+                                    years=years,
+                                )
+                            )
+                    experience = experience_items if experience_items else None
+                except Exception as e:
+                    logger.warning(f"Failed to parse experience items: {e}")
+                    experience = None
+            else:
+                experience = None
+
+            # Convert education list to EducationItem objects
+            education_list = parsed_data.get("education", [])
+            if education_list:
+                try:
+                    education_items = []
+                    for edu in education_list:
+                        if isinstance(edu, dict):
+                            education_items.append(
+                                EducationItem(
+                                    organization=edu.get(
+                                        "organization", "Unknown Organization"
+                                    ),
+                                    speciality=edu.get(
+                                        "speciality", "Unknown Speciality"
+                                    ),
+                                    type=edu.get("type"),
+                                )
+                            )
+                    education = education_items if education_items else None
+                except Exception as e:
+                    logger.warning(f"Failed to parse education items: {e}")
+                    education = None
+            else:
+                education = None
 
             candidate = CandidateCreate(
                 name=name,
                 email=clean_email,
                 position=position,
-                experience=parsed_data.get("experience"),
-                experience_years=years_val,
+                experience=experience,
                 status="pending",
                 gigachat_file_id=file_id,
                 tech=parsed_data.get("tech"),
-                education=parsed_data.get("education"),
+                education=education,
                 geo=parsed_data.get("geo"),
                 employment_type=employment_type,
             )
@@ -161,24 +246,26 @@ class PDFParserService:
 
             # Create chat completion with file attachment
             logger.info("Sending chat request to GigaChat...")
+
+            # Generate JSON schema for precise parsing
+            json_schema = self._get_vacancy_json_schema()
+
             result = self.gigachat_client.chat(
                 {
                     "messages": [
                         {
                             "role": "user",
-                            "content": """Проанализируй описание вакансии и извлеки информацию в формате JSON строго по схеме:
-{
-  "title": "название позиции",
-  "description": "описание вакансии",
-  "skills": ["основные, обязательные технические и софт навыки"],
-  "experience": "требуемый опыт (годы и тип)",
-  "responsibilities": "основные обязанности",
-  "domain": "сфера бизнеса",
-  "education": "требуемое образование и сертификаты",
-  "minor_skills": ["опциональные навыки"],
-  "company_info": "тип и размер организации"
-}
-Отвечай только корректным JSON без дополнительных комментариев. Если данных нет, ставь null или пустой массив.""",
+                            "content": f"""Проанализируй описание вакансии и извлеки всю доступную информацию в точном соответствии с JSON схемой.
+
+ВАЖНО:
+- Извлекай ВСЕ доступные данные, не оставляй поля пустыми без веской причины
+- Следуй инструкциям в описаниях полей JSON схемы
+- Если поле не найдено, используй null, но старайся найти максимум информации
+
+JSON схема с подробными инструкциями:
+{json_schema}
+
+Отвечай ТОЛЬКО валидным JSON без дополнительных комментариев или объяснений.""",
                             "attachments": [file_id],
                         }
                     ],
@@ -191,16 +278,72 @@ class PDFParserService:
             response_content = result.choices[0].message.content
             logger.info(f"GigaChat response: {response_content}")
 
-            parsed_data = json.loads(response_content)
+            # Clean JSON response from invisible Unicode characters
+            import re
+
+            cleaned_content = re.sub(r"[\u200b-\u200d\ufeff]", "", response_content)
+
+            # Parse and validate with Pydantic schema
+            parsed_data = json.loads(cleaned_content)
             logger.info(f"Parsed data: {parsed_data}")
+
+            # Fix common validation issues BEFORE schema validation
+            if parsed_data.get("minor_skills") is None:
+                parsed_data["minor_skills"] = []
+
+            # Convert employment_type string to enum
+            employment_type = None
+            if parsed_data.get("employment_type"):
+                employment_type_str = parsed_data.get("employment_type").lower()
+                # Map to enum values
+                if employment_type_str == "полная занятость":
+                    employment_type = EmploymentType.FULL_TIME
+                elif employment_type_str == "частичная занятость":
+                    employment_type = EmploymentType.PART_TIME
+                elif employment_type_str == "контракт":
+                    employment_type = EmploymentType.CONTRACT
+                elif employment_type_str == "стажировка":
+                    employment_type = EmploymentType.INTERNSHIP
+                parsed_data["employment_type"] = employment_type
+
+            # Convert experience_level string to enum
+            experience_level = None
+            if parsed_data.get("experience_level"):
+                experience_level_str = parsed_data.get("experience_level").lower()
+                # Map to enum values
+                if experience_level_str == "младший":
+                    experience_level = ExperienceLevel.JUNIOR
+                elif experience_level_str == "средний":
+                    experience_level = ExperienceLevel.MIDDLE
+                elif experience_level_str == "старший":
+                    experience_level = ExperienceLevel.SENIOR
+                elif experience_level_str == "ведущий":
+                    experience_level = ExperienceLevel.LEAD
+                parsed_data["experience_level"] = experience_level
+
+            # Validate with Pydantic schema
+            try:
+                validated_data = VacancyParsingSchema.model_validate(parsed_data)
+                logger.info(f"Validated data: {validated_data}")
+                # Use validated data for further processing
+                parsed_data = validated_data.model_dump()
+            except Exception as e:
+                logger.warning(f"Schema validation failed, using raw data: {e}")
 
             vacancy = VacancyCreate(
                 title=parsed_data.get("title", "Unknown Position"),
                 description=parsed_data.get("description", "No description available."),
                 status="open",
                 gigachat_file_id=file_id,
+                company=parsed_data.get("company"),
+                location=parsed_data.get("location"),
+                salary_min=parsed_data.get("salary_min"),
+                salary_max=parsed_data.get("salary_max"),
+                employment_type=parsed_data.get("employment_type"),
+                experience_level=parsed_data.get("experience_level"),
+                requirements=parsed_data.get("requirements"),
+                benefits=parsed_data.get("benefits"),
                 skills=parsed_data.get("skills"),
-                experience=parsed_data.get("experience"),
                 responsibilities=parsed_data.get("responsibilities"),
                 domain=parsed_data.get("domain"),
                 education=parsed_data.get("education"),

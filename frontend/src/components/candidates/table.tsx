@@ -5,7 +5,7 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { CandidateRead } from "../../api/client";
+import type { CandidateRead, ExperienceItem } from "../../api/client";
 import { CandidateStatusBadge } from "./status-badge";
 import { RelativeTimeTooltip } from "../ui/relative-time-tooltip";
 import { CandidateAvatar } from "./candidate-avatar";
@@ -64,11 +64,35 @@ export function useCandidatesTable(data: CandidateRead[]) {
 				cell: ({ row }) => row.original.position || <>&mdash;</>,
 			},
 			{
-				accessorKey: "experience_years",
-				header: "Опыт (лет)",
+				accessorKey: "experience",
+				header: "Опыт",
 				cell: ({ row }) => {
-					const years = row.original.experience_years;
-					return years ? `${years} лет` : <>&mdash;</>;
+					const experience = row.original.experience;
+					if (!experience) {
+						return <>&mdash;</>;
+					}
+
+					// Handle both string and array types
+                                        let experienceArray: ExperienceItem[] = [];
+					if (typeof experience === "string") {
+						try {
+							experienceArray = JSON.parse(experience);
+						} catch {
+							return <>&mdash;</>;
+						}
+					} else if (Array.isArray(experience)) {
+						experienceArray = experience;
+					}
+
+					if (experienceArray.length === 0) {
+						return <>&mdash;</>;
+					}
+
+					// Calculate total years from experience array
+                                        const totalYears = experienceArray.reduce((sum: number, exp: ExperienceItem) => {
+						return sum + (exp.years || 0);
+					}, 0);
+					return totalYears > 0 ? `${totalYears} лет` : <>&mdash;</>;
 				},
 			},
 			{

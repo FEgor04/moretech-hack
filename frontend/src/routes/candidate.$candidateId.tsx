@@ -32,7 +32,6 @@ const formSchema = z.object({
 	name: z.string().min(1, "Имя обязательно"),
 	email: z.string().email("Неверный формат email").optional().or(z.literal("")),
 	position: z.string().min(1, "Должность обязательна"),
-	experience_years: z.number().min(0, "Опыт не может быть отрицательным"),
 	status: z
 		.enum([
 			"pending",
@@ -47,7 +46,9 @@ const formSchema = z.object({
 	tech: z.string().optional(),
 	education: z.string().optional(),
 	geo: z.string().optional(),
-	employment_type: z.string().optional(),
+	employment_type: z
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
+		.optional(),
 	experience: z.string().optional(),
 });
 
@@ -65,12 +66,11 @@ function CandidateSelfPage() {
 	const updateMutation = useUpdateCandidate(candidateId);
 
 	const form = useForm<FormData>({
-		resolver: zodResolver(formSchema),
+                resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: candidate.name,
 			email: candidate.email || "",
 			position: candidate.position,
-			experience_years: candidate.experience_years ?? 0,
 			status: candidate.status,
 			skills: candidate.skills
 				? Array.isArray(candidate.skills)
@@ -88,7 +88,13 @@ function CandidateSelfPage() {
 					: JSON.stringify(candidate.education, null, 2)
 				: "",
 			geo: candidate.geo || "",
-			employment_type: candidate.employment_type || "",
+			employment_type:
+				(candidate.employment_type as
+					| "полная занятость"
+					| "частичная занятость"
+					| "контракт"
+					| "стажировка"
+					| undefined) || undefined,
 			experience: candidate.experience
 				? typeof candidate.experience === "string"
 					? candidate.experience
@@ -115,8 +121,10 @@ function CandidateSelfPage() {
 
 		const candidateData = {
 			...data,
-			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-			tech: techArray ? JSON.stringify(techArray) : undefined,
+			skills: skillsArray || undefined,
+			tech: techArray || undefined,
+			education: data.education ? JSON.parse(data.education) : undefined,
+			experience: data.experience ? JSON.parse(data.experience) : undefined,
 		};
 
 		updateMutation.mutate(candidateData, {
@@ -228,25 +236,6 @@ function CandidateSelfPage() {
 												)}
 											/>
 
-											<FormField
-												control={form.control}
-												name="experience_years"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Опыт работы (лет)</FormLabel>
-														<FormControl>
-															<Input
-																type="number"
-																{...field}
-																onChange={(e) =>
-																	field.onChange(Number(e.target.value))
-																}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
 											<FormField
 												control={form.control}
 												name="geo"

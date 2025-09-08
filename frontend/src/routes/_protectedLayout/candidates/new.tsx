@@ -46,13 +46,14 @@ const schema = z.object({
 	name: z.string().min(1, "Введите имя"),
 	email: z.string().email("Неверный email"),
 	position: z.string().min(1, "Введите должность"),
-	experience_years: z.number().int().min(0, "Опыт не может быть отрицательным"),
 	status: z.enum(CANDIDATE_STATUSES).optional(),
 	skills: z.string().optional(),
 	tech: z.string().optional(),
 	education: z.string().optional(),
 	geo: z.string().optional(),
-	employment_type: z.string().optional(),
+	employment_type: z
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
+		.optional(),
 	experience: z.string().optional(),
 });
 
@@ -69,13 +70,12 @@ function RouteComponent() {
 			name: "",
 			email: "",
 			position: "",
-			experience_years: 0,
 			status: undefined,
 			skills: "",
 			tech: "",
 			education: "",
 			geo: "",
-			employment_type: "",
+			employment_type: undefined,
 			experience: "",
 		},
 	});
@@ -98,8 +98,10 @@ function RouteComponent() {
 
 		const candidateData = {
 			...values,
-			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-			tech: techArray ? JSON.stringify(techArray) : undefined,
+			skills: skillsArray || undefined,
+			tech: techArray || undefined,
+			education: values.education ? JSON.parse(values.education) : undefined,
+			experience: values.experience ? JSON.parse(values.experience) : undefined,
 		};
 
 		await mutation.mutateAsync(candidateData);
@@ -155,25 +157,6 @@ function RouteComponent() {
 								<FormLabel>Должность</FormLabel>
 								<FormControl>
 									<Input placeholder="Frontend Developer" {...field} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name="experience_years"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Опыт (лет)</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										min={0}
-										step={1}
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
-									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -269,13 +252,14 @@ function RouteComponent() {
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										<SelectItem value="full-time">Полная занятость</SelectItem>
-										<SelectItem value="part-time">
+										<SelectItem value="полная занятость">
+											Полная занятость
+										</SelectItem>
+										<SelectItem value="частичная занятость">
 											Частичная занятость
 										</SelectItem>
-										<SelectItem value="contract">Контракт</SelectItem>
-										<SelectItem value="internship">Стажировка</SelectItem>
-										<SelectItem value="remote">Удаленная работа</SelectItem>
+										<SelectItem value="контракт">Контракт</SelectItem>
+										<SelectItem value="стажировка">Стажировка</SelectItem>
 									</SelectContent>
 								</Select>
 								<FormMessage />

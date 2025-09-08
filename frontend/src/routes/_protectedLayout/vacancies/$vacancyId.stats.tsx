@@ -3,8 +3,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
-import type { VacancyRead } from "@/api/client/types.gen";
+import type { VacancyRead, ExperienceItem } from "@/api/client/types.gen";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -34,7 +35,6 @@ import {
 type ExtendedVacancy = VacancyRead & {
 	company?: string | null;
 	experience_level?: string | null;
-	remote_work?: boolean;
 	benefits?: string | null;
 };
 
@@ -66,17 +66,23 @@ function VacancyStatsPage() {
 
 	// Подходящие кандидаты (простая эвристика)
 	const relevantCandidates = candidates.filter((candidate) => {
+		const candidateTotalYears =
+			candidate.experience && Array.isArray(candidate.experience)
+				? candidate.experience.reduce(
+                                                (sum: number, exp: ExperienceItem) => sum + (exp.years || 0),
+						0,
+					)
+				: 0;
+
 		const experienceMatch =
-			v.experience_level === "junior"
-				? (candidate.experience_years ?? 0) <= 2
-				: v.experience_level === "middle"
-					? (candidate.experience_years ?? 0) >= 2 &&
-						(candidate.experience_years ?? 0) <= 5
-					: v.experience_level === "senior"
-						? (candidate.experience_years ?? 0) >= 5 &&
-							(candidate.experience_years ?? 0) <= 8
-						: v.experience_level === "lead"
-							? (candidate.experience_years ?? 0) >= 8
+			v.experience_level === "младший"
+				? candidateTotalYears <= 2
+				: v.experience_level === "средний"
+					? candidateTotalYears >= 2 && candidateTotalYears <= 5
+					: v.experience_level === "старший"
+						? candidateTotalYears >= 5 && candidateTotalYears <= 8
+						: v.experience_level === "ведущий"
+							? candidateTotalYears >= 8
 							: true;
 
 		const positionMatch =
@@ -154,9 +160,16 @@ function VacancyStatsPage() {
 									Статистика: {v.title}
 								</h1>
 								<div className="flex items-center gap-2 mt-1">
-									<span className="text-sm text-muted-foreground">
-										{v.status === "open" ? "Открыта" : "Закрыта"}
-									</span>
+									<Badge
+										variant={v.status === "open" ? "default" : "secondary"}
+										className={
+											v.status === "open"
+												? "bg-green-100 text-green-800 border-green-200"
+												: "bg-red-100 text-red-800 border-red-200"
+										}
+									>
+										{v.status === "open" ? "🟢 Открыта" : "🔴 Закрыта"}
+									</Badge>
 								</div>
 							</div>
 						</div>
@@ -281,7 +294,16 @@ function VacancyStatsPage() {
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold">
-								{v.status === "open" ? "Открыта" : "Закрыта"}
+								<Badge
+									variant={v.status === "open" ? "default" : "secondary"}
+									className={
+										v.status === "open"
+											? "bg-green-100 text-green-800 border-green-200 text-lg px-3 py-1"
+											: "bg-red-100 text-red-800 border-red-200 text-lg px-3 py-1"
+									}
+								>
+									{v.status === "open" ? "🟢 Открыта" : "🔴 Закрыта"}
+								</Badge>
 							</div>
 							<p className="text-xs text-muted-foreground">
 								{daysOpen} дней в работе

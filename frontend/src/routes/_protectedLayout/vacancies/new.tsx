@@ -43,13 +43,15 @@ const schema = z.object({
 	location: z.string().optional(),
 	salary_min: z.number().optional(),
 	salary_max: z.number().optional(),
-	employment_type: z.string().optional(),
-	experience_level: z.string().optional(),
-	remote_work: z.boolean().optional(),
+	employment_type: z
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
+		.optional(),
+	experience_level: z
+		.enum(["младший", "средний", "старший", "ведущий"])
+		.optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),
 	skills: z.string().optional(),
-	experience: z.string().optional(),
 	responsibilities: z.string().optional(),
 	domain: z.string().optional(),
 	education: z.string().optional(),
@@ -74,13 +76,11 @@ function RouteComponent() {
 			location: "",
 			salary_min: undefined,
 			salary_max: undefined,
-			employment_type: "",
-			experience_level: "",
-			remote_work: false,
+			employment_type: undefined,
+			experience_level: undefined,
 			requirements: "",
 			benefits: "",
 			skills: "",
-			experience: "",
 			responsibilities: "",
 			domain: "",
 			education: "",
@@ -114,13 +114,9 @@ function RouteComponent() {
 
 		const vacancyData = {
 			...values,
-			skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
-			responsibilities: responsibilitiesArray
-				? JSON.stringify(responsibilitiesArray)
-				: undefined,
-			minor_skills: minorSkillsArray
-				? JSON.stringify(minorSkillsArray)
-				: undefined,
+			skills: skillsArray || undefined,
+			responsibilities: responsibilitiesArray || undefined,
+			minor_skills: minorSkillsArray || undefined,
 		};
 
 		await mutation.mutateAsync(vacancyData);
@@ -232,19 +228,6 @@ function RouteComponent() {
 										placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
 										rows={3}
 									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name="experience"
-						render={({ field }) => (
-							<FormItem className="col-span-2">
-								<FormLabel>Требования к опыту</FormLabel>
-								<FormControl>
-									<Textarea rows={3} {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
