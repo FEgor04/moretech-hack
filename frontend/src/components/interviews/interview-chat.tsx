@@ -27,9 +27,12 @@ type Props = {
 export function InterviewChat({ interviewId }: Props) {
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
 	const isFinished = interview.data.state === "done";
-	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(interviewId, {
-		disabled: isFinished,
-	});
+	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(
+		interviewId,
+		{
+			disabled: isFinished,
+		},
+	);
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
 	);
@@ -58,7 +61,6 @@ export function InterviewChat({ interviewId }: Props) {
 	const isSTT = socketState === "speech_recognition";
 	const isLLM = socketState === "generating_response";
 	const isTTS = socketState === "speech_synthesis";
-
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -149,19 +151,17 @@ export function InterviewChat({ interviewId }: Props) {
 						{isAwaiting ? (
 							<Tooltip>
 								<TooltipTrigger asChild>
-							<Button
-								onClick={sendAudioReadyMarker}
-								className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
-							>
-								<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
-								<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
-									<CheckIcon />
-								</span>
-							</Button>
+									<Button
+										onClick={sendAudioReadyMarker}
+										className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
+									>
+										<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
+										<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
+											<CheckIcon />
+										</span>
+									</Button>
 								</TooltipTrigger>
-								<TooltipContent>
-									Ответ готов
-								</TooltipContent>
+								<TooltipContent>Ответ готов</TooltipContent>
 							</Tooltip>
 						) : isSTT ? (
 							<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">

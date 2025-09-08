@@ -4,7 +4,12 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import z from "zod";
 
 const socketStateMessageSchema = z.object({
-	state: z.enum(["awaiting_user_answer", "speech_recognition", "generating_response", "speech_synthesis"]),
+	state: z.enum([
+		"awaiting_user_answer",
+		"speech_recognition",
+		"generating_response",
+		"speech_synthesis",
+	]),
 });
 
 type SocketState = z.infer<typeof socketStateMessageSchema>["state"];
@@ -18,7 +23,9 @@ export function useWebcamStreaming(
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const [isRecording, setIsRecording] = useState(false);
 	const isDisabled = options?.disabled === true;
-	const [socketState, setSocketState] = useState<SocketState | null>("awaiting_user_answer");
+	const [socketState, setSocketState] = useState<SocketState | null>(
+		"awaiting_user_answer",
+	);
 	const { sendMessage, readyState, lastMessage } = useWebSocket(
 		isDisabled ? null : `/ws/${interviewId}/video`,
 		{
@@ -171,10 +178,11 @@ export function useWebcamStreaming(
 				);
 			} else {
 				try {
-					const parsedData = socketStateMessageSchema.parse(JSON.parse(lastMessage.data));
+					const parsedData = socketStateMessageSchema.parse(
+						JSON.parse(lastMessage.data),
+					);
 					setSocketState(parsedData.state);
-				}
-				catch (error) {
+				} catch (error) {
 					console.error("Error parsing socket state message:", error);
 				}
 			}
