@@ -26,6 +26,7 @@ import { candidateQueryOptions } from "@/api/queries/candidates";
 import { SelectVacancy } from "@/components/vacancies/select-vacancy";
 import { SelectCandidate } from "@/components/candidates/select-candidate";
 import { Skeleton } from "../ui/skeleton";
+import { CopyIcon } from "lucide-react";
 
 const formSchema = z.object({
 	candidate_id: z.string().min(1, "Выберите кандидата"),
@@ -61,11 +62,23 @@ export function ScheduleInterviewDialog({
 			{
 				candidate_id: data.candidate_id,
 				vacancy_id: data.vacancy_id,
-				state: "in_progress",
+				state: "initialized",
 			},
 			{
-				onSuccess: () => {
-					toast.success("Интервью создано. Скопировать ссылку для кандидата");
+				onSuccess: (data) => {
+					toast.success("Интервью создано", {
+						action: {
+							label: "Скопировать ссылку",
+							actionButtonStyle: {
+								background: "var(--primary)",
+							},
+							onClick: () => {
+								navigator.clipboard.writeText(
+									`${window.location.origin}/interviews/${data.id}`,
+								);
+							},
+						},
+					});
 					setOpen(false);
 					form.reset();
 				},
