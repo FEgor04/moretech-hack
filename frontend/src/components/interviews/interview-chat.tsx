@@ -11,20 +11,23 @@ import {
 	ConversationScrollButton,
 } from "../ai-elements/conversation";
 import { Message, MessageContent, MessageAvatar } from "../ai-elements/message";
-import { Badge } from "../ui/badge";
 import { Response } from "../ai-elements/response";
 import WebcamComponent from "react-webcam";
 import { Button } from "../ui/button";
 import { useWebcamStreaming } from "@/hooks/use-webcam-streaming";
+import { InterviewStatusBadge } from "../candidates/interview-status-badge";
+import type { InterviewState } from "@/api/client";
 
 type Props = {
 	interviewId: string;
 };
 
 export function InterviewChat({ interviewId }: Props) {
-	const { webcamRef, sendAudioReadyMarker } = useWebcamStreaming(interviewId);
-
 	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
+	const isFinished = interview.data.state === ("done" as InterviewState);
+	const { webcamRef, sendAudioReadyMarker } = useWebcamStreaming(interviewId, {
+		disabled: isFinished,
+	});
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
 	);
@@ -57,16 +60,16 @@ export function InterviewChat({ interviewId }: Props) {
 					<div className="flex items-center justify-between">
 						<div>
 							<h1 className="text-2xl font-bold text-gray-900">
-								Собеседование
+								Собеседование{isFinished ? " (Завершено)" : ""}
 							</h1>
 							<p className="text-gray-600">
 								{candidate.data.name} •{" "}
 								{vacancy?.data.title || "Общее собеседование"}
 							</p>
 						</div>
-						<Badge variant="secondary" className="bg-green-100 text-green-800">
-							Активно
-						</Badge>
+						<InterviewStatusBadge
+							state={interview.data.state as InterviewState}
+						/>
 					</div>
 				</div>
 			</div>
@@ -74,14 +77,16 @@ export function InterviewChat({ interviewId }: Props) {
 			{/* Chat Container */}
 			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] flex flex-col">
 				{/* Webcam */}
-				<div className="w-full p-4">
-					<WebcamComponent
-						ref={webcamRef}
-						audio={true}
-						muted
-						className="w-full rounded-md shadow aspect-video bg-black"
-					/>
-				</div>
+				{!isFinished && (
+					<div className="w-full p-4">
+						<WebcamComponent
+							ref={webcamRef}
+							audio={true}
+							muted
+							className="w-full rounded-md shadow aspect-video bg-black"
+						/>
+					</div>
+				)}
 				{/* Messages */}
 				<Conversation className="flex-1">
 					<ConversationContent>
@@ -104,9 +109,11 @@ export function InterviewChat({ interviewId }: Props) {
 				</Conversation>
 
 				{/* Message Input */}
-				<div className="">
-					<Button onClick={sendAudioReadyMarker}>Ответ готов</Button>
-				</div>
+				{!isFinished && (
+					<div className="">
+						<Button onClick={sendAudioReadyMarker}>Ответ готов</Button>
+					</div>
+				)}
 			</div>
 		</div>
 	);

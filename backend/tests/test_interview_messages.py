@@ -62,46 +62,68 @@ class TestPostInterviewMessages:
         assert messages[1]["index"] == 1 and messages[1]["type"] == "assistant"
         assert "готовы начать" in messages[1]["text"].lower()
 
+        # Interview state should now be in_progress
+        r_state = await client.get(f"/interviews/{sample_interview['id']}")
+        assert r_state.status_code == 200
+        assert r_state.json()["state"] == "in_progress"
+
         # Subsequent call should fail (already initialized)
         r2 = await client.post(f"/interviews/{sample_interview['id']}/messages/first")
-        assert r2.status_code == 400
+        assert r2.status_code == 409
         assert "already" in r2.json()["detail"].lower()
 
     @pytest.mark.asyncio
     async def test_post_creates_user_and_assistant(
         self, client: AsyncClient, sample_interview: dict
     ):
+        # Before initialization, posting should be blocked
+        blocked = await client.post(
+            f"/interviews/{sample_interview['id']}/messages", json={"text": "Hello"}
+        )
+        assert blocked.status_code == 409
+
+        # Initialize first
+        r_init = await client.post(
+            f"/interviews/{sample_interview['id']}/messages/first"
+        )
+        assert r_init.status_code == 200
+
+        # Now posting should work
         response = await client.post(
-            f"/interviews/{sample_interview['id']}/messages",
-            json={"text": "Hello"},
+            f"/interviews/{sample_interview['id']}/messages", json={"text": "Hello"}
         )
         assert response.status_code == 200
         messages = response.json()
-        assert len(messages) == 2
+        assert len(messages) == 4
 
-        # Check ordering and fields
-        assert messages[0]["index"] == 0
-        assert messages[0]["type"] == "user"
-        assert messages[0]["text"] == "Hello"
-        assert messages[0]["interview_id"] == sample_interview["id"]
+        # Check ordering and fields for the new pair after initial system+assistant
+        assert [m["index"] for m in messages] == [0, 1, 2, 3]
 
-        assert messages[1]["index"] == 1
-        assert messages[1]["type"] == "assistant"
-        assert "Извините, произошла ошибка" in messages[1]["text"]
-        assert messages[1]["interview_id"] == sample_interview["id"]
+        assert messages[2]["type"] == "user"
+        assert messages[2]["text"] == "Hello"
+        assert messages[2]["interview_id"] == sample_interview["id"]
+
+        assert messages[3]["type"] == "assistant"
+        assert "Извините, произошла ошибка" in messages[3]["text"]
+        assert messages[3]["interview_id"] == sample_interview["id"]
 
     @pytest.mark.asyncio
     async def test_post_appends_in_order(
         self, client: AsyncClient, sample_interview: dict
     ):
+        # Initialize first
+        r0 = await client.post(f"/interviews/{sample_interview['id']}/messages/first")
+        assert r0.status_code == 200
         # First message pair
         r1 = await client.post(
             f"/interviews/{sample_interview['id']}/messages", json={"text": "Hi"}
         )
         assert r1.status_code == 200
         messages1 = r1.json()
-        assert len(messages1) == 2
-        assert [m["index"] for m in messages1] == [0, 1]
+        assert (
+            len(messages1) == 4
+        )  # includes system+assistant greeting (0,1) and new pair (2,3)
+        assert [m["index"] for m in messages1] == [0, 1, 2, 3]
 
         # Second message pair
         r2 = await client.post(
@@ -110,18 +132,21 @@ class TestPostInterviewMessages:
         )
         assert r2.status_code == 200
         messages2 = r2.json()
-        assert len(messages2) == 4
-        assert [m["index"] for m in messages2] == [0, 1, 2, 3]
-        assert messages2[2]["type"] == "user" and messages2[2]["text"] == "How are you?"
+        assert len(messages2) == 6
+        assert [m["index"] for m in messages2] == [0, 1, 2, 3, 4, 5]
+        assert messages2[4]["type"] == "user" and messages2[4]["text"] == "How are you?"
         assert (
-            messages2[3]["type"] == "assistant"
-            and "Извините, произошла ошибка" in messages2[3]["text"]
+            messages2[5]["type"] == "assistant"
+            and "Извините, произошла ошибка" in messages2[5]["text"]
         )
 
     @pytest.mark.asyncio
     async def test_post_missing_text_validation(
         self, client: AsyncClient, sample_interview: dict
     ):
+        # Initialize first to avoid 409
+        r0 = await client.post(f"/interviews/{sample_interview['id']}/messages/first")
+        assert r0.status_code == 200
         response = await client.post(
             f"/interviews/{sample_interview['id']}/messages",
             json={},
@@ -136,3 +161,29 @@ class TestPostInterviewMessages:
         )
         assert response.status_code == 404
         assert "Interview not found" in response.json()["detail"]
+
+    @pytest.mark.asyncio
+    async def test_post_blocked_when_done(
+        self, client: AsyncClient, sample_interview: dict
+    ):
+        # Initialize first
+        r0 = await client.post(f"/interviews/{sample_interview['id']}/messages/first")
+        assert r0.status_code == 200
+
+        # Mark interview as done via update
+        update_payload = {
+            "candidate_id": sample_interview["candidate_id"],
+            "status": "completed",
+            "state": "done",
+        }
+        r_upd = await client.patch(
+            f"/interviews/{sample_interview['id']}", json=update_payload
+        )
+        assert r_upd.status_code == 200
+        assert r_upd.json()["state"] == "done"
+
+        # Now posting should be blocked
+        blocked = await client.post(
+            f"/interviews/{sample_interview['id']}/messages", json={"text": "Hello"}
+        )
+        assert blocked.status_code == 409

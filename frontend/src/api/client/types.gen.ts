@@ -182,6 +182,7 @@ export type InterviewCreate = {
      * Status
      */
     status?: string | null;
+    state?: InterviewState;
     /**
      * Feedback
      */
@@ -275,8 +276,11 @@ export type InterviewRead = {
      */
     updated_at?: string | null;
     /**
+     * Id
+     */
+    id: string;
+    /**
      * Candidate Id
-     * UUID of the candidate
      */
     candidate_id: string;
     /**
@@ -291,10 +295,7 @@ export type InterviewRead = {
      * Recording Url
      */
     recording_url?: string | null;
-    /**
-     * Status
-     */
-    status?: string | null;
+    state: InterviewState;
     /**
      * Feedback
      */
@@ -303,11 +304,12 @@ export type InterviewRead = {
      * Feedback Positive
      */
     feedback_positive?: boolean | null;
-    /**
-     * Id
-     */
-    id: string;
 };
+
+/**
+ * InterviewState
+ */
+export type InterviewState = 'initialized' | 'in_progress' | 'done';
 
 /**
  * MeResponse

@@ -8,7 +8,7 @@ from app.models.candidate import Candidate
 from app.models.vacancy import Vacancy
 from app.models.interview_message import InterviewMessage, InterviewMessageType
 from app.schemas.common import InterviewMessageCreateRequest
-from app.services.exceptions import NotFoundError
+from app.services.exceptions import NotFoundError, ConflictError
 
 
 @pytest.fixture
@@ -116,6 +116,7 @@ class TestInterviewMessagesService:
         interview_id = "test-interview-id"
         payload = InterviewMessageCreateRequest(text="Привет!")
 
+        sample_interview.state = "in_progress"
         mock_session.get.return_value = sample_interview
 
         # Mock the execute result properly
@@ -161,6 +162,34 @@ class TestInterviewMessagesService:
             )
 
     @pytest.mark.asyncio
+    async def test_create_message_blocked_when_initialized(
+        self, interview_messages_service, mock_session, sample_interview
+    ):
+        interview_id = "test-interview-id"
+        payload = InterviewMessageCreateRequest(text="Hello")
+        sample_interview.state = "initialized"
+        mock_session.get.return_value = sample_interview
+
+        with pytest.raises(ConflictError):
+            await interview_messages_service.create_message(
+                mock_session, interview_id, payload
+            )
+
+    @pytest.mark.asyncio
+    async def test_create_message_blocked_when_done(
+        self, interview_messages_service, mock_session, sample_interview
+    ):
+        interview_id = "test-interview-id"
+        payload = InterviewMessageCreateRequest(text="Hello")
+        sample_interview.state = "done"
+        mock_session.get.return_value = sample_interview
+
+        with pytest.raises(ConflictError):
+            await interview_messages_service.create_message(
+                mock_session, interview_id, payload
+            )
+
+    @pytest.mark.asyncio
     @patch("app.services.interview_messages.get_gigachat_client")
     async def test_initialize_conversation_success(
         self,
@@ -185,6 +214,8 @@ class TestInterviewMessagesService:
                 return sample_vacancy
             return None
 
+        # Interview must be in initialized state to allow first message
+        sample_interview.state = "initialized"
         mock_session.get.side_effect = mock_get
         mock_session.scalar.return_value = 0  # No existing messages
 
@@ -209,7 +240,7 @@ class TestInterviewMessagesService:
         # Assert
         assert len(result) == 0  # Will be empty since we mocked empty scalars
         mock_session.add.assert_called()
-        mock_session.commit.assert_called_once()
+        mock_session.commit.assert_called()
 
     @pytest.mark.asyncio
     async def test_initialize_conversation_already_exists(
@@ -218,11 +249,12 @@ class TestInterviewMessagesService:
         """Test conversation initialization when conversation already exists."""
         # Arrange
         interview_id = "test-interview-id"
+        sample_interview.state = "initialized"
         mock_session.get.return_value = sample_interview
         mock_session.scalar.return_value = 1  # Messages already exist
 
         # Act & Assert
-        with pytest.raises(ValueError, match="Conversation already initialized"):
+        with pytest.raises(ConflictError, match="Conversation already initialized"):
             await interview_messages_service.initialize_conversation(
                 mock_session, interview_id
             )

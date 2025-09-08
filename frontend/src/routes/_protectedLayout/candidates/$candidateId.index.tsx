@@ -59,10 +59,10 @@ function CandidateDetail() {
 	// Статистика по интервью
 	const totalInterviews = candidateInterviews.length;
 	const completedInterviews = candidateInterviews.filter(
-		(i) => i.status === "завершено",
+		(i) => i.state === "done",
 	).length;
 	const activeInterviews = candidateInterviews.filter(
-		(i) => i.status === "на собеседовании",
+		(i) => i.state === "in_progress",
 	).length;
 	const positiveFeedback = candidateInterviews.filter(
 		(i) => i.feedback_positive === true,
@@ -123,12 +123,7 @@ function CandidateDetail() {
 						<Button variant="outline">Запланировать интервью</Button>
 					</ScheduleInterviewDialog>
 					<Button asChild>
-						<Link
-							to="/candidates/$candidateId/edit"
-							params={{ candidateId: params.candidateId }}
-						>
-							Редактировать
-						</Link>
+						<a href={`/candidates/${params.candidateId}/edit`}>Редактировать</a>
 					</Button>
 				</div>
 			</div>
@@ -201,7 +196,7 @@ function CandidateDetail() {
 										<p className="text-sm font-medium">
 											{lastUpdated === 0
 												? "Сегодня"
-												: `${lastUpdated} дн. назад`}
+												: "${lastUpdated} дн. назад"}
 										</p>
 									</div>
 								</div>
@@ -561,13 +556,10 @@ function CandidateDetail() {
 								className="w-full justify-start"
 								variant="outline"
 							>
-								<Link
-									to="/candidates/$candidateId/edit"
-									params={{ candidateId: params.candidateId }}
-								>
+								<a href={`/candidates/${params.candidateId}/edit`}>
 									<UserIcon className="h-4 w-4 mr-2" />
 									Редактировать профиль
-								</Link>
+								</a>
 							</Button>
 							<Button
 								asChild
