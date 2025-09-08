@@ -26,7 +26,6 @@ import { candidateQueryOptions } from "@/api/queries/candidates";
 import { SelectVacancy } from "@/components/vacancies/select-vacancy";
 import { SelectCandidate } from "@/components/candidates/select-candidate";
 import { Skeleton } from "../ui/skeleton";
-import { CopyIcon } from "lucide-react";
 
 const formSchema = z.object({
 	candidate_id: z.string().min(1, "Выберите кандидата"),
