@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
@@ -29,6 +30,7 @@ import {
 	AlertCircleIcon,
 	CalendarIcon,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -132,6 +134,41 @@ function VacancyStatsPage() {
 		: 0;
 
 	return (
+		<Suspense
+			fallback={
+				<div>
+					<div className="bg-white border-b">
+						<div className="max-w-6xl mx-auto px-4 py-4">
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-4">
+									<Skeleton className="h-9 w-24" />
+									<div>
+										<Skeleton className="h-7 w-64" />
+										<div className="flex items-center gap-2 mt-1">
+											<Skeleton className="h-5 w-20" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div className="max-w-6xl mx-auto p-6 space-y-6">
+							<Skeleton className="h-40" />
+							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+								<Skeleton className="h-28" />
+								<Skeleton className="h-28" />
+								<Skeleton className="h-28" />
+								<Skeleton className="h-28" />
+							</div>
+							<div className="grid gap-4 md:grid-cols-2">
+								<Skeleton className="h-80" />
+								<Skeleton className="h-80" />
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+		>
 		<div>
 			<div className="bg-white border-b">
 				<div className="max-w-6xl mx-auto px-4 py-4">
@@ -394,5 +431,6 @@ function VacancyStatsPage() {
 				</div>
 			</div>
 		</div>
+		</Suspense>
 	);
 }

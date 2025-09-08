@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useVacanciesTable } from "@/components/vacancies/table";
@@ -6,6 +7,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { CreateFromPDFButton } from "@/components/vacancies/create-from-pdf";
 import { PlusIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_protectedLayout/vacancies/")({
 	component: VacanciesPage,
@@ -23,6 +25,25 @@ function VacanciesPage() {
 	const table = useVacanciesTable(vacancies.data ?? []);
 
 	return (
+		<Suspense
+			fallback={
+				<div className="space-y-6">
+					<header className="flex flex-row justify-between items-center">
+						<div className="flex flex-col gap-2">
+							<Skeleton className="h-7 w-40" />
+							<Skeleton className="h-4 w-72" />
+						</div>
+						<div className="flex flex-row gap-2">
+							<Skeleton className="h-10 w-24" />
+							<Skeleton className="h-10 w-48" />
+						</div>
+					</header>
+					<main>
+						<Skeleton className="h-96 w-full" />
+					</main>
+				</div>
+			}
+		>
 		<div className="space-y-6">
 			<header className="flex flex-row justify-between items-center">
 				<div className="flex flex-col">
@@ -45,5 +66,6 @@ function VacanciesPage() {
 				<DataTable table={table} />
 			</main>
 		</div>
+		</Suspense>
 	);
 }

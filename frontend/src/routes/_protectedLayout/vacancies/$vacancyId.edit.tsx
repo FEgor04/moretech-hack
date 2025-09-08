@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -49,6 +50,7 @@ import {
 	ClockIcon,
 	UsersIcon,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
 	title: z.string().min(1, "Название обязательно"),
@@ -141,6 +143,34 @@ function VacancyEdit() {
 	};
 
 	return (
+		<Suspense
+			fallback={
+				<div>
+					<div className="bg-white border-b">
+						<div className="max-w-6xl mx-auto px-4 py-4">
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-4">
+									<Skeleton className="h-9 w-24" />
+									<div>
+										<Skeleton className="h-7 w-64" />
+										<div className="flex items-center gap-2 mt-1">
+											<Skeleton className="h-5 w-20" />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div className="max-w-6xl mx-auto p-6">
+							<div className="grid gap-6 lg:grid-cols-3">
+								<Skeleton className="h-[720px] lg:col-span-2" />
+								<Skeleton className="h-[420px]" />
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+		>
 		<div>
 			<div className="bg-white border-b">
 				<div className="max-w-6xl mx-auto px-4 py-4">
@@ -172,205 +202,204 @@ function VacancyEdit() {
 						</div>
 					</div>
 				</div>
-			</div>
 
-			<div className="max-w-6xl mx-auto p-6">
-				<div className="grid gap-6 lg:grid-cols-3">
-					<div className="lg:col-span-2 space-y-6">
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<BriefcaseIcon className="h-5 w-5" />
-									Информация о вакансии
-								</CardTitle>
-								<CardDescription>
-									Редактируйте основную информацию о вакансии
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<Form {...form}>
-									<form
-										onSubmit={form.handleSubmit(onSubmit)}
-										className="space-y-6"
-									>
-										<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-											<FormField
-												control={form.control}
-												name="title"
-												render={({ field }) => (
-													<FormItem className="md:col-span-2">
-														<FormLabel>Название вакансии</FormLabel>
-														<FormControl>
-															<Input {...field} />
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="company"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Компания</FormLabel>
-														<FormControl>
-															<Input {...field} />
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="location"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Местоположение</FormLabel>
-														<FormControl>
-															<Input {...field} />
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="salary_min"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Минимальная зарплата</FormLabel>
-														<FormControl>
-															<Input
-																type="number"
-																{...field}
-																onChange={(e) =>
-																	field.onChange(
-																		e.target.value
-																			? Number(e.target.value)
-																			: undefined,
-																	)
-																}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="salary_max"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Максимальная зарплата</FormLabel>
-														<FormControl>
-															<Input
-																type="number"
-																{...field}
-																onChange={(e) =>
-																	field.onChange(
-																		e.target.value
-																			? Number(e.target.value)
-																			: undefined,
-																	)
-																}
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="employment_type"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Тип занятости</FormLabel>
-														<Select
-															onValueChange={field.onChange}
-															defaultValue={field.value}
-														>
+				<div className="max-w-6xl mx-auto p-6">
+					<div className="grid gap-6 lg:grid-cols-3">
+						<div className="lg:col-span-2 space-y-6">
+							<Card>
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2">
+										<BriefcaseIcon className="h-5 w-5" />
+										Информация о вакансии
+									</CardTitle>
+									<CardDescription>
+										Редактируйте основную информацию о вакансии
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<Form {...form}>
+										<form
+											onSubmit={form.handleSubmit(onSubmit)}
+											className="space-y-6"
+										>
+											<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+												<FormField
+													control={form.control}
+													name="title"
+													render={({ field }) => (
+														<FormItem className="md:col-span-2">
+															<FormLabel>Название вакансии</FormLabel>
 															<FormControl>
-																<SelectTrigger className="w-full">
-																	<SelectValue placeholder="Выберите тип занятости" />
-																</SelectTrigger>
+																<Input {...field} />
 															</FormControl>
-															<SelectContent>
-																<SelectItem value="full_time">
-																	Полная занятость
-																</SelectItem>
-																<SelectItem value="part_time">
-																	Частичная занятость
-																</SelectItem>
-																<SelectItem value="contract">
-																	Контракт
-																</SelectItem>
-																<SelectItem value="internship">
-																	Стажировка
-																</SelectItem>
-															</SelectContent>
-														</Select>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
 
-											<FormField
-												control={form.control}
-												name="experience_level"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Уровень опыта</FormLabel>
-														<Select
-															onValueChange={field.onChange}
-															defaultValue={field.value}
-														>
+												<FormField
+													control={form.control}
+													name="company"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Компания</FormLabel>
 															<FormControl>
-																<SelectTrigger className="w-full">
-																	<SelectValue placeholder="Выберите уровень опыта" />
-																</SelectTrigger>
+																<Input {...field} />
 															</FormControl>
-															<SelectContent>
-																<SelectItem value="junior">Junior</SelectItem>
-																<SelectItem value="middle">Middle</SelectItem>
-																<SelectItem value="senior">Senior</SelectItem>
-																<SelectItem value="lead">Lead</SelectItem>
-															</SelectContent>
-														</Select>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
 
-											<FormField
-												control={form.control}
-												name="status"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Статус</FormLabel>
-														<Select
-															onValueChange={field.onChange}
-															defaultValue={field.value}
-														>
+												<FormField
+													control={form.control}
+													name="location"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Местоположение</FormLabel>
 															<FormControl>
-																<SelectTrigger className="w-full">
-																	<SelectValue placeholder="Выберите статус" />
-																</SelectTrigger>
+																<Input {...field} />
 															</FormControl>
-															<SelectContent>
-																<SelectItem value="open">Открыта</SelectItem>
-																<SelectItem value="closed">Закрыта</SelectItem>
-															</SelectContent>
-														</Select>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-										</div>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="salary_min"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Минимальная зарплата</FormLabel>
+															<FormControl>
+																<Input
+																	type="number"
+																	{...field}
+																	onChange={(e) =>
+																		field.onChange(
+																			e.target.value
+																				? Number(e.target.value)
+																				: undefined,
+																		)
+																	}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="salary_max"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Максимальная зарплата</FormLabel>
+															<FormControl>
+																<Input
+																	type="number"
+																	{...field}
+																	onChange={(e) =>
+																		field.onChange(
+																			e.target.value
+																				? Number(e.target.value)
+																				: undefined,
+																		)
+																	}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="employment_type"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Тип занятости</FormLabel>
+															<Select
+																onValueChange={field.onChange}
+																defaultValue={field.value}
+															>
+																<FormControl>
+																	<SelectTrigger className="w-full">
+																		<SelectValue placeholder="Выберите тип занятости" />
+																	</SelectTrigger>
+																</FormControl>
+																<SelectContent>
+																	<SelectItem value="full_time">
+																		Полная занятость
+																	</SelectItem>
+																	<SelectItem value="part_time">
+																		Частичная занятость
+																	</SelectItem>
+																	<SelectItem value="contract">
+																		Контракт
+																	</SelectItem>
+																	<SelectItem value="internship">
+																		Стажировка
+																	</SelectItem>
+																</SelectContent>
+															</Select>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="experience_level"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Уровень опыта</FormLabel>
+															<Select
+																onValueChange={field.onChange}
+																defaultValue={field.value}
+															>
+																<FormControl>
+																	<SelectTrigger className="w-full">
+																		<SelectValue placeholder="Выберите уровень опыта" />
+																	</SelectTrigger>
+																</FormControl>
+																<SelectContent>
+																	<SelectItem value="junior">Junior</SelectItem>
+																	<SelectItem value="middle">Middle</SelectItem>
+																	<SelectItem value="senior">Senior</SelectItem>
+																	<SelectItem value="lead">Lead</SelectItem>
+																</SelectContent>
+															</Select>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="status"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Статус</FormLabel>
+															<Select
+																onValueChange={field.onChange}
+																defaultValue={field.value}
+															>
+																<FormControl>
+																	<SelectTrigger className="w-full">
+																		<SelectValue placeholder="Выберите статус" />
+																	</SelectTrigger>
+																</FormControl>
+																<SelectContent>
+																	<SelectItem value="open">Открыта</SelectItem>
+																	<SelectItem value="closed">Закрыта</SelectItem>
+																</SelectContent>
+															</Select>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</div>
 
 										<FormField
 											control={form.control}
@@ -487,5 +516,6 @@ function VacancyEdit() {
 				</div>
 			</div>
 		</div>
+		</Suspense>
 	);
 }

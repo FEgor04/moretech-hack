@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import { useUpdateCandidate } from "@/api/mutations/candidates";
@@ -26,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { UserIcon, BriefcaseIcon } from "lucide-react";
 import { UploadCV } from "@/components/candidates/upload-cv";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
 	name: z.string().min(1, "Имя обязательно"),
@@ -48,6 +50,12 @@ type FormData = z.infer<typeof formSchema>;
 
 export const Route = createFileRoute("/candidate/$candidateId")({
 	component: CandidateSelfPage,
+	loader: async ({ params, context }) => {
+		await context.queryClient.fetchQuery(
+			candidateQueryOptions(params.candidateId),
+		);
+		return null;
+	},
 });
 
 function CandidateSelfPage() {
@@ -107,6 +115,22 @@ function CandidateSelfPage() {
 	};
 
 	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-gray-50 py-8">
+					<div className="max-w-4xl mx-auto px-4 space-y-6">
+						<div>
+							<Skeleton className="h-8 w-48" />
+							<Skeleton className="mt-2 h-4 w-80" />
+						</div>
+						<div className="grid gap-6 lg:grid-cols-3">
+							<Skeleton className="h-[520px] lg:col-span-2" />
+							<Skeleton className="h-[420px]" />
+						</div>
+					</div>
+				</div>
+			}
+		>
 		<div className="min-h-screen bg-gray-50 py-8">
 			<div className="max-w-4xl mx-auto px-4">
 				<div className="mb-8">
@@ -284,5 +308,6 @@ function CandidateSelfPage() {
 				</div>
 			</div>
 		</div>
+		</Suspense>
 	);
 }

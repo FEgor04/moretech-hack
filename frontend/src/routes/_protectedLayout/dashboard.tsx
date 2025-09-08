@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
 import type { VacancyRead } from "@/api/client/types.gen";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -38,6 +40,14 @@ import {
 
 export const Route = createFileRoute("/_protectedLayout/dashboard")({
 	component: Dashboard,
+	loader: async ({ context }) => {
+		await Promise.all([
+			context.queryClient.fetchQuery(vacanciesQueryOptions()),
+			context.queryClient.fetchQuery(candidatesQueryOptions()),
+			context.queryClient.fetchQuery(interviewsQueryOptions()),
+		]);
+		return null;
+	},
 });
 
 function Dashboard() {
@@ -128,6 +138,33 @@ function Dashboard() {
 			: 0;
 
 	return (
+		<Suspense
+			fallback={
+				<div className="space-y-6">
+					<div>
+						<div className="h-8 w-48"><Skeleton className="h-8 w-48" /></div>
+						<div className="mt-2 h-4 w-80"><Skeleton className="h-4 w-80" /></div>
+					</div>
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+						<Skeleton className="h-28" />
+						<Skeleton className="h-28" />
+						<Skeleton className="h-28" />
+						<Skeleton className="h-28" />
+					</div>
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+						<Skeleton className="h-40" />
+						<Skeleton className="h-40" />
+						<Skeleton className="h-40" />
+						<Skeleton className="h-40" />
+					</div>
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+						<Skeleton className="h-72" />
+						<Skeleton className="h-72" />
+						<Skeleton className="h-72" />
+					</div>
+				</div>
+			}
+		>
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold tracking-tight">Дашборд</h1>
@@ -372,5 +409,6 @@ function Dashboard() {
 				</Card>
 			</div>
 		</div>
+		</Suspense>
 	);
 }

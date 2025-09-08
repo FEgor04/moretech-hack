@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { vacancyQueryOptions } from "@/api/queries/vacancies";
 import { useUpdateVacancy } from "@/api/mutations/vacancies";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -6,6 +7,7 @@ import type { VacancyRead } from "@/api/client/types.gen";
 import { vacancyNotesQueryOptions } from "@/api/queries/vacancies";
 import { useCreateVacancyNote } from "@/api/mutations/vacancies";
 import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -92,10 +94,15 @@ export const Route = createFileRoute("/_protectedLayout/vacancies/$vacancyId/")(
 	{
 		component: VacancyDetail,
 		loader: async ({ params, context }) => {
-			const vacancy = await context.queryClient.fetchQuery(
-				vacancyQueryOptions(Number(params.vacancyId)),
-			);
-			return { vacancy };
+			await Promise.all([
+				context.queryClient.fetchQuery(
+					vacancyQueryOptions(Number(params.vacancyId)),
+				),
+				context.queryClient.fetchQuery(
+					vacancyNotesQueryOptions(Number(params.vacancyId)),
+				),
+			]);
+			return null;
 		},
 	},
 );
@@ -186,6 +193,36 @@ function VacancyDetail() {
 	};
 
 	return (
+		<Suspense
+			fallback={
+				<div>
+					<div className="bg-white border-b">
+						<div className="max-w-6xl mx-auto px-4 py-4">
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-4">
+									<Skeleton className="h-9 w-24" />
+									<div>
+										<Skeleton className="h-7 w-64" />
+										<div className="flex items-center gap-2 mt-1">
+											<Skeleton className="h-5 w-20" />
+										</div>
+									</div>
+								</div>
+								<div className="flex items-center gap-2">
+									<Skeleton className="h-9 w-32" />
+								</div>
+							</div>
+						</div>
+					</div>
+					<div className="max-w-6xl mx-auto p-6">
+						<div className="grid gap-6 lg:grid-cols-3">
+							<Skeleton className="h-[720px] lg:col-span-2" />
+							<Skeleton className="h-[720px]" />
+						</div>
+					</div>
+				</div>
+			}
+		>
 		<div>
 			<div className="bg-white border-b">
 				<div className="max-w-6xl mx-auto px-4 py-4">
@@ -611,5 +648,6 @@ function VacancyDetail() {
 				</div>
 			</div>
 		</div>
+		</Suspense>
 	);
 }

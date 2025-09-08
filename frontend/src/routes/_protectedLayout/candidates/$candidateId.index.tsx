@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import { interviewsByCandidateQueryOptions } from "@/api/queries/interviews";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -32,16 +33,22 @@ import {
 	StarIcon,
 	ActivityIcon,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId/",
 )({
 	component: CandidateDetail,
 	loader: async ({ params, context }) => {
-		const candidate = await context.queryClient.fetchQuery(
-			candidateQueryOptions(params.candidateId),
-		);
-		return { candidate };
+		await Promise.all([
+			context.queryClient.fetchQuery(
+				candidateQueryOptions(params.candidateId),
+			),
+			context.queryClient.fetchQuery(
+				interviewsByCandidateQueryOptions(params.candidateId),
+			),
+		]);
+		return null;
 	},
 });
 
@@ -85,6 +92,34 @@ function CandidateDetail() {
 		: 0;
 
 	return (
+		<Suspense
+			fallback={
+				<div className="space-y-6">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-4">
+							<Skeleton className="h-9 w-24" />
+							<Skeleton className="h-10 w-10 rounded-full" />
+							<div>
+								<Skeleton className="h-7 w-64" />
+								<Skeleton className="mt-2 h-4 w-40" />
+							</div>
+						</div>
+						<div className="flex gap-2">
+							<Skeleton className="h-10 w-36" />
+							<Skeleton className="h-10 w-40" />
+							<Skeleton className="h-10 w-32" />
+						</div>
+					</div>
+
+					<div className="grid gap-6 lg:grid-cols-3">
+						<Skeleton className="h-[420px] lg:col-span-2" />
+						<Skeleton className="h-[420px]" />
+					</div>
+
+					<Skeleton className="h-96" />
+				</div>
+			}
+		>
 		<div className="space-y-6">
 			{/* Header with candidate name and edit button */}
 			<div className="flex items-center justify-between">
@@ -439,5 +474,6 @@ function CandidateDetail() {
 			{/* Список интервью */}
 			<InterviewsList candidateId={params.candidateId} />
 		</div>
+		</Suspense>
 	);
 }
