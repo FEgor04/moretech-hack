@@ -18,6 +18,7 @@ import { useWebcamStreaming } from "@/hooks/use-webcam-streaming";
 import { InterviewStatusBadge } from "../candidates/interview-status-badge";
 import type { InterviewState } from "@/api/client";
 import { CheckIcon, Loader2Icon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type Props = {
 	interviewId: string;
@@ -146,6 +147,8 @@ export function InterviewChat({ interviewId }: Props) {
 				{!isFinished && (
 					<div className="flex justify-center py-4">
 						{isAwaiting ? (
+							<Tooltip>
+								<TooltipTrigger asChild>
 							<Button
 								onClick={sendAudioReadyMarker}
 								className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
@@ -155,6 +158,11 @@ export function InterviewChat({ interviewId }: Props) {
 									<CheckIcon />
 								</span>
 							</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									Ответ готов
+								</TooltipContent>
+							</Tooltip>
 						) : isSTT ? (
 							<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">
 								<Loader2Icon className="size-6 animate-spin" />
