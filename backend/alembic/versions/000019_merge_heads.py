@@ -1,4 +1,4 @@
-"""merge heads 
+"""merge heads
 
 Revision ID: 000019
 Revises: 000017, 000018
@@ -8,8 +8,6 @@ Create Date: 2025-09-08 10:46:40.573357
 
 from typing import Sequence, Union
 
-from alembic import op
-import sqlalchemy as sa
 
 
 revision: str = "000019"
