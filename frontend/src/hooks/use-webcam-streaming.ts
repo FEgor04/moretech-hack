@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import type Webcam from "react-webcam";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import z from "zod";
+
+const socketStateMessageSchema = z.object({
+	state: z.enum([
+		"awaiting_user_answer",
+		"speech_recognition",
+		"generating_response",
+		"speech_synthesis",
+	]),
+});
+
+type SocketState = z.infer<typeof socketStateMessageSchema>["state"];
 
 export function useWebcamStreaming(
 	interviewId: string,
@@ -11,6 +23,9 @@ export function useWebcamStreaming(
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const [isRecording, setIsRecording] = useState(false);
 	const isDisabled = options?.disabled === true;
+	const [socketState, setSocketState] = useState<SocketState | null>(
+		"awaiting_user_answer",
+	);
 	const { sendMessage, readyState, lastMessage } = useWebSocket(
 		isDisabled ? null : `/ws/${interviewId}/video`,
 		{
@@ -38,11 +53,7 @@ export function useWebcamStreaming(
 
 	useEffect(() => {
 		if (lastMessage) {
-			console.log("WebSocket message received:");
-
 			if (lastMessage.data instanceof Blob) {
-				console.log("Processing audio blob:");
-
 				// Check if blob is empty or has invalid size
 				if (lastMessage.data.size === 0) {
 					console.warn("Received empty audio blob, skipping playback");
@@ -166,7 +177,14 @@ export function useWebcamStreaming(
 					{ once: true },
 				);
 			} else {
-				console.log("Received non-blob message:", lastMessage.data);
+				try {
+					const parsedData = socketStateMessageSchema.parse(
+						JSON.parse(lastMessage.data),
+					);
+					setSocketState(parsedData.state);
+				} catch (error) {
+					console.error("Error parsing socket state message:", error);
+				}
 			}
 		}
 	}, [lastMessage]);
@@ -229,5 +247,6 @@ export function useWebcamStreaming(
 		startRecording,
 		handleStopRecording,
 		sendAudioReadyMarker,
+		socketState,
 	};
 }
