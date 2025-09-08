@@ -73,7 +73,7 @@ export function useCandidatesTable(data: CandidateRead[]) {
 					}
 
 					// Handle both string and array types
-                                        let experienceArray: ExperienceItem[] = [];
+					let experienceArray: ExperienceItem[] = [];
 					if (typeof experience === "string") {
 						try {
 							experienceArray = JSON.parse(experience);
@@ -89,9 +89,12 @@ export function useCandidatesTable(data: CandidateRead[]) {
 					}
 
 					// Calculate total years from experience array
-                                        const totalYears = experienceArray.reduce((sum: number, exp: ExperienceItem) => {
-						return sum + (exp.years || 0);
-					}, 0);
+					const totalYears = experienceArray.reduce(
+						(sum: number, exp: ExperienceItem) => {
+							return sum + (exp.years || 0);
+						},
+						0,
+					);
 					return totalYears > 0 ? `${totalYears} лет` : <>&mdash;</>;
 				},
 			},

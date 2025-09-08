@@ -108,7 +108,7 @@ function Dashboard() {
 						// Calculate total years from experience array
 						if (c.experience && Array.isArray(c.experience)) {
 							const totalYears = c.experience.reduce(
-                                                               (expSum: number, exp: ExperienceItem) => {
+								(expSum: number, exp: ExperienceItem) => {
 									return expSum + (exp.years || 0);
 								},
 								0,

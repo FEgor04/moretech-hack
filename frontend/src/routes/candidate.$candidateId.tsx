@@ -66,7 +66,7 @@ function CandidateSelfPage() {
 	const updateMutation = useUpdateCandidate(candidateId);
 
 	const form = useForm<FormData>({
-                resolver: zodResolver(formSchema),
+		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: candidate.name,
 			email: candidate.email || "",

@@ -69,7 +69,7 @@ function VacancyStatsPage() {
 		const candidateTotalYears =
 			candidate.experience && Array.isArray(candidate.experience)
 				? candidate.experience.reduce(
-                                                (sum: number, exp: ExperienceItem) => sum + (exp.years || 0),
+						(sum: number, exp: ExperienceItem) => sum + (exp.years || 0),
 						0,
 					)
 				: 0;
