@@ -64,8 +64,17 @@ export function ScheduleInterviewDialog({
 				state: "initialized",
 			},
 			{
-				onSuccess: () => {
-					toast.success("Интервью создано. Скопировать ссылку для кандидата");
+				onSuccess: (data) => {
+					toast.success("Интервью создано", {
+						action: {
+							label: "Скопировать ссылку",
+							onClick: () => {
+								navigator.clipboard.writeText(
+									`${window.location.origin}/interviews/${data.id}`,
+								);
+							},
+						},
+					});
 					setOpen(false);
 					form.reset();
 				},
