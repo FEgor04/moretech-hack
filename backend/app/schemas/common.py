@@ -178,17 +178,21 @@ class CandidateBase(BaseModel):
         if v is None or v == "":
             return None
         if isinstance(v, str):
-            # Try to match the string to enum values
-            v_lower = v.lower().replace(" ", "_")
+            # Try to match the string to enum values (exact match first)
+            for enum_val in EmploymentType:
+                if enum_val.value == v:
+                    return enum_val
+            # Try case-insensitive match
+            v_lower = v.lower()
             for enum_val in EmploymentType:
                 if enum_val.value == v_lower:
                     return enum_val
             # If no exact match, try some common variations
-            if v_lower in ["fulltime", "full-time", "full time"]:
+            if v_lower in ["fulltime", "full-time", "full time", "полная занятость"]:
                 return EmploymentType.FULL_TIME
-            elif v_lower in ["parttime", "part-time", "part time"]:
+            elif v_lower in ["parttime", "part-time", "part time", "частичная занятость"]:
                 return EmploymentType.PART_TIME
-            elif v_lower in ["contract", "contractor"]:
+            elif v_lower in ["contract", "contractor", "контракт"]:
                 return EmploymentType.CONTRACT
             elif v_lower in ["intern", "internship", "стажировка"]:
                 return EmploymentType.INTERNSHIP
@@ -285,7 +289,11 @@ class VacancyBase(BaseModel):
         if v is None or v == "":
             return None
         if isinstance(v, str):
-            # Try to match the string to enum values (Russian with spaces)
+            # Try to match the string to enum values (exact match first)
+            for enum_val in EmploymentType:
+                if enum_val.value == v:
+                    return enum_val
+            # Try case-insensitive match
             v_lower = v.lower()
             for enum_val in EmploymentType:
                 if enum_val.value == v_lower:
@@ -391,17 +399,21 @@ class VacancyUpdate(BaseModel):
         if v is None or v == "":
             return None
         if isinstance(v, str):
-            # Try to match the string to enum values
-            v_lower = v.lower().replace(" ", "_")
+            # Try to match the string to enum values (exact match first)
+            for enum_val in EmploymentType:
+                if enum_val.value == v:
+                    return enum_val
+            # Try case-insensitive match
+            v_lower = v.lower()
             for enum_val in EmploymentType:
                 if enum_val.value == v_lower:
                     return enum_val
             # If no exact match, try some common variations
-            if v_lower in ["fulltime", "full-time", "full time"]:
+            if v_lower in ["fulltime", "full-time", "full time", "полная занятость"]:
                 return EmploymentType.FULL_TIME
-            elif v_lower in ["parttime", "part-time", "part time"]:
+            elif v_lower in ["parttime", "part-time", "part time", "частичная занятость"]:
                 return EmploymentType.PART_TIME
-            elif v_lower in ["contract", "contractor"]:
+            elif v_lower in ["contract", "contractor", "контракт"]:
                 return EmploymentType.CONTRACT
             elif v_lower in ["intern", "internship", "стажировка"]:
                 return EmploymentType.INTERNSHIP
