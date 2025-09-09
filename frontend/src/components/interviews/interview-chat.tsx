@@ -19,9 +19,8 @@ import { InterviewStatusBadge } from "../candidates/interview-status-badge";
 import type { InterviewState } from "@/api/client";
 import { CheckIcon, Loader2Icon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { Input } from "../ui/input";
 import { useState } from "react";
-import { PromptInput, PromptInputTextarea } from "../ai-elements/prompt-input";
+import { PromptInputTextarea } from "../ai-elements/prompt-input";
 
 type Props = {
 	interviewId: string;
