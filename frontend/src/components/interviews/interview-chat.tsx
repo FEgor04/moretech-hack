@@ -67,7 +67,7 @@ export function InterviewChat({ interviewId }: Props) {
 			{/* Header */}
 			<div className="bg-white border-b border-gray-200 px-6 py-4">
 				<div className="max-w-4xl mx-auto">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<h1 className="text-2xl font-bold text-gray-900">
 								Собеседование{isFinished ? " (Завершено)" : ""}

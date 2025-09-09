@@ -43,15 +43,19 @@ export function useCandidatesTable(data: CandidateRead[]) {
 				cell: ({ row }) => (
 					<div className="flex flex-row gap-2 items-center">
 						<CandidateAvatar name={row.original.name} />
-						<div className="flex flex-col">
+						<div className="flex flex-col min-w-0">
 							<Link
 								to="/candidates/$candidateId"
 								params={{ candidateId: row.original.id }}
-								className="font-medium"
+								className="font-medium truncate max-w-[220px] md:max-w-[320px]"
+								title={row.original.name}
 							>
 								{row.original.name}
 							</Link>
-							<span className="text-muted-foreground">
+							<span
+								className="text-muted-foreground truncate max-w-[220px] md:max-w-[320px]"
+								title={row.original.email || ""}
+							>
 								{row.original.email}
 							</span>
 						</div>

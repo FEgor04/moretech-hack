@@ -67,7 +67,7 @@ export function UploadCV({ onSuccess }: UploadCVProps) {
 					Загрузите PDF файл с резюме для обновления информации
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="space-y-4">
+			<CardContent className="space-y-4 overflow-x-hidden">
 				{/* File Drop Zone */}
 				<Dropzone
 					accept={{
@@ -78,16 +78,16 @@ export function UploadCV({ onSuccess }: UploadCVProps) {
 					onDrop={handleFileDrop}
 					onError={handleError}
 					src={selectedFile ? [selectedFile] : undefined}
-					className="h-auto"
+					className="h-auto p-4 sm:p-6"
 				>
 					<DropzoneContent>
 						<div className="space-y-2">
 							<CheckCircle className="w-8 h-8 text-green-500 mx-auto" />
-							<p className="text-sm font-medium text-green-700">
+							<p className="text-sm font-medium text-green-700 break-words break-all text-center">
 								{selectedFile?.name}
 							</p>
 							{selectedFile && (
-								<p className="text-xs text-muted-foreground">
+								<p className="text-xs text-muted-foreground break-words text-center">
 									{(selectedFile.size / 1024 / 1024).toFixed(2)} MB
 								</p>
 							)}
@@ -98,10 +98,16 @@ export function UploadCV({ onSuccess }: UploadCVProps) {
 						<div className="space-y-2">
 							<UploadIcon className="w-8 h-8 text-muted-foreground mx-auto" />
 							<div>
-								<p className="text-sm font-medium">
+								{/* Мобильная версия */}
+								<p className="text-sm font-medium block sm:hidden">
+									Перетащите PDF файл сюда. <br /> Или нажмите для выбора.
+								</p>
+
+								{/* Десктоп версия */}
+								<p className="text-sm font-medium hidden sm:block">
 									Перетащите PDF файл сюда или нажмите для выбора
 								</p>
-								<p className="text-xs text-muted-foreground">
+								<p className="text-xs text-muted-foreground text-center break-words">
 									Максимальный размер: 10MB
 								</p>
 							</div>

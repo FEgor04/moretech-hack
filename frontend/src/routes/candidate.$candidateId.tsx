@@ -165,18 +165,20 @@ function CandidateSelfPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50 py-8">
-			<div className="max-w-4xl mx-auto px-4">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-gray-900">Мой профиль</h1>
+		<div className="min-h-screen bg-gray-50 py-6 sm:py-8 overflow-x-hidden">
+			<div className="max-w-3xl lg:max-w-4xl mx-auto px-4">
+				<div className="mb-6 sm:mb-8">
+					<h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+						Мой профиль
+					</h1>
 					<p className="text-gray-600 mt-2">
 						Обновите информацию о себе и просматривайте статус ваших заявок
 					</p>
 				</div>
 
-				<div className="grid gap-6 lg:grid-cols-3">
+				<div className="grid gap-4 sm:gap-6 lg:grid-cols-3 min-w-0">
 					{/* Информация о кандидате */}
-					<div className="lg:col-span-2 space-y-6">
+					<div className="lg:col-span-2 space-y-6 min-w-0">
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
@@ -360,7 +362,7 @@ function CandidateSelfPage() {
 					</div>
 
 					{/* Статус и информация */}
-					<div className="space-y-6">
+					<div className="space-y-6 min-w-0">
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">

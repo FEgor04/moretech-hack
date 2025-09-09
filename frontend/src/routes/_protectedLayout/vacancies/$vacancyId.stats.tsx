@@ -140,24 +140,15 @@ function VacancyStatsPage() {
 		: 0;
 
 	return (
-		<div>
+		<div className="overflow-x-hidden">
 			<div className="bg-white border-b">
 				<div className="max-w-6xl mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-4">
-							<Button variant="outline" size="sm" asChild>
-								<Link
-									to="/vacancies/$vacancyId"
-									params={{ vacancyId: params.vacancyId }}
-								>
-									<ArrowLeftIcon className="w-4 h-4" />
-									<span className="sr-only">Назад к вакансии</span>
-								</Link>
-							</Button>
 							<div>
 								<h1 className="text-2xl font-bold flex items-center gap-2">
-									<BarChart3Icon className="h-5 w-5" />
-									Статистика: {v.title}
+									<BarChart3Icon className="h-5 w-5 hidden sm:inline" />
+									{v.title}
 								</h1>
 								<div className="flex items-center gap-2 mt-1">
 									<Badge
@@ -171,13 +162,24 @@ function VacancyStatsPage() {
 										{v.status === "open" ? "🟢 Открыта" : "🔴 Закрыта"}
 									</Badge>
 								</div>
+								<div className="mt-2">
+									<Button variant="outline" size="sm" asChild>
+										<Link
+											to="/vacancies/$vacancyId"
+											params={{ vacancyId: params.vacancyId }}
+										>
+											<ArrowLeftIcon className="w-4 h-4 mr-2" />
+											Назад к вакансии
+										</Link>
+									</Button>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div className="max-w-6xl mx-auto p-6 space-y-6">
+			<div className="max-w-6xl mx-auto p-6 space-y-6 overflow-x-hidden">
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
