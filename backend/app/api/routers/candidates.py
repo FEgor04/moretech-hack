@@ -167,16 +167,44 @@ async def upload_cv(
 async def download_candidate_document(
     candidate_id: str, session: AsyncSession = Depends(get_session)
 ):
+    logger.info(
+        "[download_candidate_document] route hit | candidate_id=%s",
+        candidate_id,
+    )
     candidate = await candidates_service.get_candidate(session, candidate_id)
-    if not candidate or not candidate.document_s3_key:
+    if not candidate:
+        logger.warning(
+            "[download_candidate_document] candidate not found | candidate_id=%s",
+            candidate_id,
+        )
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    if not candidate.document_s3_key:
+        logger.warning(
+            "[download_candidate_document] document key missing | candidate_id=%s",
+            candidate_id,
+        )
         raise HTTPException(status_code=404, detail="Document not found")
     try:
+        logger.info(
+            "[download_candidate_document] fetching from S3 | bucket=%s key=%s",
+            settings.s3_bucket_name,
+            candidate.document_s3_key,
+        )
         s3 = get_s3_client()
         obj = s3.get_object(
             Bucket=settings.s3_bucket_name, Key=candidate.document_s3_key
         )
         content = obj["Body"].read()
+        logger.info(
+            "[download_candidate_document] S3 fetch OK | bytes=%s",
+            len(content) if hasattr(content, "__len__") else "unknown",
+        )
         return Response(content=content, media_type="application/pdf")
     except Exception as e:
-        logger.error(f"Failed to download candidate document: {e}")
+        logger.error(
+            "[download_candidate_document] failed | candidate_id=%s error=%s",
+            candidate_id,
+            e,
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail="Failed to download document")
