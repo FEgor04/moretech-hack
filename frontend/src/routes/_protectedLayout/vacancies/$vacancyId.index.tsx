@@ -210,10 +210,15 @@ function VacancyDetail() {
 			{
 				onSuccess: () => {
 					toast.success("Вакансия обновлена");
-					navigate({ to: "/vacancies/$vacancyId", params: { vacancyId: params.vacancyId } });
+					navigate({
+						to: "/vacancies/$vacancyId",
+						params: { vacancyId: params.vacancyId },
+					});
 				},
-				onError: (err: any) => {
-					toast.error("Не удалось обновить вакансию", { description: err.message });
+				onError: (err) => {
+					toast.error("Не удалось обновить вакансию", {
+						description: err.message,
+					});
 				},
 			},
 		);
@@ -309,7 +314,7 @@ function VacancyDetail() {
 									params={{ vacancyId: params.vacancyId }}
 								>
 									<BarChart3Icon className="w-4 h-4 mr-1" /> Статистика
-									</Link>
+								</Link>
 							</Button>
 						</div>
 					</div>

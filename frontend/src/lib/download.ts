@@ -5,25 +5,23 @@ import { apiClient } from "@/api/api-client";
  * Handles Authorization automatically via configured apiClient.
  */
 export async function downloadApiFile(
-  url: string,
-  filename: string,
+	url: string,
+	filename: string,
 ): Promise<void> {
-  const response = await apiClient.instance.request<Blob>({
-    url,
-    method: "GET",
-    responseType: "blob",
-    baseURL: "/",
-  });
+	const response = await apiClient.instance.request<Blob>({
+		url,
+		method: "GET",
+		responseType: "blob",
+		baseURL: "/",
+	});
 
-  const blob = response.data;
-  const objectUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = objectUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(objectUrl);
+	const blob = response.data;
+	const objectUrl = window.URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = objectUrl;
+	link.download = filename;
+	document.body.appendChild(link);
+	link.click();
+	link.remove();
+	window.URL.revokeObjectURL(objectUrl);
 }
-
-
