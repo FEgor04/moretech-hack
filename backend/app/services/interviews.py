@@ -172,21 +172,6 @@ async def delete_note(session: AsyncSession, note_id: int) -> None:
     await session.delete(note)
     await session.commit()
 
-
-def get_system_prompt(candidate: Candidate, vacancy: Vacancy | None) -> str:
-    vacancy_part = (
-        f"Вакансия: {vacancy.title}. Описание: {vacancy.description or 'нет описания.'}"
-        if vacancy
-        else "Вакансия не указана."
-    )
-    return (
-        "Ты ассистент HR, проводишь первичное интервью. "
-        "Собери краткую информацию, будь дружелюбен и говори по-русски. "
-        f"Кандидат: {candidate.name}, позиция: {candidate.position}, опыт: {candidate.experience} лет. "
-        f"{vacancy_part}"
-    )
-
-
 async def initialize_first_message(
     session: AsyncSession, interview_id: str
 ) -> list[InterviewMessage]:
