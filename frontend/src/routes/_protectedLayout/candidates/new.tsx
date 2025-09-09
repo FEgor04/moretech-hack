@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -300,7 +300,10 @@ function RouteComponent() {
 							</FormItem>
 						)}
 					/>
-					<div className="col-span-2 flex gap-2 justify-end">
+					<div className="col-span-2 flex gap-2 justify-between">
+						<Button asChild variant="outline">
+							<Link to="/candidates">Назад</Link>
+						</Button>
 						<Button type="submit" disabled={mutation.isPending}>
 							{mutation.isPending ? "Создание..." : "Создать"}
 						</Button>

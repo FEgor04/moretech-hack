@@ -213,7 +213,7 @@ function Dashboard() {
 			}
 		>
 			<div className="space-y-6">
-				<header className="flex flex-row justify-between items-center">
+				<header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex flex-col">
 						<h1 className="text-2xl font-bold mb-2">Дашборд</h1>
 						<p className="text-muted-foreground">

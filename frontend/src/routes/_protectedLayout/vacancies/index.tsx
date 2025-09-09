@@ -43,14 +43,14 @@ function VacanciesPage() {
 			}
 		>
 			<div className="space-y-6">
-				<header className="flex flex-row justify-between items-center">
+				<header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex flex-col">
 						<h1 className="text-2xl font-bold mb-2">Вакансии</h1>
 						<p className="text-muted-foreground">
 							Управление вакансиями и отслеживание открытых позиций
 						</p>
 					</div>
-					<div className="flex flex-row gap-2">
+					<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
 						<Button variant="outline" asChild>
 							<Link to="/vacancies/new">
 								<PlusIcon />

@@ -263,20 +263,16 @@ function VacancyDetail() {
 	};
 
 	return (
-		<div>
+		<div className="overflow-x-hidden">
 			<div className="bg-white border-b">
-				<div className="max-w-6xl mx-auto px-4 py-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-4">
-							<Button variant="outline" size="sm" asChild>
-								<Link to="/vacancies">
-									<ArrowLeftIcon className="w-4 h-4" />
-									<span className="sr-only">Назад к вакансиям</span>
-								</Link>
-							</Button>
+				<div className="max-w-4xl lg:max-w-6xl mx-auto px-3 py-3 sm:px-4 sm:py-4">
+					<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+						<div className="flex items-start gap-4">
 							<div>
-								<h1 className="text-2xl font-bold">{v.title}</h1>
-								<div className="flex items-center gap-2 mt-1">
+								<h1 className="text-xl sm:text-2xl font-bold leading-tight break-words max-w-[80vw]">
+									{v.title}
+								</h1>
+								<div className="flex flex-wrap items-center gap-2 mt-2">
 									<Badge
 										variant={getStatusBadge(v.status || "").variant}
 										className={getStatusBadge(v.status || "").className || ""}
@@ -292,11 +288,16 @@ function VacancyDetail() {
 								</div>
 							</div>
 						</div>
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 sm:justify-end">
+							<Button variant="outline" asChild>
+								<Link to="/vacancies">
+									<ArrowLeftIcon className="w-4 h-4 mr-2" />
+									Назад
+								</Link>
+							</Button>
 							{v.document_s3_key && (
 								<Button
 									variant="outline"
-									size="sm"
 									onClick={() =>
 										downloadApiFile(
 											`/vacancies/${params.vacancyId}/document`,
@@ -308,12 +309,13 @@ function VacancyDetail() {
 									Скачать документ
 								</Button>
 							)}
-							<Button variant="outline" size="sm" asChild>
+							<Button variant="default" asChild>
 								<Link
 									to="/vacancies/$vacancyId/stats"
 									params={{ vacancyId: params.vacancyId }}
 								>
-									<BarChart3Icon className="w-4 h-4 mr-1" /> Статистика
+									<BarChart3Icon className="w-4 h-4 mr-2" />
+									Статистика
 								</Link>
 							</Button>
 						</div>
@@ -321,10 +323,10 @@ function VacancyDetail() {
 				</div>
 			</div>
 
-			<div className="max-w-6xl mx-auto p-6">
+			<div className="max-w-6xl mx-auto p-3">
 				<div className="grid gap-6 lg:grid-cols-3">
 					{/* Основная информация */}
-					<div className="lg:col-span-2 space-y-6">
+					<div className="lg:col-span-2 space-y-6 min-w-0">
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
@@ -661,13 +663,22 @@ function VacancyDetail() {
 											)}
 										/>
 
-										<div className="flex gap-3">
-											<Button type="submit" disabled={mutation.isPending}>
+										<div className="flex gap-3 flex-col sm:flex-row">
+											<Button
+												type="submit"
+												disabled={mutation.isPending}
+												className="w-full sm:w-auto"
+											>
 												{mutation.isPending
 													? "Сохранение..."
 													: "Сохранить изменения"}
 											</Button>
-											<Button type="button" variant="outline" asChild>
+											<Button
+												type="button"
+												variant="outline"
+												asChild
+												className="w-full sm:w-auto"
+											>
 												<Link to="/vacancies">Отмена</Link>
 											</Button>
 										</div>
