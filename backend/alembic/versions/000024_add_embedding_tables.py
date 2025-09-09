@@ -1,7 +1,7 @@
 """Add embedding tables with pgvector support
 
-Revision ID: 000022
-Revises: 000021
+Revision ID: 000024
+Revises: 000023
 Create Date: 2024-01-09 12:00:00.000000
 
 """
@@ -11,8 +11,8 @@ from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
-revision = "000022"
-down_revision = "000021"
+revision = "000024"
+down_revision = "000023"
 branch_labels = None
 depends_on = None
 
