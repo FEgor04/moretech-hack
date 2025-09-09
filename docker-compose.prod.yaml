@@ -2,6 +2,7 @@ services:
   traefik:
     image: traefik:v3.1
     container_name: traefik
+    env_file: .env
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
@@ -27,12 +28,14 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
   postgres:
+    env_file: .env
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     # Remove port exposure in production
     ports: []
 
   backend:
+    env_file: .env
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/postgres
       - HOST=${HOST}
@@ -42,6 +45,7 @@ services:
     volumes: []
 
   frontend:
+    env_file: .env
     # Remove port exposure in production
     ports: []
     # Remove volume mount in production
