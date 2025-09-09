@@ -108,11 +108,12 @@ function CandidateEdit() {
 				? c.education.map((edu) => ({
 						organization: edu.organization || "",
 						speciality: edu.speciality || "",
-						year: (edu as any).year || null,
+						year:
+							"year" in edu ? (edu as { year?: number }).year || null : null,
 						type: edu.type || null,
 						start_date: edu.start_date || null,
 						end_date: edu.end_date || null,
-				  }))
+					}))
 				: [],
 			geo: c.geo ?? "",
 			employment_type: c.employment_type ?? undefined,
@@ -123,7 +124,7 @@ function CandidateEdit() {
 						years: exp.years || 0,
 						start_date: exp.start_date || null,
 						end_date: exp.end_date || null,
-				  }))
+					}))
 				: [],
 		},
 	});
@@ -177,7 +178,7 @@ function CandidateEdit() {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className="max-w-2xl space-y-6"
 				>
-					<div className="rounded-lg border p-6">
+					<div className="rounded-lg border p-6 space-y-6">
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<FormField
 								control={form.control}
@@ -251,83 +252,93 @@ function CandidateEdit() {
 								)}
 							/>
 						</div>
-						<FormField
-							control={form.control}
-							name="skills"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Ключевые навыки</FormLabel>
-									<FormControl>
-										<TagsInput
-											{...field}
-											value={field.value || []}
-											placeholder="Введите навык и нажмите Enter"
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="tech"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Технологии</FormLabel>
-									<FormControl>
-										<TagsInput
-											{...field}
-											value={field.value || []}
-											placeholder="Введите технологию и нажмите Enter"
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="geo"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Местоположение</FormLabel>
-									<FormControl>
-										<Input {...field} placeholder="Москва, Россия" />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="employment_type"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Тип занятости</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
+
+						{/* Skills and Technologies Section */}
+						<div className="space-y-4">
+							<FormField
+								control={form.control}
+								name="skills"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Ключевые навыки</FormLabel>
 										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Выберите тип занятости" />
-											</SelectTrigger>
+											<TagsInput
+												{...field}
+												value={field.value || []}
+												placeholder="Введите навык и нажмите Enter"
+											/>
 										</FormControl>
-										<SelectContent>
-											<SelectItem value="полная занятость">
-												Полная занятость
-											</SelectItem>
-											<SelectItem value="частичная занятость">
-												Частичная занятость
-											</SelectItem>
-											<SelectItem value="контракт">Контракт</SelectItem>
-											<SelectItem value="стажировка">Стажировка</SelectItem>
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="tech"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Технологии</FormLabel>
+										<FormControl>
+											<TagsInput
+												{...field}
+												value={field.value || []}
+												placeholder="Введите технологию и нажмите Enter"
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						{/* Location and Employment Type Section */}
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+							<FormField
+								control={form.control}
+								name="geo"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Местоположение</FormLabel>
+										<FormControl>
+											<Input {...field} placeholder="Москва, Россия" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="employment_type"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Тип занятости</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Выберите тип занятости" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="полная занятость">
+													Полная занятость
+												</SelectItem>
+												<SelectItem value="частичная занятость">
+													Частичная занятость
+												</SelectItem>
+												<SelectItem value="контракт">Контракт</SelectItem>
+												<SelectItem value="стажировка">Стажировка</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						{/* Education Section */}
 						<FormField
 							control={form.control}
 							name="education"
@@ -344,6 +355,8 @@ function CandidateEdit() {
 								</FormItem>
 							)}
 						/>
+
+						{/* Experience Section */}
 						<FormField
 							control={form.control}
 							name="experience"
