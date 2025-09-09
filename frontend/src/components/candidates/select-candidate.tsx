@@ -31,13 +31,18 @@ export function SelectCandidate({
 
 	return (
 		<Select value={value} onValueChange={onValueChange}>
-			<SelectTrigger {...props}>
-				<SelectValue placeholder={placeholder} />
+			<SelectTrigger
+				{...props}
+				className={`${props.className ?? ""} max-w-full`}
+			>
+				<SelectValue placeholder={placeholder} className="truncate" />
 			</SelectTrigger>
 			<SelectContent>
 				{filteredCandidates.map((candidate) => (
 					<SelectItem key={candidate.id} value={candidate.id}>
-						{candidate.name} - {candidate.position}
+						<span className="block max-w-[360px] truncate">
+							{candidate.name} - {candidate.position}
+						</span>
 					</SelectItem>
 				))}
 			</SelectContent>

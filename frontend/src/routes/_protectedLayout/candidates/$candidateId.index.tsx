@@ -542,45 +542,6 @@ function CandidateDetail() {
 
 				{/* Боковая панель */}
 				<div className="space-y-6">
-					{/* Быстрые действия */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-lg">Быстрые действия</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<ScheduleInterviewDialog currentCandidateId={params.candidateId}>
-								<Button className="w-full justify-start" variant="outline">
-									<CalendarIcon className="h-4 w-4 mr-2" />
-									Запланировать интервью
-								</Button>
-							</ScheduleInterviewDialog>
-							<Button
-								asChild
-								className="w-full justify-start"
-								variant="outline"
-							>
-								<a href={`/candidates/${params.candidateId}/edit`}>
-									<UserIcon className="h-4 w-4 mr-2" />
-									Редактировать профиль
-								</a>
-							</Button>
-							<Button
-								asChild
-								className="w-full justify-start"
-								variant="outline"
-							>
-								<a
-									href={`/candidate/${params.candidateId}`}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									<ExternalLinkIcon className="h-4 w-4 mr-2" />
-									Открыть страницу кандидата
-								</a>
-							</Button>
-						</CardContent>
-					</Card>
-
 					{/* Самообслуживание */}
 					<Card>
 						<CardHeader>

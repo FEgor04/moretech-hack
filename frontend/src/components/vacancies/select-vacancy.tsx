@@ -28,13 +28,15 @@ export function SelectVacancy({
 			value={value != null ? String(value) : undefined}
 			onValueChange={(v) => onValueChange(v ? Number(v) : undefined)}
 		>
-			<SelectTrigger className={className}>
-				<SelectValue placeholder={placeholder} />
+			<SelectTrigger className={`${className ?? ""} max-w-full`}>
+				<SelectValue placeholder={placeholder} className="truncate" />
 			</SelectTrigger>
 			<SelectContent>
 				{vacancies.data.map((vacancy) => (
 					<SelectItem key={vacancy.id} value={String(vacancy.id)}>
-						{vacancy.title}
+						<span className="block max-w-[360px] truncate">
+							{vacancy.title}
+						</span>
 					</SelectItem>
 				))}
 			</SelectContent>
