@@ -329,7 +329,7 @@ class PDFParserService:
 
 1. **Клонируйте репозиторий**
 ```bash
-git clone https://github.com/your-org/moretech-hack.git
+git clone https://github.com/FEgor04/moretech-hack.git
 cd moretech-hack
 ```
 
