@@ -22,7 +22,6 @@ services:
     labels:
       - "traefik.enable=true"
       # Redirect HTTP to HTTPS
-      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
@@ -60,3 +59,4 @@ services:
 
 volumes:
   traefik-letsencrypt:
+
