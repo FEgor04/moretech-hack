@@ -98,10 +98,10 @@ function RouteComponent() {
 
 		const candidateData = {
 			...values,
-			skills: skillsArray || undefined,
-			tech: techArray || undefined,
-			education: values.education ? JSON.parse(values.education) : undefined,
-			experience: values.experience ? JSON.parse(values.experience) : undefined,
+			skills: skillsArray || [],
+			tech: techArray || [],
+			education: values.education ? JSON.parse(values.education) : [],
+			experience: values.experience ? JSON.parse(values.experience) : [],
 		};
 
 		await mutation.mutateAsync(candidateData);

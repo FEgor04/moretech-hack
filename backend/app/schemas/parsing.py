@@ -44,6 +44,10 @@ class CVParsingSchema(BaseModel):
         description="List of work experience entries. Extract ALL work experience entries with company name, position, and years worked.",
         default_factory=list,
     )
+    skills: List[str] = Field(
+        description="Key skills and competencies. Extract ALL main skills, competencies, and abilities mentioned in the CV.",
+        default_factory=list,
+    )
     tech: List[str] = Field(
         description="Technical skills, programming languages, tools, frameworks. Extract ALL technologies, programming languages, frameworks, tools, and technical skills mentioned in the CV.",
         default_factory=list,

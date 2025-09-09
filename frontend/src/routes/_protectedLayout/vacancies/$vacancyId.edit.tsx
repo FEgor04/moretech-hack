@@ -169,9 +169,9 @@ function VacancyEdit() {
 
 		const vacancyData = {
 			...data,
-			skills: skillsArray || undefined,
-			responsibilities: responsibilitiesArray || undefined,
-			minor_skills: minorSkillsArray || undefined,
+			skills: skillsArray || [],
+			responsibilities: responsibilitiesArray || [],
+			minor_skills: minorSkillsArray || [],
 		};
 
 		mutation.mutate(vacancyData, {

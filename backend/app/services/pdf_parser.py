@@ -28,6 +28,62 @@ class PDFParserService:
     def __init__(self):
         self.gigachat_client = get_gigachat_client()
 
+    def _normalize_blank_fields(self, data: dict) -> dict:
+        """Normalize blank/empty fields to None values"""
+        blank_values = [
+            "",
+            " ",
+            "  ",
+            "\n",
+            "\t",
+            "null",
+            "NULL",
+            "None",
+            "none",
+            "не указано",
+            "не указан",
+            "не указана",
+            "не указаны",
+            "not specified",
+            "unknown",
+            "нет информации",
+            "нет данных",
+            "N/A",
+            "n/a",
+            "—",
+            "–",
+            "-",
+            "отсутствует",
+        ]
+
+        normalized_data = {}
+        for key, value in data.items():
+            if value is None:
+                normalized_data[key] = None
+            elif isinstance(value, str):
+                # Check if string is blank or contains only whitespace
+                if value.strip() in blank_values or not value.strip():
+                    normalized_data[key] = None
+                else:
+                    normalized_data[key] = value.strip()
+            elif isinstance(value, list):
+                # For lists, filter out blank items
+                if not value:
+                    normalized_data[key] = None
+                else:
+                    filtered_list = []
+                    for item in value:
+                        if isinstance(item, str):
+                            if item.strip() not in blank_values and item.strip():
+                                filtered_list.append(item.strip())
+                        else:
+                            filtered_list.append(item)
+                    normalized_data[key] = filtered_list if filtered_list else None
+            else:
+                normalized_data[key] = value
+
+        return normalized_data
+
     def _get_cv_json_schema(self) -> str:
         """Generate JSON schema for CV parsing"""
         schema = CVParsingSchema.model_json_schema()
@@ -101,6 +157,10 @@ JSON схема с подробными инструкциями:
             parsed_data = json.loads(cleaned_content)
             logger.info(f"Parsed data: {parsed_data}")
 
+            # Normalize blank fields to None
+            parsed_data = self._normalize_blank_fields(parsed_data)
+            logger.info(f"Normalized data: {parsed_data}")
+
             # Validate with Pydantic schema
             try:
                 validated_data = CVParsingSchema.model_validate(parsed_data)
@@ -111,28 +171,15 @@ JSON схема с подробными инструкциями:
                 logger.warning(f"Schema validation failed, using raw data: {e}")
 
             # Clean and validate email
-            email = parsed_data.get("email", "")
-            if (
-                email
-                and email.strip()
-                and email not in ["не указано", "not specified", "unknown", ""]
-            ):
-                # Basic email validation - must contain @ and be reasonable length
-                if "@" in email and len(email) > 3:
-                    clean_email = email.strip()
-                else:
-                    clean_email = None
+            email = parsed_data.get("email")
+            if email and "@" in email and len(email) > 3:
+                clean_email = email.strip()
             else:
                 clean_email = None
 
-            # Handle null values from AI with fallbacks
+            # Get normalized values
             name = parsed_data.get("name")
-            if not name or name == "нет информации":
-                name = "Unknown Candidate"
-
             position = parsed_data.get("position")
-            if not position or position == "нет информации":
-                position = "Unknown Position"
 
             # Convert employment_type string to enum
             employment_type = None
@@ -205,6 +252,7 @@ JSON схема с подробными инструкциями:
                 experience=experience,
                 status="pending",
                 gigachat_file_id=file_id,
+                skills=parsed_data.get("skills"),
                 tech=parsed_data.get("tech"),
                 education=education,
                 geo=parsed_data.get("geo"),
@@ -287,9 +335,12 @@ JSON схема с подробными инструкциями:
             parsed_data = json.loads(cleaned_content)
             logger.info(f"Parsed data: {parsed_data}")
 
-            # Fix common validation issues BEFORE schema validation
-            if parsed_data.get("minor_skills") is None:
-                parsed_data["minor_skills"] = []
+            # Normalize blank fields to None
+            parsed_data = self._normalize_blank_fields(parsed_data)
+            logger.info(f"Normalized data: {parsed_data}")
+
+            # Fix common validation issues AFTER normalization
+            # minor_skills will now be handled by the validator to return [] instead of None
 
             # Convert employment_type string to enum
             employment_type = None
@@ -331,8 +382,8 @@ JSON схема с подробными инструкциями:
                 logger.warning(f"Schema validation failed, using raw data: {e}")
 
             vacancy = VacancyCreate(
-                title=parsed_data.get("title", "Unknown Position"),
-                description=parsed_data.get("description", "No description available."),
+                title=parsed_data.get("title") or "Не указано",
+                description=parsed_data.get("description") or "Не указано",
                 status="open",
                 gigachat_file_id=file_id,
                 company=parsed_data.get("company"),

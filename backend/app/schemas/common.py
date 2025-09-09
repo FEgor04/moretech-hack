@@ -95,14 +95,14 @@ class CandidateBase(BaseModel):
     email: EmailStr | None = None
     position: str
     # List of experience entries
-    experience: list[ExperienceItem] | None = None
+    experience: list[ExperienceItem] = []
     status: CandidateStatus = CandidateStatus.PENDING
     gigachat_file_id: str | None = None
-    skills: list[str] | None = None  # Список навыков
+    skills: list[str] = []  # Список навыков
     # Extended CV fields
-    tech: list[str] | None = None
+    tech: list[str] = []
     # Education entries
-    education: list[EducationItem] | None = None
+    education: list[EducationItem] = []
     geo: str | None = None
     employment_type: EmploymentType | None = None
 
@@ -110,58 +110,67 @@ class CandidateBase(BaseModel):
     @classmethod
     def validate_skills(cls, v):
         if v is None:
-            return None
+            return []
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
         if isinstance(v, list):
             return v
-        return None
+        return []
 
     @field_validator("tech", mode="before")
     @classmethod
     def validate_tech(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, str):
             try:
                 import json
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return [v]
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
         if isinstance(v, list):
             return v
-        return None
+        return []
 
     @field_validator("education", mode="before")
     @classmethod
     def validate_education(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, str):
             try:
                 import json
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return v
+                return []
         if isinstance(v, list):
             return v
-        return v
+        return []
 
     @field_validator("experience", mode="before")
     @classmethod
     def validate_experience_list(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, str):
             try:
                 import json
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return v
+                return []
         if isinstance(v, list):
             return v
-        return v
+        return []
 
     @field_validator("employment_type", mode="before")
     @classmethod
@@ -212,18 +221,18 @@ class VacancyBase(BaseModel):
     benefits: str | None = None
 
     # New spec fields
-    skills: list[str] | None = None
-    responsibilities: list[str] | None = None
+    skills: list[str] = []
+    responsibilities: list[str] = []
     domain: str | None = None
     education: str | None = None
-    minor_skills: list[str] | None = None
+    minor_skills: list[str] = []
     company_info: str | None = None
 
     @field_validator("skills", mode="before")
     @classmethod
     def validate_skills_vacancy(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, list):
             return v
         if isinstance(v, str):
@@ -232,14 +241,15 @@ class VacancyBase(BaseModel):
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return None
-        return None
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        return []
 
     @field_validator("minor_skills", mode="before")
     @classmethod
     def validate_minor_skills(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, list):
             return v
         if isinstance(v, str):
@@ -248,14 +258,15 @@ class VacancyBase(BaseModel):
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return None
-        return None
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        return []
 
     @field_validator("responsibilities", mode="before")
     @classmethod
     def validate_responsibilities(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, list):
             return v
         if isinstance(v, str):
@@ -264,8 +275,9 @@ class VacancyBase(BaseModel):
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return None
-        return None
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        return []
 
     @field_validator("employment_type", mode="before")
     @classmethod
@@ -339,39 +351,39 @@ class VacancyUpdate(BaseModel):
     experience_level: ExperienceLevel | None = None
     requirements: str | None = None
     benefits: str | None = None
-    skills: list[str] | None = None
-    responsibilities: list[str] | None = None
+    skills: list[str] = []
+    responsibilities: list[str] = []
     domain: str | None = None
     education: str | None = None
-    minor_skills: list[str] | None = None
+    minor_skills: list[str] = []
     company_info: str | None = None
 
     @field_validator("skills", mode="before")
     @classmethod
     def validate_skills_update(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, list):
             return v
-        return None
+        return []
 
     @field_validator("minor_skills", mode="before")
     @classmethod
     def validate_minor_skills_update(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, list):
             return v
-        return None
+        return []
 
     @field_validator("responsibilities", mode="before")
     @classmethod
     def validate_responsibilities_update(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, list):
             return v
-        return None
+        return []
 
     @field_validator("employment_type", mode="before")
     @classmethod

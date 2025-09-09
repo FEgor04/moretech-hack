@@ -111,9 +111,9 @@ function CandidateEdit() {
 				email: data.email,
 				position: data.position,
 				status: data.status,
-				skills: skillsArray || undefined,
-				tech: techArray || undefined,
-				education: data.education ? JSON.parse(data.education) : undefined,
+				skills: skillsArray || [],
+				tech: techArray || [],
+				education: data.education ? JSON.parse(data.education) : [],
 				geo: data.geo || undefined,
 				employment_type: data.employment_type as
 					| "полная занятость"
@@ -121,7 +121,7 @@ function CandidateEdit() {
 					| "контракт"
 					| "стажировка"
 					| undefined,
-				experience: data.experience ? JSON.parse(data.experience) : undefined,
+				experience: data.experience ? JSON.parse(data.experience) : [],
 			},
 			{
 				onSuccess: () => {

@@ -121,10 +121,10 @@ function CandidateSelfPage() {
 
 		const candidateData = {
 			...data,
-			skills: skillsArray || undefined,
-			tech: techArray || undefined,
-			education: data.education ? JSON.parse(data.education) : undefined,
-			experience: data.experience ? JSON.parse(data.experience) : undefined,
+			skills: skillsArray || [],
+			tech: techArray || [],
+			education: data.education ? JSON.parse(data.education) : [],
+			experience: data.experience ? JSON.parse(data.experience) : [],
 		};
 
 		updateMutation.mutate(candidateData, {
