@@ -25,7 +25,10 @@ type Props = {
 };
 
 export function InterviewChat({ interviewId }: Props) {
-	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
+	const interview = useSuspenseQuery({
+		...interviewQueryOptions(interviewId),
+		refetchInterval: 1000,
+	});
 	const isFinished = interview.data.state === "done";
 	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(
 		interviewId,
@@ -86,18 +89,21 @@ export function InterviewChat({ interviewId }: Props) {
 
 			{/* Chat Container */}
 			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] p-4">
-				<div className="h-full grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div
+					className="h-full grid grid-cols-1 md:grid-cols-2 gap-4 data-[finished=true]:grid-cols-1"
+					data-finished={isFinished}
+				>
 					{/* Left: Webcam */}
-					<div className="flex flex-col">
-						{!isFinished && (
+					{!isFinished && (
+						<div className="flex flex-col">
 							<WebcamComponent
 								ref={webcamRef}
 								audio={true}
 								muted
 								className="w-full rounded-md shadow aspect-video bg-black"
 							/>
-						)}
-					</div>
+						</div>
+					)}
 					{/* Right: Chat */}
 					<div className="flex flex-col min-h-0">
 						<Conversation className="flex-1 min-h-0">
