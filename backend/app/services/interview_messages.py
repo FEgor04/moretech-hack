@@ -21,6 +21,9 @@ GIGACHAT_MAX_TOKENS = 1000
 INITIAL_GREETING_TEMPERATURE = 0.3
 INITIAL_GREETING_MAX_TOKENS = 200
 
+# Business rules
+MIN_MESSAGES_FOR_FINISH_FUNCTION = 8
+
 
 class InterviewMessagesService:
     """Service for managing interview messages with GigaChat integration."""
@@ -38,10 +41,23 @@ class InterviewMessagesService:
         """Call GigaChat client async method."""
         return await client.achat(chat_params)
 
-    async def _prepare_functions(self):
-        """Prepare functions for GigaChat."""
+    async def _prepare_functions(self, session: AsyncSession, interview_id: str):
+        """Prepare functions for GigaChat.
+
+        The "finish_interview" function is exposed to the model only when the
+        conversation has at least MIN_MESSAGES_FOR_FINISH_FUNCTION messages.
+        """
+        # Count messages for gating the finish_interview function exposure
+        messages_count = await session.scalar(
+            select(func.count())
+            .select_from(InterviewMessage)
+            .where(InterviewMessage.interview_id == interview_id)
+        )
+        messages_count = int(messages_count or 0)
+        if messages_count < MIN_MESSAGES_FOR_FINISH_FUNCTION:
+            return []
         finish_interview = Function(
-            name="finish_review",
+            name="finish_interview",
             description="Завершает интервью и сохраняет фидбек. НЕ ВЫЗЫВАЙ эту функцию, пока ты не получишь ПОЛНОЕ представление о кандидате.",
             parameters=FunctionParameters(
                 type="object",
@@ -188,7 +204,7 @@ class InterviewMessagesService:
 
             chat_params = {
                 "messages": gigachat_messages,
-                "functions": await self._prepare_functions(),
+                "functions": await self._prepare_functions(session, interview_id),
                 "temperature": GIGACHAT_TEMPERATURE,
                 "max_tokens": GIGACHAT_MAX_TOKENS,
                 "stream": False,
@@ -228,11 +244,28 @@ class InterviewMessagesService:
                     "function_call arguments type=%s", type(func_args).__name__
                 )
 
-                if func_name == "finish_review":
+                if func_name == "finish_interview":
+                    # Guard: skip handling finish_interview if not enough messages yet
+                    messages_count = await session.scalar(
+                        select(func.count())
+                        .select_from(InterviewMessage)
+                        .where(InterviewMessage.interview_id == interview_id)
+                    )
+                    messages_count = int(messages_count or 0)
+                    if messages_count < MIN_MESSAGES_FOR_FINISH_FUNCTION:
+                        logger.info(
+                            "Skipping finish_interview for interview %s: messages_count=%s < min=%s",
+                            interview_id,
+                            messages_count,
+                            MIN_MESSAGES_FOR_FINISH_FUNCTION,
+                        )
+                        return (
+                            "Спасибо! Давайте продолжим интервью, чтобы собрать достаточно информации перед завершением."
+                        )
                     feedback = func_args.get("feedback")
                     positive = func_args.get("positive")
                     logger.info(
-                        "Handling finish_review for interview %s (positive=%s, feedback_len=%s)",
+                        "Handling finish_interview for interview %s (positive=%s, feedback_len=%s)",
                         interview_id,
                         positive,
                         len(feedback) if isinstance(feedback, str) else 0,
@@ -371,13 +404,13 @@ class InterviewMessagesService:
 Твоя цель:
 - собрать краткую информацию о кандидате,
 - оценить его профессиональный опыт,
-- проверить знания и умения,
-- оценить коммуникацию и общую культуру.
+- проверить знания и умения, специфичные для вакансии,
+- оценить коммуникацию и общую культуру
 
 Правила интервью:
 1. Всегда начинай с приветствия и короткого объяснения формата (несколько вопросов).
 2. Сначала задавай вопросы и получай ответы. Используй стиль живого интервью.
-3. НЕ завершай интервью и НЕ вызывай функцию finish_review, пока:
+3. НЕ завершай интервью и НЕ вызывай функцию finish_interview, пока:
    - не уточнишь опыт работы и проекты,
    - не проверишь знания ключевых технологий,
    - не спросишь о мотивации и ожиданиях,
@@ -385,10 +418,7 @@ class InterviewMessagesService:
    - кандидат не ответит на все вопросы, перечисленные выше
 4. Если кандидат забывает ответить на твой вопрос. повтори его.
 4. Ты ведёшь интервью ТОЛЬКО со своей стороны.  НИКОГДА не пиши ответы за кандидата.  Все ответы кандидата всегда вводятся пользователем.  Если информации не хватает — задай уточняющий вопрос, но не придумывай ответ.
-5. Только когда собрана вся информация, сделай вывод и вызови:
-   finish_review(candidate, vacancy, feedback)
-   где feedback — это развернутое мнение о сильных/слабых сторонах кандидата,
-   плюс рекомендация принять (True) или отклонить (False).
+5. Только когда собрана вся информация, сделай вывод и вызови finish_interview.
 
 Очень важно: не переходи к финальному шагу раньше времени.
 Сначала проведи полноценное интервью!
