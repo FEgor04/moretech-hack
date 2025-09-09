@@ -223,9 +223,9 @@ class TestInterviewMessagesService:
         mock_client = MagicMock()
         mock_response = MagicMock()
         mock_response.choices = [MagicMock()]
-        mock_response.choices[
-            0
-        ].message.content = "Здравствуйте! Готовы начать интервью?"
+        mock_response.choices[0].message.content = (
+            "Здравствуйте! Готовы начать интервью?"
+        )
         mock_client.achat = AsyncMock(return_value=mock_response)
         mock_get_gigachat_client.return_value = mock_client
 
