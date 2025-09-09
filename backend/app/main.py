@@ -8,6 +8,7 @@ from app.api.routers.interviews import router as interviews_router
 from app.api.routers.users import router as users_router
 from app.api.routers.vacancies import router as vacancies_router
 from app.api.routers.ws import router as ws_router
+from app.api.compatibility import router as compatibility_router
 
 
 def _configure_logging() -> None:
@@ -53,12 +54,12 @@ _configure_logging()
 app = FastAPI(title="AI HR Backend")
 
 # Emit a startup log to verify logging pipeline
-logging.getLogger("app").info("Application logging configured and FastAPI initialized")
+logging.info("Application logging configured and FastAPI initialized")
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    logging.getLogger("app").info("Health check OK")
+    logging.info("Health check OK")
     return {"status": "ok"}
 
 
@@ -67,4 +68,5 @@ app.include_router(candidates_router, prefix="/candidates", tags=["candidates"])
 app.include_router(vacancies_router, prefix="/vacancies", tags=["vacancies"])
 app.include_router(interviews_router, prefix="/interviews", tags=["interviews"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(compatibility_router)
 app.include_router(ws_router)
