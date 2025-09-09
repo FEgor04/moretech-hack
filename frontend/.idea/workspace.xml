@@ -12,7 +12,8 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "node.js.selected.package.tslint": "(autodetect)"
+    "node.js.selected.package.tslint": "(autodetect)",
+    "ts.external.directory.path": "/Users/forafox/hack/moretech-hack/frontend/node_modules/typescript/lib"
   }
 }]]></component>
   <component name="TaskManager">
