@@ -21,6 +21,7 @@ import { CheckIcon, Loader2Icon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import { PromptInput, PromptInputTextarea } from "../ai-elements/prompt-input";
 
 type Props = {
 	interviewId: string;
@@ -163,7 +164,7 @@ export function InterviewChat({ interviewId }: Props) {
 							<div className="flex justify-center py-4 w-full">
 								{isDev ? (
 									<div className="flex w-full max-w-xl items-center gap-2">
-										<Input
+										<PromptInputTextarea
 											placeholder="Debug prompt..."
 											value={debugPrompt}
 											onChange={(e) => setDebugPrompt(e.target.value)}

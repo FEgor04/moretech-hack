@@ -224,9 +224,9 @@ class InterviewMessagesService:
             if finish_reason == "function_call" and getattr(
                 message, "function_call", None
             ):
-                func = message.function_call
-                func_name = getattr(func, "name", None)
-                func_args = getattr(func, "arguments", {})
+                function_call = message.function_call
+                func_name = getattr(function_call, "name", None)
+                func_args = getattr(function_call, "arguments", {})
                 logger.info(
                     "GigaChat requested function_call '%s' for interview %s",
                     func_name,
@@ -419,6 +419,7 @@ class InterviewMessagesService:
 4. Если кандидат забывает ответить на твой вопрос. повтори его.
 4. Ты ведёшь интервью ТОЛЬКО со своей стороны.  НИКОГДА не пиши ответы за кандидата.  Все ответы кандидата всегда вводятся пользователем.  Если информации не хватает — задай уточняющий вопрос, но не придумывай ответ.
 5. Только когда собрана вся информация, сделай вывод и вызови finish_interview.
+6. Твое финальное сообщение с вызовом функции finish_interview должно быть коротким и не должно превышать 100 символов. Оно не должно содержать информации о твоих намерениях относительно кандидата. Только прощание и обещание скорого фидбека.
 
 Очень важно: не переходи к финальному шагу раньше времени.
 Сначала проведи полноценное интервью!
