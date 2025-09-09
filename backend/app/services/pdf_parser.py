@@ -158,7 +158,7 @@ class PDFParserService:
             # Generate JSON schema for precise parsing
             json_schema = self._get_cv_json_schema()
 
-            result = self.gigachat_client.chat(
+            result = await self.gigachat_client.achat(
                 {
                     "messages": [
                         {
@@ -339,7 +339,7 @@ JSON схема с подробными инструкциями:
             # Generate JSON schema for precise parsing
             json_schema = self._get_vacancy_json_schema()
 
-            result = self.gigachat_client.chat(
+            result = await self.gigachat_client.achat(
                 {
                     "messages": [
                         {
@@ -472,7 +472,7 @@ JSON схема с подробными инструкциями:
             PDFParsingError: If analysis fails
         """
         try:
-            result = self.gigachat_client.chat(
+            result = await self.gigachat_client.achat(
                 {
                     "function_call": "auto",
                     "messages": [
@@ -502,7 +502,7 @@ JSON схема с подробными инструкциями:
             PDFParsingError: If analysis fails
         """
         try:
-            result = self.gigachat_client.chat(
+            result = await self.gigachat_client.achat(
                 {
                     "function_call": "auto",
                     "messages": [

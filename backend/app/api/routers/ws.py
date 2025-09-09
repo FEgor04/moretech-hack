@@ -137,7 +137,7 @@ class InterviewWebsocketService:
 
     def extract_audio_from_video(self, video_path: str) -> str | None:
         """Extract audio from video file and save as WAV with same base filename."""
-        # Generate audio file path with .wav extension
+        # Generate audio file path with .wav extensionu
         audio_path = video_path.replace(".webm", ".wav")
 
         logger.debug("Extracting audio from %s to %s", video_path, audio_path)
@@ -438,36 +438,6 @@ async def websocket_video_stream(
                 text_data = message.get("text")
                 if text_data == "audio-ready":
                     await service.handle_audio_marker()
-                    continue
-                if text_data is not None:
-                    # Treat any other text frame as a direct user answer (debug mode support)
-                    logger.info(
-                        "Received direct text on WS for interview %s: %s",
-                        interview_id,
-                        text_data[:200],
-                    )
-                    await service.update_state(InterviewSocketState.GENERATING_RESPONSE)
-                    latest_message = await service.submit_user_answer(
-                        interview_id, text_data.strip()
-                    )
-                    if latest_message is None:
-                        logger.warning(
-                            "Failed to submit direct text for interview %s",
-                            interview_id,
-                        )
-                    else:
-                        logger.info(
-                            "Direct text submitted successfully for interview %s",
-                            interview_id,
-                        )
-                        if settings.use_yandex_speech_synthesis:
-                            await service.update_state(
-                                InterviewSocketState.SPEECH_SYNTHESIS
-                            )
-                            await service.send_message_to_user(latest_message)
-                    await service.update_state(
-                        InterviewSocketState.AWAITING_USER_ANSWER
-                    )
                     continue
 
             if data_bytes and len(data_bytes) > 0:

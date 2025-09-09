@@ -32,10 +32,12 @@ export function InterviewChat({ interviewId }: Props) {
 		refetchInterval: 1000,
 	});
 	const isFinished = interview.data.state === "done";
-	const { webcamRef, sendAudioReadyMarker, socketState, sendTextMessage } =
-		useWebcamStreaming(interviewId, {
+	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(
+		interviewId,
+		{
 			disabled: isFinished,
-		});
+		},
+	);
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
 	);
@@ -170,7 +172,6 @@ export function InterviewChat({ interviewId }: Props) {
 													e.key === "Enter" &&
 													debugPrompt.trim().length > 0
 												) {
-													sendTextMessage(debugPrompt.trim());
 													setDebugPrompt("");
 												}
 											}}
@@ -178,7 +179,6 @@ export function InterviewChat({ interviewId }: Props) {
 										<Button
 											onClick={() => {
 												if (debugPrompt.trim().length === 0) return;
-												sendTextMessage(debugPrompt.trim());
 												setDebugPrompt("");
 											}}
 										>
