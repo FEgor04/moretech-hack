@@ -84,12 +84,12 @@ export function CreateFromCVButton() {
 					Загрузить резюме
 				</Button>
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent className="w-[95vw] max-w-md sm:max-w-lg">
 				<DialogHeader>
 					<DialogTitle>Загрузить резюме</DialogTitle>
 				</DialogHeader>
 
-				<div className="space-y-4">
+				<div className="space-y-4 w-full max-w-full overflow-hidden">
 					{/* File Drop Zone */}
 					<Dropzone
 						accept={{
@@ -100,12 +100,12 @@ export function CreateFromCVButton() {
 						onDrop={handleFileDrop}
 						onError={handleError}
 						src={selectedFile ? [selectedFile] : undefined}
-						className="h-auto"
+						className="h-auto w-full max-w-full"
 					>
 						<DropzoneContent>
-							<div className="space-y-2">
+							<div className="space-y-2 text-center break-words">
 								<CheckCircle className="w-8 h-8 text-green-500 mx-auto" />
-								<p className="text-sm font-medium text-green-700">
+								<p className="text-sm font-medium text-green-700 break-words">
 									{selectedFile?.name}
 								</p>
 								{selectedFile && (
@@ -117,13 +117,21 @@ export function CreateFromCVButton() {
 						</DropzoneContent>
 
 						<DropzoneEmptyState>
-							<div className="space-y-2">
+							<div className="space-y-2 text-center break-words">
 								<UploadIcon className="w-8 h-8 text-muted-foreground mx-auto" />
 								<div>
-									<p className="text-sm font-medium">
-										Перетащите PDF файл сюда или нажмите для выбора
-									</p>
-									<p className="text-xs text-muted-foreground">
+									<div>
+										{/* Мобильная версия */}
+										<p className="text-sm font-medium block sm:hidden">
+											Перетащите PDF файл сюда. <br /> Или нажмите для выбора.
+										</p>
+
+										{/* Десктоп версия */}
+										<p className="text-sm font-medium hidden sm:block">
+											Перетащите PDF файл сюда или нажмите для выбора
+										</p>
+									</div>
+									<p className="text-xs text-muted-foreground break-words">
 										Максимальный размер: 10MB
 									</p>
 								</div>
@@ -133,9 +141,9 @@ export function CreateFromCVButton() {
 
 					{/* Error Message */}
 					{error && (
-						<div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+						<div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md w-full break-words">
 							<AlertCircle className="w-4 h-4 text-red-500" />
-							<p className="text-sm text-red-700">{error}</p>
+							<p className="text-sm text-red-700 break-words">{error}</p>
 						</div>
 					)}
 

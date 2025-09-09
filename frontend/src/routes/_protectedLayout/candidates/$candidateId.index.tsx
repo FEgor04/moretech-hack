@@ -88,10 +88,15 @@ function CandidateDetail() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header with candidate name and edit button */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-4">
-					<Button variant="outline" size="sm" asChild>
+			{/* Header with candidate name and actions */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+				<div className="flex items-start gap-3 sm:items-center">
+					<Button
+						variant="outline"
+						size="sm"
+						asChild
+						className="hidden sm:inline-flex"
+					>
 						<Link to="/candidates">
 							<ArrowLeftIcon className="h-4 w-4" />
 							<span className="sr-only">Назад к кандидатам</span>
@@ -99,9 +104,13 @@ function CandidateDetail() {
 					</Button>
 					<CandidateAvatar name={c.name} />
 					<div>
-						<h1 className="text-2xl font-semibold">{c.name}</h1>
-						<p className="text-muted-foreground">{c.position}</p>
-						<div className="flex items-center gap-2 mt-1">
+						<h1 className="text-xl sm:text-2xl font-semibold leading-tight break-words max-w-[80vw]">
+							{c.name}
+						</h1>
+						<p className="text-muted-foreground break-words max-w-[80vw]">
+							{c.position}
+						</p>
+						<div className="flex flex-wrap items-center gap-2 mt-2">
 							{c.status && <CandidateStatusBadge status={c.status} />}
 							<Badge variant="outline" className="text-xs">
 								В системе {daysInSystem} дн.
@@ -109,7 +118,19 @@ function CandidateDetail() {
 						</div>
 					</div>
 				</div>
-				<div className="flex gap-2">
+				<div className="flex flex-wrap gap-2 sm:justify-end">
+					{/* Mobile back button first */}
+					<Button
+						variant="outline"
+						size="sm"
+						asChild
+						className="sm:hidden order-[-1]"
+					>
+						<Link to="/candidates">
+							<ArrowLeftIcon className="h-4 w-4 mr-2" />
+							Назад
+						</Link>
+					</Button>
 					<Button variant="outline" asChild>
 						<a
 							href={`/candidate/${params.candidateId}`}
@@ -121,9 +142,14 @@ function CandidateDetail() {
 						</a>
 					</Button>
 					<ScheduleInterviewDialog currentCandidateId={params.candidateId}>
-						<Button variant="outline">Запланировать интервью</Button>
+						<Button
+							variant="outline"
+							className="whitespace-normal leading-snug"
+						>
+							Запланировать интервью
+						</Button>
 					</ScheduleInterviewDialog>
-					<Button asChild>
+					<Button asChild className="whitespace-normal leading-snug">
 						<a href={`/candidates/${params.candidateId}/edit`}>Редактировать</a>
 					</Button>
 				</div>

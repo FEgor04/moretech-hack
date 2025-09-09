@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_protectedLayout/vacancies/$vacancyId")({
 function VacancyLayout() {
 	return (
 		<div>
-			<div className="max-w-6xl mx-auto p-6">
+			<div className="max-w-6xl mx-auto p-1">
 				<Outlet />
 			</div>
 		</div>
