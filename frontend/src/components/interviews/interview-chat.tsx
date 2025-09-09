@@ -19,6 +19,8 @@ import { InterviewStatusBadge } from "../candidates/interview-status-badge";
 import type { InterviewState } from "@/api/client";
 import { CheckIcon, Loader2Icon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useState } from "react";
+import { PromptInputTextarea } from "../ai-elements/prompt-input";
 
 type Props = {
 	interviewId: string;
@@ -30,12 +32,10 @@ export function InterviewChat({ interviewId }: Props) {
 		refetchInterval: 1000,
 	});
 	const isFinished = interview.data.state === "done";
-	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(
-		interviewId,
-		{
+	const { webcamRef, sendAudioReadyMarker, socketState, sendTextMessage } =
+		useWebcamStreaming(interviewId, {
 			disabled: isFinished,
-		},
-	);
+		});
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
 	);
@@ -64,6 +64,9 @@ export function InterviewChat({ interviewId }: Props) {
 	const isSTT = socketState === "speech_recognition";
 	const isLLM = socketState === "generating_response";
 	const isTTS = socketState === "speech_synthesis";
+
+	const isDev = import.meta.env.DEV;
+	const [debugPrompt, setDebugPrompt] = useState("");
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -155,8 +158,34 @@ export function InterviewChat({ interviewId }: Props) {
 						</Conversation>
 						{/* Message Input */}
 						{!isFinished && (
-							<div className="flex justify-center py-4">
-								{isAwaiting ? (
+							<div className="flex justify-center py-4 w-full">
+								{isDev ? (
+									<div className="flex w-full max-w-xl items-center gap-2">
+										<PromptInputTextarea
+											placeholder="Debug prompt..."
+											value={debugPrompt}
+											onChange={(e) => setDebugPrompt(e.target.value)}
+											onKeyDown={(e) => {
+												if (
+													e.key === "Enter" &&
+													debugPrompt.trim().length > 0
+												) {
+													sendTextMessage(debugPrompt.trim());
+													setDebugPrompt("");
+												}
+											}}
+										/>
+										<Button
+											onClick={() => {
+												if (debugPrompt.trim().length === 0) return;
+												sendTextMessage(debugPrompt.trim());
+												setDebugPrompt("");
+											}}
+										>
+											Отправить
+										</Button>
+									</div>
+								) : isAwaiting ? (
 									<Tooltip>
 										<TooltipTrigger asChild>
 											<Button

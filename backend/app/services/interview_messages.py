@@ -15,6 +15,15 @@ from app.clients.gigachat import get_gigachat_client
 
 logger = logging.getLogger(__name__)
 
+# Global configuration for GigaChat
+GIGACHAT_TEMPERATURE = 0.3
+GIGACHAT_MAX_TOKENS = 1000
+INITIAL_GREETING_TEMPERATURE = 0.3
+INITIAL_GREETING_MAX_TOKENS = 200
+
+# Business rules
+MIN_MESSAGES_FOR_FINISH_FUNCTION = 8
+
 
 class InterviewMessagesService:
     """Service for managing interview messages with GigaChat integration."""
@@ -32,10 +41,23 @@ class InterviewMessagesService:
         """Call GigaChat client async method."""
         return await client.achat(chat_params)
 
-    async def _prepare_functions(self):
-        """Prepare functions for GigaChat."""
+    async def _prepare_functions(self, session: AsyncSession, interview_id: str):
+        """Prepare functions for GigaChat.
+
+        The "finish_interview" function is exposed to the model only when the
+        conversation has at least MIN_MESSAGES_FOR_FINISH_FUNCTION messages.
+        """
+        # Count messages for gating the finish_interview function exposure
+        messages_count = await session.scalar(
+            select(func.count())
+            .select_from(InterviewMessage)
+            .where(InterviewMessage.interview_id == interview_id)
+        )
+        messages_count = int(messages_count or 0)
+        if messages_count < MIN_MESSAGES_FOR_FINISH_FUNCTION:
+            return []
         finish_interview = Function(
-            name="finish_review",
+            name="finish_interview",
             description="Завершает интервью и сохраняет фидбек. НЕ ВЫЗЫВАЙ эту функцию, пока ты не получишь ПОЛНОЕ представление о кандидате.",
             parameters=FunctionParameters(
                 type="object",
@@ -64,8 +86,10 @@ class InterviewMessagesService:
 
         result = await session.scalars(
             select(InterviewMessage)
-            .where(InterviewMessage.interview_id == interview_id)
-            .order_by(InterviewMessage.index)
+            # Filter out first system message
+            .where(InterviewMessage.interview_id == interview_id).order_by(
+                InterviewMessage.index
+            )
         )
         return list(result)
 
@@ -181,9 +205,9 @@ class InterviewMessagesService:
 
             chat_params = {
                 "messages": gigachat_messages,
-                "functions": await self._prepare_functions(),
-                "temperature": 0.7,
-                "max_tokens": 1000,
+                "functions": await self._prepare_functions(session, interview_id),
+                "temperature": GIGACHAT_TEMPERATURE,
+                "max_tokens": GIGACHAT_MAX_TOKENS,
                 "stream": False,
             }
             response = await self._call_gigachat_async(client, chat_params)
@@ -201,9 +225,9 @@ class InterviewMessagesService:
             if finish_reason == "function_call" and getattr(
                 message, "function_call", None
             ):
-                func = message.function_call
-                func_name = getattr(func, "name", None)
-                func_args = getattr(func, "arguments", {})
+                function_call = message.function_call
+                func_name = getattr(function_call, "name", None)
+                func_args = getattr(function_call, "arguments", {})
                 logger.info(
                     "GigaChat requested function_call '%s' for interview %s",
                     func_name,
@@ -221,11 +245,26 @@ class InterviewMessagesService:
                     "function_call arguments type=%s", type(func_args).__name__
                 )
 
-                if func_name == "finish_review":
+                if func_name == "finish_interview":
+                    # Guard: skip handling finish_interview if not enough messages yet
+                    messages_count = await session.scalar(
+                        select(func.count())
+                        .select_from(InterviewMessage)
+                        .where(InterviewMessage.interview_id == interview_id)
+                    )
+                    messages_count = int(messages_count or 0)
+                    if messages_count < MIN_MESSAGES_FOR_FINISH_FUNCTION:
+                        logger.info(
+                            "Skipping finish_interview for interview %s: messages_count=%s < min=%s",
+                            interview_id,
+                            messages_count,
+                            MIN_MESSAGES_FOR_FINISH_FUNCTION,
+                        )
+                        return "Спасибо! Давайте продолжим интервью, чтобы собрать достаточно информации перед завершением."
                     feedback = func_args.get("feedback")
                     positive = func_args.get("positive")
                     logger.info(
-                        "Handling finish_review for interview %s (positive=%s, feedback_len=%s)",
+                        "Handling finish_interview for interview %s (positive=%s, feedback_len=%s)",
                         interview_id,
                         positive,
                         len(feedback) if isinstance(feedback, str) else 0,
@@ -356,32 +395,174 @@ class InterviewMessagesService:
         self, candidate: Candidate, vacancy: Vacancy | None
     ) -> str:
         """Create system prompt for the interview."""
-        vacancy_info = ""
-        if vacancy:
-            vacancy_info = (
-                f"Вакансия: {vacancy.title}. "
-                f"Описание: {vacancy.description or 'нет описания.'}"
+
+        # Helpers for safe extraction and formatting of fields
+        def to_list(value) -> list:
+            if value is None:
+                return []
+            if isinstance(value, list):
+                return value
+            if isinstance(value, str):
+                try:
+                    import json
+
+                    parsed = json.loads(value)
+                    return parsed if isinstance(parsed, list) else [value]
+                except Exception:
+                    return [item.strip() for item in value.split(",") if item.strip()]
+            return [str(value)]
+
+        def join_list(values: list) -> str:
+            if not values:
+                return "не указано"
+            return ", ".join(str(v) for v in values if v is not None and str(v).strip())
+
+        def format_experience(value) -> str:
+            items = to_list(value)
+            if not items:
+                return "не указано"
+            formatted = []
+            for item in items:
+                if isinstance(item, dict):
+                    company = item.get("company") or "?"
+                    position = item.get("position") or "?"
+                    years = item.get("years")
+                    years_str = f"{years} лет" if years not in (None, "") else "?"
+                    formatted.append(f"• {company}, {position}, {years_str}")
+                else:
+                    formatted.append(f"• {item}")
+            return "\n".join(formatted)
+
+        def format_education(value) -> str:
+            items = to_list(value)
+            if not items:
+                return "не указано"
+            formatted = []
+            for item in items:
+                if isinstance(item, dict):
+                    org = item.get("organization") or "?"
+                    spec = item.get("speciality") or "?"
+                    typ = item.get("type")
+                    if typ:
+                        formatted.append(f"• {org} — {spec} ({typ})")
+                    else:
+                        formatted.append(f"• {org} — {spec}")
+                else:
+                    formatted.append(f"• {item}")
+            return "\n".join(formatted)
+
+        def format_salary(min_val, max_val) -> str:
+            if min_val and max_val:
+                return f"{min_val}–{max_val}"
+            if min_val and not max_val:
+                return f"от {min_val}"
+            if max_val and not min_val:
+                return f"до {max_val}"
+            return "не указано"
+
+        # Candidate fields
+        c_name = getattr(candidate, "name", None) or "не указан"
+        c_email = getattr(candidate, "email", None) or "не указан"
+        c_position = getattr(candidate, "position", None) or "не указана"
+        c_status = getattr(candidate, "status", None) or "не указан"
+        c_geo = getattr(candidate, "geo", None) or "не указано"
+        c_employment_type = getattr(candidate, "employment_type", None) or "не указан"
+        c_skills = join_list(to_list(getattr(candidate, "skills", None)))
+        c_tech = join_list(to_list(getattr(candidate, "tech", None)))
+        c_experience_block = format_experience(getattr(candidate, "experience", None))
+        c_education_block = format_education(getattr(candidate, "education", None))
+
+        candidate_block = (
+            "Информация о кандидате:\n"
+            f"- Имя: {c_name}\n"
+            f"- Email: {c_email}\n"
+            f"- Позиция: {c_position}\n"
+            f"- Статус: {c_status}\n"
+            f"- Гео: {c_geo}\n"
+            f"- Тип занятости: {c_employment_type}\n"
+            f"- Навыки: {c_skills}\n"
+            f"- Техстек: {c_tech}\n"
+            f"- Опыт:\n{c_experience_block}\n"
+            f"- Образование:\n{c_education_block}\n"
+        )
+
+        # Vacancy fields
+        if vacancy is not None:
+            v_title = getattr(vacancy, "title", None) or "не указана"
+            v_company = getattr(vacancy, "company", None) or "не указана"
+            v_location = getattr(vacancy, "location", None) or "не указана"
+            v_status = getattr(vacancy, "status", None) or "не указан"
+            v_employment_type = getattr(vacancy, "employment_type", None) or "не указан"
+            v_experience_level = (
+                getattr(vacancy, "experience_level", None) or "не указан"
+            )
+            v_salary = format_salary(
+                getattr(vacancy, "salary_min", None),
+                getattr(vacancy, "salary_max", None),
+            )
+            v_requirements = getattr(vacancy, "requirements", None) or "не указано"
+            v_benefits = getattr(vacancy, "benefits", None) or "не указано"
+            v_description = getattr(vacancy, "description", None) or "не указано"
+            v_domain = getattr(vacancy, "domain", None) or "не указан"
+            v_education = getattr(vacancy, "education", None) or "не указано"
+            v_company_info = getattr(vacancy, "company_info", None) or "не указано"
+            v_skills = join_list(to_list(getattr(vacancy, "skills", None)))
+            v_minor_skills = join_list(to_list(getattr(vacancy, "minor_skills", None)))
+            v_responsibilities = join_list(
+                to_list(getattr(vacancy, "responsibilities", None))
+            )
+
+            vacancy_block = (
+                "Информация о вакансии:\n"
+                f"- Название: {v_title}\n"
+                f"- Компания: {v_company}\n"
+                f"- Локация: {v_location}\n"
+                f"- Статус вакансии: {v_status}\n"
+                f"- Уровень: {v_experience_level}\n"
+                f"- Тип занятости: {v_employment_type}\n"
+                f"- Зарплата: {v_salary}\n"
+                f"- Навыки: {v_skills}\n"
+                f"- Доп. навыки: {v_minor_skills}\n"
+                f"- Обязанности: {v_responsibilities}\n"
+                f"- Домен: {v_domain}\n"
+                f"- Требования (текст): {v_requirements}\n"
+                f"- Бенефиты: {v_benefits}\n"
+                f"- Образование: {v_education}\n"
+                f"- Описание: {v_description}\n"
+                f"- Информация о компании: {v_company_info}\n"
             )
         else:
-            vacancy_info = "Вакансия не указана."
+            vacancy_block = "Вакансия не указана"
 
-        return (
-            "Ты ассистент HR, проводишь первичное интервью с кандидатом. "
-            "Твоя задача - собрать краткую информацию о кандидате, "
-            "оценить его соответствие позиции и дать рекомендации. "
-            "Будь дружелюбен, профессиональен и говори только по-русски. "
-            f"Информация о кандидате: имя - {candidate.name}, "
-            f"позиция - {candidate.position}, "
-            f"опыт работы - {candidate.experience} лет. "
-            f"{vacancy_info} "
-            "Начни с приветствия и попроси кандидата рассказать о себе."
-            "В конце интервью вызови функцию finish_review, дав полное представление о кандидате."
-            "НЕ ЗАКАНЧИВАЙ интервью раньше времени. Всегда жди всей информации, дай кандидату разослать её."
-            "Если информации пока не хватает - спроси кандидата ещё раз."
-            "Интервью должно занять не меньше 5 сообщений с обоих сторон, но не более 10."
-            "НЕ ПИШИ памфлеты, восхваляя опыт кандидата. Будь кратким и лаконичным. Показывай кандидату уважение, но не распевай дифирамбы."
-            "НЕ ПИШИ кандидату финальное мнение о нем. Только вызови функцию finish_review и скажи, что с ним свяжуться далее."
-        )
+        return f"""
+Ты — ассистент HR. Проводишь первичное интервью с кандидатом.
+
+Твоя цель:
+- собрать краткую информацию о кандидате,
+- оценить его профессиональный опыт,
+- проверить знания и умения, специфичные для вакансии,
+- оценить коммуникацию и общую культуру
+
+Правила интервью:
+1. Всегда начинай с приветствия и короткого объяснения формата (несколько вопросов).
+2. Сначала задавай вопросы и получай ответы. Используй стиль живого интервью.
+3. НЕ завершай интервью и НЕ вызывай функцию finish_interview, пока:
+   - не уточнишь опыт работы и проекты,
+   - не проверишь знания ключевых технологий,
+   - не спросишь о мотивации и ожиданиях,
+   - не оценишь soft skills (коммуникацию, культуру),
+   - кандидат не ответит на все вопросы, перечисленные выше.
+4. Если кандидат забывает ответить на твой вопрос — повтори его.
+5. Ты ведёшь интервью ТОЛЬКО со своей стороны. НИКОГДА не пиши ответы за кандидата. Все ответы кандидата вводятся пользователем. Если информации не хватает — задай уточняющий вопрос, но не придумывай ответ.
+6. Только когда собрана вся информация, сделай вывод и вызови finish_interview.
+7. Твоё финальное сообщение с вызовом функции finish_interview должно быть коротким (до 100 символов) и не содержать информации о твоих намерениях относительно кандидата. Только прощание и обещание скорого фидбека.
+
+Очень важно: не переходи к финальному шагу раньше времени. Сначала проведи полноценное интервью!
+
+{candidate_block}
+
+{vacancy_block}
+"""
 
     async def _get_initial_greeting(self, system_prompt: str) -> str:
         """Get initial greeting from GigaChat."""
@@ -395,8 +576,8 @@ class InterviewMessagesService:
 
             chat_params = {
                 "messages": messages,
-                "temperature": 0.7,
-                "max_tokens": 200,
+                "temperature": INITIAL_GREETING_TEMPERATURE,
+                "max_tokens": INITIAL_GREETING_MAX_TOKENS,
                 "stream": False,
             }
             response = await self._call_gigachat_async(client, chat_params)

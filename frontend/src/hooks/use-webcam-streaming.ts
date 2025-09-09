@@ -212,6 +212,16 @@ export function useWebcamStreaming(
 		setSocketState("speech_recognition");
 	}
 
+	/**
+	 * Отправка текстового сообщения напрямую по WebSocket (dev/debug режим)
+	 */
+	function sendTextMessage(text: string) {
+		if (!text) return;
+		console.log("Sending text message over WS:", text);
+		sendMessage(text);
+		setSocketState("generating_response");
+	}
+
 	function startRecording() {
 		console.log("Attempting to start recording...");
 		setIsRecording(true);
@@ -248,6 +258,7 @@ export function useWebcamStreaming(
 		startRecording,
 		handleStopRecording,
 		sendAudioReadyMarker,
+		sendTextMessage,
 		socketState,
 	};
 }
