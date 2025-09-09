@@ -25,6 +25,7 @@ import { Route as ProtectedLayoutVacanciesVacancyIdIndexRouteImport } from './ro
 import { Route as ProtectedLayoutCandidatesCandidateIdIndexRouteImport } from './routes/_protectedLayout/candidates/$candidateId.index'
 import { Route as ProtectedLayoutVacanciesVacancyIdStatsRouteImport } from './routes/_protectedLayout/vacancies/$vacancyId.stats'
 import { Route as ProtectedLayoutVacanciesVacancyIdEditRouteImport } from './routes/_protectedLayout/vacancies/$vacancyId.edit'
+import { Route as ProtectedLayoutCompatibilityCandidateIdVacancyIdRouteImport } from './routes/_protectedLayout/compatibility/$candidateId.$vacancyId'
 import { Route as ProtectedLayoutCandidatesCandidateIdEditRouteImport } from './routes/_protectedLayout/candidates/$candidateId.edit'
 
 const SignInRoute = SignInRouteImport.update({
@@ -116,6 +117,12 @@ const ProtectedLayoutVacanciesVacancyIdEditRoute =
     path: '/edit',
     getParentRoute: () => ProtectedLayoutVacanciesVacancyIdRoute,
   } as any)
+const ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute =
+  ProtectedLayoutCompatibilityCandidateIdVacancyIdRouteImport.update({
+    id: '/compatibility/$candidateId/$vacancyId',
+    path: '/compatibility/$candidateId/$vacancyId',
+    getParentRoute: () => ProtectedLayoutRouteRoute,
+  } as any)
 const ProtectedLayoutCandidatesCandidateIdEditRoute =
   ProtectedLayoutCandidatesCandidateIdEditRouteImport.update({
     id: '/candidates/$candidateId/edit',
@@ -136,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/candidates': typeof ProtectedLayoutCandidatesIndexRoute
   '/vacancies': typeof ProtectedLayoutVacanciesIndexRoute
   '/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  '/compatibility/$candidateId/$vacancyId': typeof ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute
   '/vacancies/$vacancyId/edit': typeof ProtectedLayoutVacanciesVacancyIdEditRoute
   '/vacancies/$vacancyId/stats': typeof ProtectedLayoutVacanciesVacancyIdStatsRoute
   '/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
   '/candidates': typeof ProtectedLayoutCandidatesIndexRoute
   '/vacancies': typeof ProtectedLayoutVacanciesIndexRoute
   '/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  '/compatibility/$candidateId/$vacancyId': typeof ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute
   '/vacancies/$vacancyId/edit': typeof ProtectedLayoutVacanciesVacancyIdEditRoute
   '/vacancies/$vacancyId/stats': typeof ProtectedLayoutVacanciesVacancyIdStatsRoute
   '/candidates/$candidateId': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
@@ -173,6 +182,7 @@ export interface FileRoutesById {
   '/_protectedLayout/candidates/': typeof ProtectedLayoutCandidatesIndexRoute
   '/_protectedLayout/vacancies/': typeof ProtectedLayoutVacanciesIndexRoute
   '/_protectedLayout/candidates/$candidateId/edit': typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  '/_protectedLayout/compatibility/$candidateId/$vacancyId': typeof ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute
   '/_protectedLayout/vacancies/$vacancyId/edit': typeof ProtectedLayoutVacanciesVacancyIdEditRoute
   '/_protectedLayout/vacancies/$vacancyId/stats': typeof ProtectedLayoutVacanciesVacancyIdStatsRoute
   '/_protectedLayout/candidates/$candidateId/': typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/vacancies'
     | '/candidates/$candidateId/edit'
+    | '/compatibility/$candidateId/$vacancyId'
     | '/vacancies/$vacancyId/edit'
     | '/vacancies/$vacancyId/stats'
     | '/candidates/$candidateId'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/vacancies'
     | '/candidates/$candidateId/edit'
+    | '/compatibility/$candidateId/$vacancyId'
     | '/vacancies/$vacancyId/edit'
     | '/vacancies/$vacancyId/stats'
     | '/candidates/$candidateId'
@@ -229,6 +241,7 @@ export interface FileRouteTypes {
     | '/_protectedLayout/candidates/'
     | '/_protectedLayout/vacancies/'
     | '/_protectedLayout/candidates/$candidateId/edit'
+    | '/_protectedLayout/compatibility/$candidateId/$vacancyId'
     | '/_protectedLayout/vacancies/$vacancyId/edit'
     | '/_protectedLayout/vacancies/$vacancyId/stats'
     | '/_protectedLayout/candidates/$candidateId/'
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedLayoutVacanciesVacancyIdEditRouteImport
       parentRoute: typeof ProtectedLayoutVacanciesVacancyIdRoute
     }
+    '/_protectedLayout/compatibility/$candidateId/$vacancyId': {
+      id: '/_protectedLayout/compatibility/$candidateId/$vacancyId'
+      path: '/compatibility/$candidateId/$vacancyId'
+      fullPath: '/compatibility/$candidateId/$vacancyId'
+      preLoaderRoute: typeof ProtectedLayoutCompatibilityCandidateIdVacancyIdRouteImport
+      parentRoute: typeof ProtectedLayoutRouteRoute
+    }
     '/_protectedLayout/candidates/$candidateId/edit': {
       id: '/_protectedLayout/candidates/$candidateId/edit'
       path: '/candidates/$candidateId/edit'
@@ -397,6 +417,7 @@ interface ProtectedLayoutRouteRouteChildren {
   ProtectedLayoutCandidatesIndexRoute: typeof ProtectedLayoutCandidatesIndexRoute
   ProtectedLayoutVacanciesIndexRoute: typeof ProtectedLayoutVacanciesIndexRoute
   ProtectedLayoutCandidatesCandidateIdEditRoute: typeof ProtectedLayoutCandidatesCandidateIdEditRoute
+  ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute: typeof ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute
   ProtectedLayoutCandidatesCandidateIdIndexRoute: typeof ProtectedLayoutCandidatesCandidateIdIndexRoute
 }
 
@@ -410,6 +431,8 @@ const ProtectedLayoutRouteRouteChildren: ProtectedLayoutRouteRouteChildren = {
   ProtectedLayoutVacanciesIndexRoute: ProtectedLayoutVacanciesIndexRoute,
   ProtectedLayoutCandidatesCandidateIdEditRoute:
     ProtectedLayoutCandidatesCandidateIdEditRoute,
+  ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute:
+    ProtectedLayoutCompatibilityCandidateIdVacancyIdRoute,
   ProtectedLayoutCandidatesCandidateIdIndexRoute:
     ProtectedLayoutCandidatesCandidateIdIndexRoute,
 }

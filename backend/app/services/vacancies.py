@@ -1,11 +1,15 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 
 from app.models.vacancy import Vacancy
 from app.models.note import Note
 from app.schemas.common import VacancyCreate, VacancyUpdate, NoteCreate, NoteUpdate
 import json
 from app.services.exceptions import NotFoundError
+from app.services.embedding_service import embedding_service
+
+logger = logging.getLogger(__name__)
 
 
 async def create_vacancy(session: AsyncSession, payload: VacancyCreate) -> Vacancy:
@@ -33,6 +37,18 @@ async def create_vacancy(session: AsyncSession, payload: VacancyCreate) -> Vacan
     session.add(vacancy)
     await session.commit()
     await session.refresh(vacancy)
+
+    # Automatically generate embedding for the new vacancy
+    try:
+        logger.info(f"Generating embedding for new vacancy: {vacancy.id}")
+        await embedding_service.generate_vacancy_embedding(session, vacancy)
+        await session.commit()  # Commit after embedding generation
+        logger.info(f"Successfully generated embedding for vacancy: {vacancy.id}")
+    except Exception as e:
+        logger.error(f"Failed to generate embedding for vacancy {vacancy.id}: {e}")
+        await session.rollback()  # Rollback if embedding generation fails
+        # Don't fail the vacancy creation if embedding generation fails
+
     return vacancy
 
 
@@ -77,6 +93,16 @@ async def update_vacancy(
         setattr(vacancy, key, value)
     await session.commit()
     await session.refresh(vacancy)
+
+    # Regenerate embedding after updates
+    try:
+        logger.info(f"Regenerating embedding for updated vacancy: {vacancy.id}")
+        await embedding_service.generate_vacancy_embedding(session, vacancy)
+        await session.commit()  # Commit after embedding regeneration
+    except Exception as e:
+        logger.error(f"Failed to regenerate vacancy embedding {vacancy.id}: {e}")
+        await session.rollback()  # Rollback if embedding generation fails
+
     return vacancy
 
 
@@ -84,6 +110,8 @@ async def delete_vacancy(session: AsyncSession, vacancy_id: int) -> None:
     vacancy = await session.get(Vacancy, vacancy_id)
     if not vacancy:
         raise NotFoundError("Vacancy not found")
+
+    # Delete the vacancy - this will cascade to delete the embedding due to ondelete="CASCADE"
     await session.delete(vacancy)
     await session.commit()
 
