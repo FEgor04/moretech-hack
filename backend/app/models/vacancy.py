@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Text, func, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.embedding import VacancyEmbedding
 
 
 class Vacancy(Base):
@@ -37,4 +41,9 @@ class Vacancy(Base):
     created_at: Mapped[datetime] = mapped_column(default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    embedding: Mapped["VacancyEmbedding | None"] = relationship(
+        "VacancyEmbedding", back_populates="vacancy", uselist=False
     )

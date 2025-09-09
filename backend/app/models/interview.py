@@ -11,9 +11,11 @@ class Interview(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    candidate_id: Mapped[str] = mapped_column(String(36), ForeignKey("candidate.id"))
+    candidate_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("candidate.id", ondelete="CASCADE")
+    )
     vacancy_id: Mapped[int | None] = mapped_column(
-        ForeignKey("vacancy.id"), nullable=True
+        ForeignKey("vacancy.id", ondelete="CASCADE"), nullable=True
     )
     transcript: Mapped[str | None] = mapped_column(Text, nullable=True)
     recording_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)

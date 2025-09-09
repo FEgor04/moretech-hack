@@ -6,6 +6,7 @@ import type { VacancyRead } from "@/api/client/types.gen";
 import { vacancyNotesQueryOptions } from "@/api/queries/vacancies";
 import { useCreateVacancyNote } from "@/api/mutations/vacancies";
 import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
+import { SimilarCandidates } from "@/components/compatibility/similar-candidates";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
@@ -812,6 +813,9 @@ function VacancyDetail() {
 					</div>
 				</div>
 			</div>
+
+			{/* Similar Candidates */}
+			<SimilarCandidates vacancyId={Number.parseInt(params.vacancyId)} />
 		</div>
 	);
 }
