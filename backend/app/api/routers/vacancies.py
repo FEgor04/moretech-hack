@@ -1,3 +1,4 @@
+import logging
 from fastapi import (
     APIRouter,
     Depends,
@@ -185,38 +186,18 @@ async def upload_vacancy_pdf(
 async def download_vacancy_document(
     vacancy_id: int, session: AsyncSession = Depends(get_session)
 ):
-    logging.getLogger("app").info(
-        "[download_vacancy_document] route hit | vacancy_id=%s", vacancy_id
-    )
     vacancy = await vacancies_service.get_vacancy(session, vacancy_id)
     if not vacancy:
-        logging.getLogger("app").warning(
-            "[download_vacancy_document] vacancy not found | vacancy_id=%s",
-            vacancy_id,
-        )
         raise HTTPException(status_code=404, detail="Vacancy not found")
     if not vacancy.document_s3_key:
-        logging.getLogger("app").warning(
-            "[download_vacancy_document] document key missing | vacancy_id=%s",
-            vacancy_id,
-        )
         raise HTTPException(status_code=404, detail="Document not found")
     try:
-        logging.getLogger("app").info(
-            "[download_vacancy_document] fetching from S3 | bucket=%s key=%s",
-            settings.s3_bucket_name,
-            vacancy.document_s3_key,
-        )
         s3 = get_s3_client()
         obj = s3.get_object(Bucket=settings.s3_bucket_name, Key=vacancy.document_s3_key)
         content = obj["Body"].read()
-        logging.getLogger("app").info(
-            "[download_vacancy_document] S3 fetch OK | bytes=%s",
-            len(content) if hasattr(content, "__len__") else "unknown",
-        )
         return Response(content=content, media_type="application/pdf")
     except Exception as e:
-        logging.getLogger("app").error(
+        logging.error(
             "[download_vacancy_document] failed | vacancy_id=%s error=%s",
             vacancy_id,
             e,

@@ -1,6 +1,7 @@
 import boto3
 from app.core.config import settings
 
+
 def get_s3_client():
     return boto3.client(
         service_name="s3",
