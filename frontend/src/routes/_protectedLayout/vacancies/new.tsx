@@ -11,6 +11,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -21,7 +22,6 @@ import {
 } from "@/components/ui/select";
 import { useCreateVacancy } from "@/api/mutations/vacancies";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
-import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_protectedLayout/vacancies/new")({
 	component: RouteComponent,
@@ -39,6 +39,24 @@ const schema = z.object({
 	title: z.string().min(1, "Введите название вакансии"),
 	description: z.string().optional(),
 	status: z.enum(VACANCY_STATUSES).optional(),
+	company: z.string().optional(),
+	location: z.string().optional(),
+	salary_min: z.number().optional(),
+	salary_max: z.number().optional(),
+	employment_type: z
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
+		.optional(),
+	experience_level: z
+		.enum(["младший", "средний", "старший", "ведущий"])
+		.optional(),
+	requirements: z.string().optional(),
+	benefits: z.string().optional(),
+	skills: z.string().optional(),
+	responsibilities: z.string().optional(),
+	domain: z.string().optional(),
+	education: z.string().optional(),
+	minor_skills: z.string().optional(),
+	company_info: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -54,11 +72,54 @@ function RouteComponent() {
 			title: "",
 			description: "",
 			status: undefined,
+			company: "",
+			location: "",
+			salary_min: undefined,
+			salary_max: undefined,
+			employment_type: undefined,
+			experience_level: undefined,
+			requirements: "",
+			benefits: "",
+			skills: "",
+			responsibilities: "",
+			domain: "",
+			education: "",
+			minor_skills: "",
+			company_info: "",
 		},
 	});
 
 	async function onSubmit(values: FormValues) {
-		await mutation.mutateAsync(values);
+		// Преобразуем строки навыков в массивы
+		const skillsArray = values.skills
+			? values.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const responsibilitiesArray = values.responsibilities
+			? values.responsibilities
+					.split(",")
+					.map((resp) => resp.trim())
+					.filter((resp) => resp.length > 0)
+			: undefined;
+
+		const minorSkillsArray = values.minor_skills
+			? values.minor_skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const vacancyData = {
+			...values,
+			skills: skillsArray || [],
+			responsibilities: responsibilitiesArray || [],
+			minor_skills: minorSkillsArray || [],
+		};
+
+		await mutation.mutateAsync(vacancyData);
 		navigate({ to: "/vacancies" });
 	}
 
@@ -125,6 +186,125 @@ function RouteComponent() {
 										))}
 									</SelectContent>
 								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="company"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Компания</FormLabel>
+								<FormControl>
+									<Input placeholder="Название компании" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="location"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Местоположение</FormLabel>
+								<FormControl>
+									<Input placeholder="Москва, Россия" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="skills"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Требуемые навыки</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
+										rows={3}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="responsibilities"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Обязанности</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите обязанности через запятую"
+										rows={4}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="domain"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Домен/Отрасль</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										placeholder="IT, Финансы, Медицина и т.д."
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="education"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Требования к образованию</FormLabel>
+								<FormControl>
+									<Textarea rows={3} {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="minor_skills"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Дополнительные навыки</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите дополнительные навыки через запятую"
+										rows={3}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="company_info"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Информация о компании</FormLabel>
+								<FormControl>
+									<Textarea rows={4} {...field} />
+								</FormControl>
 								<FormMessage />
 							</FormItem>
 						)}

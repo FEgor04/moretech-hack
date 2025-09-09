@@ -1,15 +1,15 @@
 """merge heads
 
-Revision ID: 2965a21a45b8
-Revises: 000009_add_vacancy_notes, 3a7bf0979312
+Revision ID: 000014
+Revises: 000011, 000009
 Create Date: 2025-09-07 14:46:19.168094
 
 """
 
 from typing import Sequence, Union
 
-revision: str = "2965a21a45b8"
-down_revision: Union[str, None] = ("000009_add_vacancy_notes", "3a7bf0979312")
+revision: str = "000014"
+down_revision: Union[str, None] = ("000011", "000009")
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

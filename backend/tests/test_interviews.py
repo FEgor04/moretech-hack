@@ -10,7 +10,7 @@ async def sample_candidate(client: AsyncClient) -> dict:
         "name": "John Doe",
         "email": "john@example.com",
         "position": "Software Engineer",
-        "experience": 3,
+        "experience_years": 3,
     }
     response = await client.post("/candidates/", json=candidate_data)
     assert response.status_code == 201
@@ -210,7 +210,7 @@ class TestGetInterviewsByCandidate:
             "name": "Jane Doe",
             "email": "jane@example.com",
             "position": "Designer",
-            "experience": 2,
+            "experience_years": 2,
         }
         other_candidate_response = await client.post(
             "/candidates/", json=other_candidate_data

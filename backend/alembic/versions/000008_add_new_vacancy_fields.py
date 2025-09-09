@@ -6,15 +6,17 @@ Create Date: 2024-09-07 03:30:00.000000
 
 """
 
+from typing import Sequence, Union
+
 from alembic import op
 import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "000008"
-down_revision = "000007"
-branch_labels = None
-depends_on = None
+revision: str = "000008"
+down_revision: Union[str, None] = "000007"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:

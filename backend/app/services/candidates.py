@@ -11,9 +11,20 @@ async def create_candidate(
     session: AsyncSession, payload: CandidateCreate
 ) -> Candidate:
     data = payload.model_dump(exclude_unset=True)
-    # Преобразуем список навыков в JSON строку
+    # Serialize JSON-like fields to TEXT columns
     if "skills" in data and data["skills"] is not None:
         data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
+    if "tech" in data and data["tech"] is not None:
+        data["tech"] = json.dumps(data["tech"], ensure_ascii=False)
+    if "education" in data and data["education"] is not None:
+        try:
+            json.dumps(data["education"])  # ensure serializable
+        except TypeError:
+            pass
+        else:
+            data["education"] = json.dumps(data["education"], ensure_ascii=False)
+    if "experience" in data and data["experience"] is not None:
+        data["experience"] = json.dumps(data["experience"], ensure_ascii=False)
 
     candidate = Candidate(**data)
     session.add(candidate)
@@ -42,9 +53,20 @@ async def update_candidate(
         raise NotFoundError("Candidate not found")
 
     data = payload.model_dump(exclude_unset=True)
-    # Преобразуем список навыков в JSON строку
+    # Serialize JSON-like fields to TEXT columns
     if "skills" in data and data["skills"] is not None:
         data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
+    if "tech" in data and data["tech"] is not None:
+        data["tech"] = json.dumps(data["tech"], ensure_ascii=False)
+    if "education" in data and data["education"] is not None:
+        try:
+            json.dumps(data["education"])  # ensure serializable
+        except TypeError:
+            pass
+        else:
+            data["education"] = json.dumps(data["education"], ensure_ascii=False)
+    if "experience" in data and data["experience"] is not None:
+        data["experience"] = json.dumps(data["experience"], ensure_ascii=False)
 
     for key, value in data.items():
         setattr(candidate, key, value)

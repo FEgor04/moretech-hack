@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import { interviewsByCandidateQueryOptions } from "@/api/queries/interviews";
+import type { ExperienceItem } from "@/api/client/types.gen";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { CandidateAvatar } from "@/components/candidates/candidate-avatar";
 import { CandidateStatusBadge } from "@/components/candidates/status-badge";
@@ -31,6 +32,7 @@ import {
 	FileTextIcon,
 	StarIcon,
 	ActivityIcon,
+	MapPinIcon,
 } from "lucide-react";
 
 export const Route = createFileRoute(
@@ -166,7 +168,13 @@ function CandidateDetail() {
 										<Label className="text-xs text-muted-foreground">
 											Опыт работы
 										</Label>
-										<p className="text-sm font-medium">{c.experience} лет</p>
+										<p className="text-sm font-medium">
+											{c.experience &&
+											Array.isArray(c.experience) &&
+											c.experience.length > 0
+												? `${c.experience.reduce((sum: number, exp: ExperienceItem) => sum + (exp.years || 0), 0)} лет`
+												: "Не указан"}
+										</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">
@@ -233,9 +241,207 @@ function CandidateDetail() {
 										</div>
 									</div>
 								)}
+								{c.geo && (
+									<div className="flex items-center gap-3">
+										<MapPinIcon className="h-4 w-4 text-muted-foreground" />
+										<div>
+											<Label className="text-xs text-muted-foreground">
+												Местоположение
+											</Label>
+											<p className="text-sm font-medium">{c.geo}</p>
+										</div>
+									</div>
+								)}
+								{c.employment_type && (
+									<div className="flex items-center gap-3">
+										<BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
+										<div>
+											<Label className="text-xs text-muted-foreground">
+												Тип занятости
+											</Label>
+											<p className="text-sm font-medium">{c.employment_type}</p>
+										</div>
+									</div>
+								)}
+								{c.tech && (
+									<div className="flex items-start gap-3 md:col-span-2">
+										<StarIcon className="h-4 w-4 text-muted-foreground mt-1" />
+										<div className="flex-1">
+											<Label className="text-xs text-muted-foreground">
+												Технологии
+											</Label>
+											<div className="flex flex-wrap gap-1 mt-1">
+												{Array.isArray(c.tech) ? (
+													c.tech.map((tech) => (
+														<Badge
+															key={tech}
+															variant="outline"
+															className="text-xs"
+														>
+															{tech}
+														</Badge>
+													))
+												) : (
+													<Badge variant="outline" className="text-xs">
+														{c.tech}
+													</Badge>
+												)}
+											</div>
+										</div>
+									</div>
+								)}
 							</div>
 						</CardContent>
 					</Card>
+
+					{/* Образование и опыт */}
+					{(c.education || c.experience) && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<FileTextIcon className="h-5 w-5" />
+									Образование и опыт
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-6">
+									{c.education && (
+										<div>
+											<Label className="text-sm font-medium text-muted-foreground">
+												Образование
+											</Label>
+											<div className="mt-2 space-y-3">
+												{(() => {
+													try {
+														const educationData =
+															typeof c.education === "string"
+																? JSON.parse(c.education)
+																: c.education;
+
+														if (Array.isArray(educationData)) {
+															return educationData.map((edu, index) => (
+																<div
+																	key={`edu-${edu.organization || "unknown"}-${edu.speciality || "unknown"}-${index}`}
+																	className="p-3 bg-blue-50 rounded-lg border border-blue-200"
+																>
+																	<div className="flex items-start justify-between">
+																		<div className="flex-1">
+																			<h4 className="font-medium text-blue-900">
+																				{edu.organization || "Не указано"}
+																			</h4>
+																			{edu.speciality && (
+																				<p className="text-sm text-blue-700 mt-1">
+																					{edu.speciality}
+																				</p>
+																			)}
+																		</div>
+																		<Badge
+																			variant="outline"
+																			className="bg-blue-100 text-blue-800 border-blue-300"
+																		>
+																			{edu.type || "Не указано"}
+																		</Badge>
+																	</div>
+																</div>
+															));
+														}
+														return (
+															<div className="p-3 bg-gray-50 rounded-lg">
+																<pre className="text-sm whitespace-pre-wrap">
+																	{typeof c.education === "string"
+																		? c.education
+																		: JSON.stringify(c.education, null, 2)}
+																</pre>
+															</div>
+														);
+													} catch {
+														return (
+															<div className="p-3 bg-gray-50 rounded-lg">
+																<pre className="text-sm whitespace-pre-wrap">
+																	{typeof c.education === "string"
+																		? c.education
+																		: JSON.stringify(c.education, null, 2)}
+																</pre>
+															</div>
+														);
+													}
+												})()}
+											</div>
+										</div>
+									)}
+									{c.experience && (
+										<div>
+											<Label className="text-sm font-medium text-muted-foreground">
+												Детальный опыт работы
+											</Label>
+											<div className="mt-2 space-y-3">
+												{(() => {
+													try {
+														const experienceData =
+															typeof c.experience === "string"
+																? JSON.parse(c.experience)
+																: c.experience;
+
+														if (Array.isArray(experienceData)) {
+															return experienceData.map((exp, index) => (
+																<div
+																	key={`exp-${exp.company || "unknown"}-${exp.position || "unknown"}-${index}`}
+																	className="p-3 bg-green-50 rounded-lg border border-green-200"
+																>
+																	<div className="flex items-start justify-between">
+																		<div className="flex-1">
+																			<h4 className="font-medium text-green-900">
+																				{exp.company || "Не указано"}
+																			</h4>
+																			<p className="text-sm text-green-700 mt-1">
+																				{exp.position || "Не указано"}
+																			</p>
+																		</div>
+																		{exp.years && (
+																			<Badge
+																				variant="outline"
+																				className="bg-green-100 text-green-800 border-green-300"
+																			>
+																				{exp.years}{" "}
+																				{exp.years === 1
+																					? "год"
+																					: exp.years < 5
+																						? "года"
+																						: "лет"}
+																			</Badge>
+																		)}
+																	</div>
+																</div>
+															));
+														}
+														return (
+															<div className="p-3 bg-gray-50 rounded-lg">
+																<pre className="text-sm whitespace-pre-wrap">
+																	{typeof c.experience === "string"
+																		? c.experience
+																		: JSON.stringify(c.experience, null, 2)}
+																</pre>
+															</div>
+														);
+													} catch {
+														return (
+															<div className="p-3 bg-gray-50 rounded-lg">
+																<pre className="text-sm whitespace-pre-wrap">
+																	{typeof c.experience === "string"
+																		? c.experience
+																		: JSON.stringify(c.experience, null, 2)}
+																</pre>
+															</div>
+														);
+													}
+												})()}
+											</div>
+										</div>
+									)}
+								</div>
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Статистика интервью */}
 					<Card>
@@ -336,45 +542,6 @@ function CandidateDetail() {
 
 				{/* Боковая панель */}
 				<div className="space-y-6">
-					{/* Быстрые действия */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-lg">Быстрые действия</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<ScheduleInterviewDialog currentCandidateId={params.candidateId}>
-								<Button className="w-full justify-start" variant="outline">
-									<CalendarIcon className="h-4 w-4 mr-2" />
-									Запланировать интервью
-								</Button>
-							</ScheduleInterviewDialog>
-							<Button
-								asChild
-								className="w-full justify-start"
-								variant="outline"
-							>
-								<a href={`/candidates/${params.candidateId}/edit`}>
-									<UserIcon className="h-4 w-4 mr-2" />
-									Редактировать профиль
-								</a>
-							</Button>
-							<Button
-								asChild
-								className="w-full justify-start"
-								variant="outline"
-							>
-								<a
-									href={`/candidate/${params.candidateId}`}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									<ExternalLinkIcon className="h-4 w-4 mr-2" />
-									Открыть страницу кандидата
-								</a>
-							</Button>
-						</CardContent>
-					</Card>
-
 					{/* Самообслуживание */}
 					<Card>
 						<CardHeader>
@@ -429,7 +596,13 @@ function CandidateDetail() {
 							</div>
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">Опыт</span>
-								<Badge variant="secondary">{c.experience} лет</Badge>
+								<Badge variant="secondary">
+									{c.experience &&
+									Array.isArray(c.experience) &&
+									c.experience.length > 0
+										? `${c.experience.reduce((sum: number, exp: ExperienceItem) => sum + (exp.years || 0), 0)} лет`
+										: "Не указан"}
+								</Badge>
 							</div>
 						</CardContent>
 					</Card>
