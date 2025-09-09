@@ -10,7 +10,7 @@ from pydantic import (
     field_validator,
     PlainSerializer,
 )
-from typing import Union, Annotated
+from typing import Annotated
 
 
 def _to_utc_iso_z(value: datetime | None) -> str | None:
@@ -40,23 +40,35 @@ class CandidateStatus(str, Enum):
 
 
 class EmploymentType(str, Enum):
-    FULL_TIME = "full_time"
-    PART_TIME = "part_time"
-    CONTRACT = "contract"
-    INTERNSHIP = "internship"
+    FULL_TIME = "полная занятость"
+    PART_TIME = "частичная занятость"
+    CONTRACT = "контракт"
+    INTERNSHIP = "стажировка"
 
 
 class ExperienceLevel(str, Enum):
-    JUNIOR = "junior"
-    MIDDLE = "middle"
-    SENIOR = "senior"
-    LEAD = "lead"
+    JUNIOR = "младший"
+    MIDDLE = "средний"
+    SENIOR = "старший"
+    LEAD = "ведущий"
 
 
 class InterviewState(str, Enum):
     INITIALIZED = "initialized"
     IN_PROGRESS = "in_progress"
     DONE = "done"
+
+
+class ExperienceItem(BaseModel):
+    company: str
+    position: str
+    years: int
+
+
+class EducationItem(BaseModel):
+    organization: str
+    speciality: str
+    type: str | None = None
 
 
 class Timestamped(BaseModel):
@@ -82,26 +94,107 @@ class CandidateBase(BaseModel):
     name: str
     email: EmailStr | None = None
     position: str
-    experience: int
+    # List of experience entries
+    experience: list[ExperienceItem] = []
     status: CandidateStatus = CandidateStatus.PENDING
     gigachat_file_id: str | None = None
-    skills: Union[list[str], str, None] = None  # Список навыков или JSON строка
+    skills: list[str] = []  # Список навыков
+    # Extended CV fields
+    tech: list[str] = []
+    # Education entries
+    education: list[EducationItem] = []
+    geo: str | None = None
+    employment_type: EmploymentType | None = None
 
     @field_validator("skills", mode="before")
     @classmethod
     def validate_skills(cls, v):
         if v is None:
-            return None
+            return []
         if isinstance(v, str):
             try:
                 import json
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return [v]  # Если не JSON, то считаем одной строкой
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
         if isinstance(v, list):
             return v
-        return None
+        return []
+
+    @field_validator("tech", mode="before")
+    @classmethod
+    def validate_tech(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        if isinstance(v, list):
+            return v
+        return []
+
+    @field_validator("education", mode="before")
+    @classmethod
+    def validate_education(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return []
+        if isinstance(v, list):
+            return v
+        return []
+
+    @field_validator("experience", mode="before")
+    @classmethod
+    def validate_experience_list(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return []
+        if isinstance(v, list):
+            return v
+        return []
+
+    @field_validator("employment_type", mode="before")
+    @classmethod
+    def validate_employment_type(cls, v):
+        if v is None or v == "":
+            return None
+        if isinstance(v, str):
+            # Try to match the string to enum values
+            v_lower = v.lower().replace(" ", "_")
+            for enum_val in EmploymentType:
+                if enum_val.value == v_lower:
+                    return enum_val
+            # If no exact match, try some common variations
+            if v_lower in ["fulltime", "full-time", "full time"]:
+                return EmploymentType.FULL_TIME
+            elif v_lower in ["parttime", "part-time", "part time"]:
+                return EmploymentType.PART_TIME
+            elif v_lower in ["contract", "contractor"]:
+                return EmploymentType.CONTRACT
+            elif v_lower in ["intern", "internship", "стажировка"]:
+                return EmploymentType.INTERNSHIP
+            # If no match found, return None
+            return None
+        return v
 
 
 class CandidateCreate(CandidateBase):
@@ -117,44 +210,127 @@ class VacancyBase(BaseModel):
     description: str | None = None
     status: str | None = None
     gigachat_file_id: str | None = None
-
-    # Новые поля
+    # Legacy/previous fields (retain)
     company: str | None = None
     location: str | None = None
     salary_min: int | None = None
     salary_max: int | None = None
     employment_type: EmploymentType | None = None
     experience_level: ExperienceLevel | None = None
-    remote_work: bool = False
     requirements: str | None = None
     benefits: str | None = None
 
-    # Normalize enums that might come with dashes from DB or external sources
+    # New spec fields
+    skills: list[str] = []
+    responsibilities: list[str] = []
+    domain: str | None = None
+    education: str | None = None
+    minor_skills: list[str] = []
+    company_info: str | None = None
+
+    @field_validator("skills", mode="before")
+    @classmethod
+    def validate_skills_vacancy(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        return []
+
+    @field_validator("minor_skills", mode="before")
+    @classmethod
+    def validate_minor_skills(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        return []
+
+    @field_validator("responsibilities", mode="before")
+    @classmethod
+    def validate_responsibilities(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                import json
+
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If it's not JSON, treat as comma-separated string
+                return [item.strip() for item in v.split(",") if item.strip()]
+        return []
+
     @field_validator("employment_type", mode="before")
     @classmethod
-    def normalize_employment_type(cls, value):
-        if value is None:
+    def validate_employment_type_vacancy(cls, v):
+        if v is None or v == "":
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
-            try:
-                return EmploymentType(normalized)
-            except Exception:
-                return normalized
-        return value
+        if isinstance(v, str):
+            # Try to match the string to enum values (Russian with spaces)
+            v_lower = v.lower()
+            for enum_val in EmploymentType:
+                if enum_val.value == v_lower:
+                    return enum_val
+            # If no exact match, try some common variations
+            if v_lower in ["fulltime", "full-time", "full time", "полная занятость"]:
+                return EmploymentType.FULL_TIME
+            elif v_lower in [
+                "parttime",
+                "part-time",
+                "part time",
+                "частичная занятость",
+            ]:
+                return EmploymentType.PART_TIME
+            elif v_lower in ["contract", "contractor", "контракт"]:
+                return EmploymentType.CONTRACT
+            elif v_lower in ["intern", "internship", "стажировка"]:
+                return EmploymentType.INTERNSHIP
+            # If no match found, return None
+            return None
+        return v
 
     @field_validator("experience_level", mode="before")
     @classmethod
-    def normalize_experience_level(cls, value):
-        if value is None:
+    def validate_experience_level_vacancy(cls, v):
+        if v is None or v == "":
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
-            try:
-                return ExperienceLevel(normalized)
-            except Exception:
-                return normalized
-        return value
+        if isinstance(v, str):
+            # Try to match the string to enum values (Russian with spaces)
+            v_lower = v.lower()
+            for enum_val in ExperienceLevel:
+                if enum_val.value == v_lower:
+                    return enum_val
+            # If no exact match, try some common variations
+            if v_lower in ["junior", "джуниор", "начинающий", "младший"]:
+                return ExperienceLevel.JUNIOR
+            elif v_lower in ["middle", "мидл", "средний"]:
+                return ExperienceLevel.MIDDLE
+            elif v_lower in ["senior", "сеньор", "старший"]:
+                return ExperienceLevel.SENIOR
+            elif v_lower in ["lead", "лид", "ведущий"]:
+                return ExperienceLevel.LEAD
+            # If no match found, return None
+            return None
+        return v
 
 
 class VacancyCreate(VacancyBase):
@@ -166,42 +342,96 @@ class VacancyUpdate(BaseModel):
     description: str | None = None
     status: str | None = None
     gigachat_file_id: str | None = None
+    # Legacy/previous fields (retain)
     company: str | None = None
     location: str | None = None
     salary_min: int | None = None
     salary_max: int | None = None
     employment_type: EmploymentType | None = None
     experience_level: ExperienceLevel | None = None
-    remote_work: bool | None = None
     requirements: str | None = None
     benefits: str | None = None
+    skills: list[str] = []
+    responsibilities: list[str] = []
+    domain: str | None = None
+    education: str | None = None
+    minor_skills: list[str] = []
+    company_info: str | None = None
 
-    # The update payload may also contain dashed enum values
+    @field_validator("skills", mode="before")
+    @classmethod
+    def validate_skills_update(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        return []
+
+    @field_validator("minor_skills", mode="before")
+    @classmethod
+    def validate_minor_skills_update(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        return []
+
+    @field_validator("responsibilities", mode="before")
+    @classmethod
+    def validate_responsibilities_update(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        return []
+
     @field_validator("employment_type", mode="before")
     @classmethod
-    def normalize_employment_type_update(cls, value):
-        if value is None:
+    def validate_employment_type_update(cls, v):
+        if v is None or v == "":
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
-            try:
-                return EmploymentType(normalized)
-            except Exception:
-                return normalized
-        return value
+        if isinstance(v, str):
+            # Try to match the string to enum values
+            v_lower = v.lower().replace(" ", "_")
+            for enum_val in EmploymentType:
+                if enum_val.value == v_lower:
+                    return enum_val
+            # If no exact match, try some common variations
+            if v_lower in ["fulltime", "full-time", "full time"]:
+                return EmploymentType.FULL_TIME
+            elif v_lower in ["parttime", "part-time", "part time"]:
+                return EmploymentType.PART_TIME
+            elif v_lower in ["contract", "contractor"]:
+                return EmploymentType.CONTRACT
+            elif v_lower in ["intern", "internship", "стажировка"]:
+                return EmploymentType.INTERNSHIP
+            # If no match found, return None
+            return None
+        return v
 
     @field_validator("experience_level", mode="before")
     @classmethod
-    def normalize_experience_level_update(cls, value):
-        if value is None:
+    def validate_experience_level_update(cls, v):
+        if v is None or v == "":
             return None
-        if isinstance(value, str):
-            normalized = value.replace("-", "_")
-            try:
-                return ExperienceLevel(normalized)
-            except Exception:
-                return normalized
-        return value
+        if isinstance(v, str):
+            # Try to match the string to enum values
+            v_lower = v.lower().replace(" ", "_")
+            for enum_val in ExperienceLevel:
+                if enum_val.value == v_lower:
+                    return enum_val
+            # If no exact match, try some common variations
+            if v_lower in ["junior", "джуниор", "начинающий"]:
+                return ExperienceLevel.JUNIOR
+            elif v_lower in ["middle", "мидл", "средний"]:
+                return ExperienceLevel.MIDDLE
+            elif v_lower in ["senior", "сеньор", "старший"]:
+                return ExperienceLevel.SENIOR
+            elif v_lower in ["lead", "лид", "ведущий"]:
+                return ExperienceLevel.LEAD
+            # If no match found, return None
+            return None
+        return v
 
 
 class VacancyRead(VacancyBase, Timestamped):

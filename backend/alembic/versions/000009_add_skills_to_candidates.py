@@ -1,6 +1,6 @@
 """add_skills_to_candidates
 
-Revision ID: 3a7bf0979312
+Revision ID: 000009
 Revises: 000008
 Create Date: 2025-09-07 04:47:51.700629
 
@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "3a7bf0979312"
+revision: str = "000009"
 down_revision: Union[str, None] = "000008"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

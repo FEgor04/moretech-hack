@@ -26,7 +26,6 @@ type CandidateFormData = {
 	name: string;
 	email: string;
 	position: string;
-	experience: number;
 	status?:
 		| "pending"
 		| "reviewing"
@@ -35,6 +34,11 @@ type CandidateFormData = {
 		| "rejected"
 		| "on_hold";
 	skills?: string;
+	tech?: string;
+	education?: string;
+	geo?: string;
+	employment_type?: string;
+	experience?: string;
 };
 
 export const Route = createFileRoute(
@@ -63,18 +67,30 @@ function CandidateEdit() {
 			name: c.name,
 			email: c.email ?? "",
 			position: c.position,
-			experience: c.experience,
 			status: c.status,
 			skills: c.skills
 				? Array.isArray(c.skills)
 					? c.skills.join(", ")
 					: c.skills
 				: "",
+			tech: c.tech ? (Array.isArray(c.tech) ? c.tech.join(", ") : c.tech) : "",
+			education: c.education
+				? typeof c.education === "string"
+					? c.education
+					: JSON.stringify(c.education, null, 2)
+				: "",
+			geo: c.geo ?? "",
+			employment_type: c.employment_type ?? undefined,
+			experience: c.experience
+				? typeof c.experience === "string"
+					? c.experience
+					: JSON.stringify(c.experience, null, 2)
+				: "",
 		},
 	});
 
 	const onSubmit = (data: CandidateFormData) => {
-		// Преобразуем строку навыков в массив
+		// Преобразуем строки навыков и технологий в массивы
 		const skillsArray = data.skills
 			? data.skills
 					.split(",")
@@ -82,14 +98,30 @@ function CandidateEdit() {
 					.filter((skill) => skill.length > 0)
 			: undefined;
 
+		const techArray = data.tech
+			? data.tech
+					.split(",")
+					.map((tech) => tech.trim())
+					.filter((tech) => tech.length > 0)
+			: undefined;
+
 		mutation.mutate(
 			{
 				name: data.name,
 				email: data.email,
 				position: data.position,
-				experience: data.experience,
 				status: data.status,
-				skills: skillsArray ? JSON.stringify(skillsArray) : undefined,
+				skills: skillsArray || [],
+				tech: techArray || [],
+				education: data.education ? JSON.parse(data.education) : [],
+				geo: data.geo || undefined,
+				employment_type: data.employment_type as
+					| "полная занятость"
+					| "частичная занятость"
+					| "контракт"
+					| "стажировка"
+					| undefined,
+				experience: data.experience ? JSON.parse(data.experience) : [],
 			},
 			{
 				onSuccess: () => {
@@ -169,25 +201,6 @@ function CandidateEdit() {
 							/>
 							<FormField
 								control={form.control}
-								name="experience"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Опыт работы (лет)</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												min={0}
-												step={1}
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
 								name="status"
 								render={({ field }) => (
 									<FormItem>
@@ -230,6 +243,100 @@ function CandidateEdit() {
 											{...field}
 											placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
 											rows={3}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="tech"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Технологии</FormLabel>
+									<FormControl>
+										<Textarea
+											{...field}
+											placeholder="Введите технологии через запятую (например: JavaScript, TypeScript, Node.js, PostgreSQL)"
+											rows={3}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="geo"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Местоположение</FormLabel>
+									<FormControl>
+										<Input {...field} placeholder="Москва, Россия" />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="employment_type"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Тип занятости</FormLabel>
+									<Select
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Выберите тип занятости" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											<SelectItem value="полная занятость">
+												Полная занятость
+											</SelectItem>
+											<SelectItem value="частичная занятость">
+												Частичная занятость
+											</SelectItem>
+											<SelectItem value="контракт">Контракт</SelectItem>
+											<SelectItem value="стажировка">Стажировка</SelectItem>
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="education"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Образование</FormLabel>
+									<FormControl>
+										<Textarea
+											{...field}
+											placeholder="Введите информацию об образовании (JSON формат или текст)"
+											rows={4}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="experience"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Детальный опыт работы</FormLabel>
+									<FormControl>
+										<Textarea
+											{...field}
+											placeholder="Введите детальную информацию об опыте работы (JSON формат или текст)"
+											rows={6}
 										/>
 									</FormControl>
 									<FormMessage />

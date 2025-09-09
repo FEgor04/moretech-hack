@@ -21,6 +21,15 @@ else
 fi
 echo "Migrations completed successfully!"
 
+# Verify parsing schemas are working
+echo "Verifying parsing schemas..."
+if [ -x "/opt/venv/bin/python" ]; then
+  /opt/venv/bin/python -c "from app.schemas.parsing import CVParsingSchema, VacancyParsingSchema; from app.services.pdf_parser import PDFParserService; service = PDFParserService(); cv_schema = service._get_cv_json_schema(); vacancy_schema = service._get_vacancy_json_schema(); print('✅ Parsing schemas verified successfully')"
+else
+  python -c "from app.schemas.parsing import CVParsingSchema, VacancyParsingSchema; from app.services.pdf_parser import PDFParserService; service = PDFParserService(); cv_schema = service._get_cv_json_schema(); vacancy_schema = service._get_vacancy_json_schema(); print('✅ Parsing schemas verified successfully')"
+fi
+echo "Schema verification completed!"
+
 # Start server
 echo "Starting FastAPI server..."
 if [ -x "/opt/venv/bin/uvicorn" ]; then

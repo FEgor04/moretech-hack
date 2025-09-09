@@ -3,13 +3,12 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { vacanciesQueryOptions } from "@/api/queries/vacancies";
 import { candidatesQueryOptions } from "@/api/queries/candidates";
 import { interviewsQueryOptions } from "@/api/queries/interviews";
-import type { VacancyRead } from "@/api/client/types.gen";
+import type { VacancyRead, ExperienceItem } from "@/api/client/types.gen";
 
 // Расширенный тип для вакансии с дополнительными полями
 type ExtendedVacancy = VacancyRead & {
 	company?: string | null;
 	experience_level?: string | null;
-	remote_work?: boolean;
 	benefits?: string | null;
 };
 import {
@@ -105,7 +104,19 @@ function Dashboard() {
 	const avgExperience =
 		candidates.length > 0
 			? Math.round(
-					(candidates.reduce((sum, c) => sum + c.experience, 0) /
+					(candidates.reduce((sum, c) => {
+						// Calculate total years from experience array
+						if (c.experience && Array.isArray(c.experience)) {
+							const totalYears = c.experience.reduce(
+								(expSum: number, exp: ExperienceItem) => {
+									return expSum + (exp.years || 0);
+								},
+								0,
+							);
+							return sum + totalYears;
+						}
+						return sum;
+					}, 0) /
 						candidates.length) *
 						10,
 				) / 10

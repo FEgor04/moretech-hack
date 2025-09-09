@@ -8,7 +8,7 @@ async def sample_candidate(client: AsyncClient) -> dict:
         "name": "John Doe",
         "email": "john@example.com",
         "position": "Software Engineer",
-        "experience": 3,
+        "experience_years": 3,
     }
     response = await client.post("/candidates/", json=data)
     assert response.status_code == 201

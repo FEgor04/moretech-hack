@@ -1,7 +1,7 @@
 AI HR Backend (FastAPI)
 
 Requirements
-- Python 3.11+
+- Python 3.13+
 - uv (package/deps manager)
 - Docker (for integration tests with Testcontainers)
 

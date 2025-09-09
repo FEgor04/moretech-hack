@@ -11,6 +11,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -45,8 +46,15 @@ const schema = z.object({
 	name: z.string().min(1, "Введите имя"),
 	email: z.string().email("Неверный email"),
 	position: z.string().min(1, "Введите должность"),
-	experience: z.number().int().min(0, "Опыт не может быть отрицательным"),
 	status: z.enum(CANDIDATE_STATUSES).optional(),
+	skills: z.string().optional(),
+	tech: z.string().optional(),
+	education: z.string().optional(),
+	geo: z.string().optional(),
+	employment_type: z
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
+		.optional(),
+	experience: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -62,13 +70,41 @@ function RouteComponent() {
 			name: "",
 			email: "",
 			position: "",
-			experience: 0,
 			status: undefined,
+			skills: "",
+			tech: "",
+			education: "",
+			geo: "",
+			employment_type: undefined,
+			experience: "",
 		},
 	});
 
 	async function onSubmit(values: FormValues) {
-		await mutation.mutateAsync(values);
+		// Преобразуем строки навыков и технологий в массивы
+		const skillsArray = values.skills
+			? values.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const techArray = values.tech
+			? values.tech
+					.split(",")
+					.map((tech) => tech.trim())
+					.filter((tech) => tech.length > 0)
+			: undefined;
+
+		const candidateData = {
+			...values,
+			skills: skillsArray || [],
+			tech: techArray || [],
+			education: values.education ? JSON.parse(values.education) : [],
+			experience: values.experience ? JSON.parse(values.experience) : [],
+		};
+
+		await mutation.mutateAsync(candidateData);
 		navigate({ to: "/candidates" });
 	}
 
@@ -128,25 +164,6 @@ function RouteComponent() {
 					/>
 					<FormField
 						control={form.control}
-						name="experience"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Опыт (лет)</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										min={0}
-										step={1}
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
 						name="status"
 						render={({ field }) => (
 							<FormItem>
@@ -168,6 +185,117 @@ function RouteComponent() {
 										))}
 									</SelectContent>
 								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="skills"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Ключевые навыки</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
+										rows={3}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="tech"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Технологии</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите технологии через запятую (например: JavaScript, TypeScript, Node.js, PostgreSQL)"
+										rows={3}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="geo"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Местоположение</FormLabel>
+								<FormControl>
+									<Input {...field} placeholder="Москва, Россия" />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="employment_type"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Тип занятости</FormLabel>
+								<Select
+									value={field.value ?? undefined}
+									onValueChange={field.onChange}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Не выбран" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										<SelectItem value="полная занятость">
+											Полная занятость
+										</SelectItem>
+										<SelectItem value="частичная занятость">
+											Частичная занятость
+										</SelectItem>
+										<SelectItem value="контракт">Контракт</SelectItem>
+										<SelectItem value="стажировка">Стажировка</SelectItem>
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="education"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Образование</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите информацию об образовании (JSON формат или текст)"
+										rows={4}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="experience"
+						render={({ field }) => (
+							<FormItem className="col-span-2">
+								<FormLabel>Детальный опыт работы</FormLabel>
+								<FormControl>
+									<Textarea
+										{...field}
+										placeholder="Введите детальную информацию об опыте работы (JSON формат или текст)"
+										rows={6}
+									/>
+								</FormControl>
 								<FormMessage />
 							</FormItem>
 						)}

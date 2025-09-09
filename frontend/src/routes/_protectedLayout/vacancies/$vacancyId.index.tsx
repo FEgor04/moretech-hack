@@ -11,7 +11,6 @@ import { RelativeTimeTooltip } from "@/components/ui/relative-time-tooltip";
 type ExtendedVacancy = VacancyRead & {
 	company?: string | null;
 	experience_level?: string | null;
-	remote_work?: boolean;
 	benefits?: string | null;
 };
 import { useForm } from "react-hook-form";
@@ -78,12 +77,19 @@ const formSchema = z.object({
 	salary_min: z.number().optional(),
 	salary_max: z.number().optional(),
 	employment_type: z
-		.enum(["full_time", "part_time", "contract", "internship"])
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
 		.optional(),
-	experience_level: z.enum(["junior", "middle", "senior", "lead"]).optional(),
-	remote_work: z.boolean().optional(),
+	experience_level: z
+		.enum(["младший", "средний", "старший", "ведущий"])
+		.optional(),
 	requirements: z.string().optional(),
 	benefits: z.string().optional(),
+	skills: z.string().optional(),
+	responsibilities: z.string().optional(),
+	domain: z.string().optional(),
+	education: z.string().optional(),
+	minor_skills: z.string().optional(),
+	company_info: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -132,16 +138,74 @@ function VacancyDetail() {
 			location: v.location || "",
 			salary_min: v.salary_min || undefined,
 			salary_max: v.salary_max || undefined,
-			employment_type: v.employment_type || undefined,
-			experience_level: v.experience_level || undefined,
-			remote_work: v.remote_work || false,
+			employment_type:
+				(v.employment_type as
+					| "полная занятость"
+					| "частичная занятость"
+					| "контракт"
+					| "стажировка"
+					| undefined) || undefined,
+			experience_level:
+				(v.experience_level as
+					| "младший"
+					| "средний"
+					| "старший"
+					| "ведущий"
+					| undefined) || undefined,
 			requirements: v.requirements || "",
 			benefits: v.benefits || "",
+			skills: v.skills
+				? Array.isArray(v.skills)
+					? v.skills.join(", ")
+					: v.skills
+				: "",
+			responsibilities: v.responsibilities
+				? Array.isArray(v.responsibilities)
+					? v.responsibilities.join(", ")
+					: v.responsibilities
+				: "",
+			domain: v.domain || "",
+			education: v.education || "",
+			minor_skills: v.minor_skills
+				? Array.isArray(v.minor_skills)
+					? v.minor_skills.join(", ")
+					: v.minor_skills
+				: "",
+			company_info: v.company_info || "",
 		},
 	});
 
 	const onSubmit = (data: FormData) => {
-		mutation.mutate(data, {
+		// Преобразуем строки навыков в массивы
+		const skillsArray = data.skills
+			? data.skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const responsibilitiesArray = data.responsibilities
+			? data.responsibilities
+					.split(",")
+					.map((resp) => resp.trim())
+					.filter((resp) => resp.length > 0)
+			: undefined;
+
+		const minorSkillsArray = data.minor_skills
+			? data.minor_skills
+					.split(",")
+					.map((skill) => skill.trim())
+					.filter((skill) => skill.length > 0)
+			: undefined;
+
+		const vacancyData = {
+			...data,
+			skills: skillsArray || undefined,
+			responsibilities: responsibilitiesArray || undefined,
+			minor_skills: minorSkillsArray || undefined,
+		};
+
+		mutation.mutate(vacancyData, {
 			onSuccess: () => {
 				toast.success("Вакансия обновлена", {
 					description: "Изменения успешно сохранены.",
@@ -174,14 +238,23 @@ function VacancyDetail() {
 		switch (status) {
 			case "open":
 				return {
-					label: "Открыта",
+					label: "🟢 Открыта",
 					variant: "default" as const,
-					className: "bg-green-500 hover:bg-green-500",
+					className:
+						"bg-green-100 text-green-800 border-green-200 hover:bg-green-200",
 				};
 			case "closed":
-				return { label: "Закрыта", variant: "destructive" as const };
+				return {
+					label: "🔴 Закрыта",
+					variant: "secondary" as const,
+					className: "bg-red-100 text-red-800 border-red-200 hover:bg-red-200",
+				};
 			default:
-				return { label: "Неизвестно", variant: "secondary" as const };
+				return {
+					label: "❓ Неизвестно",
+					variant: "secondary" as const,
+					className: "bg-gray-100 text-gray-800 border-gray-200",
+				};
 		}
 	};
 
@@ -356,16 +429,16 @@ function VacancyDetail() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="full_time">
+																<SelectItem value="полная занятость">
 																	Полная занятость
 																</SelectItem>
-																<SelectItem value="part_time">
+																<SelectItem value="частичная занятость">
 																	Частичная занятость
 																</SelectItem>
-																<SelectItem value="contract">
+																<SelectItem value="контракт">
 																	Контракт
 																</SelectItem>
-																<SelectItem value="internship">
+																<SelectItem value="стажировка">
 																	Стажировка
 																</SelectItem>
 															</SelectContent>
@@ -391,10 +464,10 @@ function VacancyDetail() {
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																<SelectItem value="junior">Junior</SelectItem>
-																<SelectItem value="middle">Middle</SelectItem>
-																<SelectItem value="senior">Senior</SelectItem>
-																<SelectItem value="lead">Lead</SelectItem>
+																<SelectItem value="младший">Младший</SelectItem>
+																<SelectItem value="средний">Средний</SelectItem>
+																<SelectItem value="старший">Старший</SelectItem>
+																<SelectItem value="ведущий">Ведущий</SelectItem>
 															</SelectContent>
 														</Select>
 														<FormMessage />
@@ -464,6 +537,105 @@ function VacancyDetail() {
 													<FormLabel>Преимущества</FormLabel>
 													<FormControl>
 														<Textarea rows={3} {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="skills"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Требуемые навыки</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
+															rows={3}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="responsibilities"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Обязанности</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите обязанности через запятую"
+															rows={4}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="domain"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Домен/Отрасль</FormLabel>
+													<FormControl>
+														<Input
+															{...field}
+															placeholder="IT, Финансы, Медицина и т.д."
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="education"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Требования к образованию</FormLabel>
+													<FormControl>
+														<Textarea rows={3} {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="minor_skills"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Дополнительные навыки</FormLabel>
+													<FormControl>
+														<Textarea
+															{...field}
+															placeholder="Введите дополнительные навыки через запятую"
+															rows={3}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="company_info"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Информация о компании</FormLabel>
+													<FormControl>
+														<Textarea rows={4} {...field} />
 													</FormControl>
 													<FormMessage />
 												</FormItem>

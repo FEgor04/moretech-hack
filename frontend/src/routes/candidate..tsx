@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { candidateQueryOptions } from "@/api/queries/candidates";
 import { useUpdateCandidate } from "@/api/mutations/candidates";
+import type { ExperienceItem } from "@/api/client/types.gen";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,7 +32,6 @@ const formSchema = z.object({
 	name: z.string().min(1, "Имя обязательно"),
 	email: z.string().email("Неверный формат email").optional().or(z.literal("")),
 	position: z.string().min(1, "Должность обязательна"),
-	experience: z.number().min(0, "Опыт не может быть отрицательным"),
 	status: z
 		.enum([
 			"pending",
@@ -64,7 +64,6 @@ function CandidateSelfPage() {
 			name: candidate.name,
 			email: candidate.email || "",
 			position: candidate.position,
-			experience: candidate.experience,
 			status: candidate.status,
 		},
 	});
@@ -189,23 +188,6 @@ function CandidateSelfPage() {
 											</FormItem>
 										)}
 									/>
-									<FormField
-										control={form.control}
-										name="experience"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Опыт работы (лет)</FormLabel>
-												<FormControl>
-													<Input
-														type="number"
-														placeholder="Опыт в годах"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
 								</div>
 								<Button type="submit" disabled={updateMutation.isPending}>
 									{updateMutation.isPending
@@ -257,7 +239,13 @@ function CandidateSelfPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Опыт работы</p>
-							<p className="font-medium">{candidate.experience} лет</p>
+							<p className="font-medium">
+								{candidate.experience &&
+								Array.isArray(candidate.experience) &&
+								candidate.experience.length > 0
+									? `${candidate.experience.reduce((sum: number, exp: ExperienceItem) => sum + (exp.years || 0), 0)} лет`
+									: "Не указан"}
+							</p>
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Статус</p>

@@ -4,11 +4,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.vacancy import Vacancy
 from app.models.note import Note
 from app.schemas.common import VacancyCreate, VacancyUpdate, NoteCreate, NoteUpdate
+import json
 from app.services.exceptions import NotFoundError
 
 
 async def create_vacancy(session: AsyncSession, payload: VacancyCreate) -> Vacancy:
-    vacancy = Vacancy(**payload.model_dump(exclude_unset=True))
+    data = payload.model_dump(exclude_unset=True)
+
+    # Convert enum objects to their string values
+    if "employment_type" in data and data["employment_type"] is not None:
+        if hasattr(data["employment_type"], "value"):
+            data["employment_type"] = data["employment_type"].value
+    if "experience_level" in data and data["experience_level"] is not None:
+        if hasattr(data["experience_level"], "value"):
+            data["experience_level"] = data["experience_level"].value
+
+    # Serialize list fields
+    if "skills" in data and data["skills"] is not None:
+        data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
+    if "minor_skills" in data and data["minor_skills"] is not None:
+        data["minor_skills"] = json.dumps(data["minor_skills"], ensure_ascii=False)
+    if "responsibilities" in data and data["responsibilities"] is not None:
+        if isinstance(data["responsibilities"], list):
+            data["responsibilities"] = json.dumps(
+                data["responsibilities"], ensure_ascii=False
+            )
+    vacancy = Vacancy(**data)
     session.add(vacancy)
     await session.commit()
     await session.refresh(vacancy)
@@ -33,7 +54,26 @@ async def update_vacancy(
     vacancy = await session.get(Vacancy, vacancy_id)
     if not vacancy:
         raise NotFoundError("Vacancy not found")
-    for key, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+
+    # Convert enum objects to their string values
+    if "employment_type" in data and data["employment_type"] is not None:
+        if hasattr(data["employment_type"], "value"):
+            data["employment_type"] = data["employment_type"].value
+    if "experience_level" in data and data["experience_level"] is not None:
+        if hasattr(data["experience_level"], "value"):
+            data["experience_level"] = data["experience_level"].value
+
+    if "skills" in data and data["skills"] is not None:
+        data["skills"] = json.dumps(data["skills"], ensure_ascii=False)
+    if "minor_skills" in data and data["minor_skills"] is not None:
+        data["minor_skills"] = json.dumps(data["minor_skills"], ensure_ascii=False)
+    if "responsibilities" in data and data["responsibilities"] is not None:
+        if isinstance(data["responsibilities"], list):
+            data["responsibilities"] = json.dumps(
+                data["responsibilities"], ensure_ascii=False
+            )
+    for key, value in data.items():
         setattr(vacancy, key, value)
     await session.commit()
     await session.refresh(vacancy)
