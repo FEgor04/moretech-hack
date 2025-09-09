@@ -7,6 +7,7 @@ import { CandidateAvatar } from "@/components/candidates/candidate-avatar";
 import { CandidateStatusBadge } from "@/components/candidates/status-badge";
 import { ScheduleInterviewDialog } from "@/components/interviews/schedule-interview-dialog";
 import { InterviewsList } from "@/components/candidates/interviews-list";
+import { SimilarVacancies } from "@/components/compatibility/similar-vacancies";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -649,6 +650,9 @@ function CandidateDetail() {
 					</Card>
 				</div>
 			</div>
+
+			{/* Similar Vacancies */}
+			<SimilarVacancies candidateId={params.candidateId} />
 
 			{/* Список интервью */}
 			<InterviewsList candidateId={params.candidateId} />

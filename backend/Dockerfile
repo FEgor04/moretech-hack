@@ -30,7 +30,7 @@ ENV PYTHONPATH=/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    sh -c 'uv venv "$VIRTUAL_ENV" && uv sync --frozen --no-install-project --no-dev'
+    sh -c 'uv venv "$VIRTUAL_ENV" && uv sync --frozen --no-install-project --no-dev --trusted-host pypi.org --trusted-host files.pythonhosted.org '
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching

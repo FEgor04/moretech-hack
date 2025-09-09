@@ -1,10 +1,14 @@
 import json
+import logging
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.candidate import Candidate
 from app.schemas.common import CandidateCreate
 from app.services.exceptions import NotFoundError
+from app.services.embedding_service import embedding_service
+
+logger = logging.getLogger(__name__)
 
 
 async def create_candidate(
@@ -30,6 +34,18 @@ async def create_candidate(
     session.add(candidate)
     await session.commit()
     await session.refresh(candidate)
+
+    # Automatically generate embedding for the new candidate
+    try:
+        logger.info(f"Generating embedding for new candidate: {candidate.id}")
+        await embedding_service.generate_candidate_embedding(session, candidate)
+        await session.commit()  # Commit after embedding generation
+        logger.info(f"Successfully generated embedding for candidate: {candidate.id}")
+    except Exception as e:
+        logger.error(f"Failed to generate embedding for candidate {candidate.id}: {e}")
+        await session.rollback()  # Rollback if embedding generation fails
+        # Don't fail the candidate creation if embedding generation fails
+
     return candidate
 
 
@@ -72,6 +88,16 @@ async def update_candidate(
         setattr(candidate, key, value)
     await session.commit()
     await session.refresh(candidate)
+
+    # Regenerate embedding after updates
+    try:
+        logger.info(f"Regenerating embedding for updated candidate: {candidate.id}")
+        await embedding_service.generate_candidate_embedding(session, candidate)
+        await session.commit()  # Commit after embedding regeneration
+    except Exception as e:
+        logger.error(f"Failed to regenerate candidate embedding {candidate.id}: {e}")
+        await session.rollback()  # Rollback if embedding generation fails
+
     return candidate
 
 
@@ -79,5 +105,7 @@ async def delete_candidate(session: AsyncSession, candidate_id: str) -> None:
     candidate = await session.get(Candidate, candidate_id)
     if not candidate:
         raise NotFoundError("Candidate not found")
+
+    # Delete the candidate - this will cascade to delete the embedding due to ondelete="CASCADE"
     await session.delete(candidate)
     await session.commit()
