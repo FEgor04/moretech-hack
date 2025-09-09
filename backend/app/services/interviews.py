@@ -3,8 +3,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.interview import Interview
-from app.models.candidate import Candidate
-from app.models.vacancy import Vacancy
 from app.models.interview_message import InterviewMessage
 from app.models.interview_note import InterviewNote
 from app.schemas.common import (
@@ -172,6 +170,7 @@ async def delete_note(session: AsyncSession, note_id: int) -> None:
         raise NotFoundError("Note not found")
     await session.delete(note)
     await session.commit()
+
 
 async def initialize_first_message(
     session: AsyncSession, interview_id: str

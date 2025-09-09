@@ -87,8 +87,9 @@ class InterviewMessagesService:
         result = await session.scalars(
             select(InterviewMessage)
             # Filter out first system message
-            .where(InterviewMessage.interview_id == interview_id)
-            .order_by(InterviewMessage.index)
+            .where(InterviewMessage.interview_id == interview_id).order_by(
+                InterviewMessage.index
+            )
         )
         return list(result)
 
@@ -259,9 +260,7 @@ class InterviewMessagesService:
                             messages_count,
                             MIN_MESSAGES_FOR_FINISH_FUNCTION,
                         )
-                        return (
-                            "Спасибо! Давайте продолжим интервью, чтобы собрать достаточно информации перед завершением."
-                        )
+                        return "Спасибо! Давайте продолжим интервью, чтобы собрать достаточно информации перед завершением."
                     feedback = func_args.get("feedback")
                     positive = func_args.get("positive")
                     logger.info(
