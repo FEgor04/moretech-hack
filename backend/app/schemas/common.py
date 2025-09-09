@@ -63,12 +63,16 @@ class ExperienceItem(BaseModel):
     company: str
     position: str
     years: int
+    start_date: datetime | None = None
+    end_date: datetime | None = None
 
 
 class EducationItem(BaseModel):
     organization: str
     speciality: str
     type: str | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
 
 
 class Timestamped(BaseModel):
@@ -190,7 +194,12 @@ class CandidateBase(BaseModel):
             # If no exact match, try some common variations
             if v_lower in ["fulltime", "full-time", "full time", "полная занятость"]:
                 return EmploymentType.FULL_TIME
-            elif v_lower in ["parttime", "part-time", "part time", "частичная занятость"]:
+            elif v_lower in [
+                "parttime",
+                "part-time",
+                "part time",
+                "частичная занятость",
+            ]:
                 return EmploymentType.PART_TIME
             elif v_lower in ["contract", "contractor", "контракт"]:
                 return EmploymentType.CONTRACT
@@ -411,7 +420,12 @@ class VacancyUpdate(BaseModel):
             # If no exact match, try some common variations
             if v_lower in ["fulltime", "full-time", "full time", "полная занятость"]:
                 return EmploymentType.FULL_TIME
-            elif v_lower in ["parttime", "part-time", "part time", "частичная занятость"]:
+            elif v_lower in [
+                "parttime",
+                "part-time",
+                "part time",
+                "частичная занятость",
+            ]:
                 return EmploymentType.PART_TIME
             elif v_lower in ["contract", "contractor", "контракт"]:
                 return EmploymentType.CONTRACT

@@ -4,6 +4,8 @@ import { useUpdateCandidate } from "@/api/mutations/candidates";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
 	Form,
 	FormControl,
@@ -13,7 +15,6 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
 	Select,
 	SelectContent,
@@ -21,25 +22,57 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { TagsInput } from "@/components/ui/tags-input";
+import { EducationForm } from "@/components/ui/education-form";
+import { ExperienceForm } from "@/components/ui/experience-form";
 
-type CandidateFormData = {
-	name: string;
-	email: string;
-	position: string;
-	status?:
-		| "pending"
-		| "reviewing"
-		| "interviewing"
-		| "accepted"
-		| "rejected"
-		| "on_hold";
-	skills?: string;
-	tech?: string;
-	education?: string;
-	geo?: string;
-	employment_type?: string;
-	experience?: string;
-};
+// Схема валидации
+const formSchema = z.object({
+	name: z.string().min(1, "Имя обязательно"),
+	email: z.string().email("Неверный формат email"),
+	position: z.string().min(1, "Должность обязательна"),
+	status: z
+		.enum([
+			"pending",
+			"reviewing",
+			"interviewing",
+			"accepted",
+			"rejected",
+			"on_hold",
+		])
+		.optional(),
+	skills: z.array(z.string()).optional(),
+	tech: z.array(z.string()).optional(),
+	education: z
+		.array(
+			z.object({
+				organization: z.string(),
+				speciality: z.string(),
+				year: z.number().nullable().optional(),
+				type: z.string().nullable().optional(),
+				start_date: z.string().nullable().optional(),
+				end_date: z.string().nullable().optional(),
+			}),
+		)
+		.optional(),
+	geo: z.string().optional(),
+	employment_type: z
+		.enum(["полная занятость", "частичная занятость", "контракт", "стажировка"])
+		.optional(),
+	experience: z
+		.array(
+			z.object({
+				company: z.string(),
+				position: z.string(),
+				years: z.number(),
+				start_date: z.string().nullable().optional(),
+				end_date: z.string().nullable().optional(),
+			}),
+		)
+		.optional(),
+});
+
+type CandidateFormData = z.infer<typeof formSchema>;
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId/edit",
@@ -63,65 +96,51 @@ function CandidateEdit() {
 	const c = candidate.data;
 
 	const form = useForm<CandidateFormData>({
+		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: c.name,
 			email: c.email ?? "",
 			position: c.position,
 			status: c.status,
-			skills: c.skills
-				? Array.isArray(c.skills)
-					? c.skills.join(", ")
-					: c.skills
-				: "",
-			tech: c.tech ? (Array.isArray(c.tech) ? c.tech.join(", ") : c.tech) : "",
-			education: c.education
-				? typeof c.education === "string"
-					? c.education
-					: JSON.stringify(c.education, null, 2)
-				: "",
+			skills: Array.isArray(c.skills) ? c.skills : [],
+			tech: Array.isArray(c.tech) ? c.tech : [],
+			education: Array.isArray(c.education)
+				? c.education.map((edu) => ({
+						organization: edu.organization || "",
+						speciality: edu.speciality || "",
+						year: (edu as any).year || null,
+						type: edu.type || null,
+						start_date: edu.start_date || null,
+						end_date: edu.end_date || null,
+				  }))
+				: [],
 			geo: c.geo ?? "",
 			employment_type: c.employment_type ?? undefined,
-			experience: c.experience
-				? typeof c.experience === "string"
-					? c.experience
-					: JSON.stringify(c.experience, null, 2)
-				: "",
+			experience: Array.isArray(c.experience)
+				? c.experience.map((exp) => ({
+						company: exp.company || "",
+						position: exp.position || "",
+						years: exp.years || 0,
+						start_date: exp.start_date || null,
+						end_date: exp.end_date || null,
+				  }))
+				: [],
 		},
 	});
 
 	const onSubmit = (data: CandidateFormData) => {
-		// Преобразуем строки навыков и технологий в массивы
-		const skillsArray = data.skills
-			? data.skills
-					.split(",")
-					.map((skill) => skill.trim())
-					.filter((skill) => skill.length > 0)
-			: undefined;
-
-		const techArray = data.tech
-			? data.tech
-					.split(",")
-					.map((tech) => tech.trim())
-					.filter((tech) => tech.length > 0)
-			: undefined;
-
 		mutation.mutate(
 			{
 				name: data.name,
 				email: data.email,
 				position: data.position,
 				status: data.status,
-				skills: skillsArray || [],
-				tech: techArray || [],
-				education: data.education ? JSON.parse(data.education) : [],
+				skills: data.skills || [],
+				tech: data.tech || [],
+				education: data.education || [],
 				geo: data.geo || undefined,
-				employment_type: data.employment_type as
-					| "полная занятость"
-					| "частичная занятость"
-					| "контракт"
-					| "стажировка"
-					| undefined,
-				experience: data.experience ? JSON.parse(data.experience) : [],
+				employment_type: data.employment_type,
+				experience: data.experience || [],
 			},
 			{
 				onSuccess: () => {
@@ -239,10 +258,10 @@ function CandidateEdit() {
 								<FormItem>
 									<FormLabel>Ключевые навыки</FormLabel>
 									<FormControl>
-										<Textarea
+										<TagsInput
 											{...field}
-											placeholder="Введите навыки через запятую (например: Python, React, SQL, Docker)"
-											rows={3}
+											value={field.value || []}
+											placeholder="Введите навык и нажмите Enter"
 										/>
 									</FormControl>
 									<FormMessage />
@@ -256,10 +275,10 @@ function CandidateEdit() {
 								<FormItem>
 									<FormLabel>Технологии</FormLabel>
 									<FormControl>
-										<Textarea
+										<TagsInput
 											{...field}
-											placeholder="Введите технологии через запятую (например: JavaScript, TypeScript, Node.js, PostgreSQL)"
-											rows={3}
+											value={field.value || []}
+											placeholder="Введите технологию и нажмите Enter"
 										/>
 									</FormControl>
 									<FormMessage />
@@ -316,10 +335,9 @@ function CandidateEdit() {
 								<FormItem>
 									<FormLabel>Образование</FormLabel>
 									<FormControl>
-										<Textarea
-											{...field}
-											placeholder="Введите информацию об образовании (JSON формат или текст)"
-											rows={4}
+										<EducationForm
+											value={field.value || []}
+											onChange={field.onChange}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -333,10 +351,9 @@ function CandidateEdit() {
 								<FormItem>
 									<FormLabel>Детальный опыт работы</FormLabel>
 									<FormControl>
-										<Textarea
-											{...field}
-											placeholder="Введите детальную информацию об опыте работы (JSON формат или текст)"
-											rows={6}
+										<ExperienceForm
+											value={field.value || []}
+											onChange={field.onChange}
 										/>
 									</FormControl>
 									<FormMessage />

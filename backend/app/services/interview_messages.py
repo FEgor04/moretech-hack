@@ -87,9 +87,8 @@ class InterviewMessagesService:
         result = await session.scalars(
             select(InterviewMessage)
             # Filter out first system message
-            .where(InterviewMessage.interview_id == interview_id).order_by(
-                InterviewMessage.index
-            )
+            .where(InterviewMessage.interview_id == interview_id)
+            .order_by(InterviewMessage.index)
         )
         return list(result)
 

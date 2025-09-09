@@ -39,7 +39,7 @@ export type CandidateCreate = {
     /**
      * Experience
      */
-    experience?: Array<ExperienceItem> | null;
+    experience?: Array<ExperienceItem>;
     status?: CandidateStatus;
     /**
      * Gigachat File Id
@@ -48,15 +48,15 @@ export type CandidateCreate = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Tech
      */
-    tech?: Array<string> | null;
+    tech?: Array<string>;
     /**
      * Education
      */
-    education?: Array<EducationItem> | null;
+    education?: Array<EducationItem>;
     /**
      * Geo
      */
@@ -91,7 +91,7 @@ export type CandidateRead = {
     /**
      * Experience
      */
-    experience?: Array<ExperienceItem> | null;
+    experience?: Array<ExperienceItem>;
     status?: CandidateStatus;
     /**
      * Gigachat File Id
@@ -100,15 +100,15 @@ export type CandidateRead = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Tech
      */
-    tech?: Array<string> | null;
+    tech?: Array<string>;
     /**
      * Education
      */
-    education?: Array<EducationItem> | null;
+    education?: Array<EducationItem>;
     /**
      * Geo
      */
@@ -141,6 +141,14 @@ export type EducationItem = {
      * Type
      */
     type?: string | null;
+    /**
+     * Start Date
+     */
+    start_date?: string | null;
+    /**
+     * End Date
+     */
+    end_date?: string | null;
 };
 
 /**
@@ -164,6 +172,14 @@ export type ExperienceItem = {
      * Years
      */
     years: number;
+    /**
+     * Start Date
+     */
+    start_date?: string | null;
+    /**
+     * End Date
+     */
+    end_date?: string | null;
 };
 
 /**
@@ -516,11 +532,11 @@ export type VacancyCreate = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | null;
+    responsibilities?: Array<string>;
     /**
      * Domain
      */
@@ -532,7 +548,7 @@ export type VacancyCreate = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | null;
+    minor_skills?: Array<string>;
     /**
      * Company Info
      */
@@ -596,11 +612,11 @@ export type VacancyRead = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | null;
+    responsibilities?: Array<string>;
     /**
      * Domain
      */
@@ -612,7 +628,7 @@ export type VacancyRead = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | null;
+    minor_skills?: Array<string>;
     /**
      * Company Info
      */
@@ -672,11 +688,11 @@ export type VacancyUpdate = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | null;
+    responsibilities?: Array<string>;
     /**
      * Domain
      */
@@ -688,7 +704,7 @@ export type VacancyUpdate = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | null;
+    minor_skills?: Array<string>;
     /**
      * Company Info
      */

@@ -7,6 +7,24 @@ from app.schemas.common import CandidateCreate
 from app.services.exceptions import NotFoundError
 
 
+def serialize_datetime_fields(data_list):
+    """Convert datetime objects to ISO strings for JSON serialization"""
+    if not data_list:
+        return data_list
+
+    serialized_data = []
+    for item in data_list:
+        item_dict = item.copy() if isinstance(item, dict) else item.dict()
+        if "start_date" in item_dict and item_dict["start_date"] is not None:
+            if hasattr(item_dict["start_date"], "isoformat"):
+                item_dict["start_date"] = item_dict["start_date"].isoformat()
+        if "end_date" in item_dict and item_dict["end_date"] is not None:
+            if hasattr(item_dict["end_date"], "isoformat"):
+                item_dict["end_date"] = item_dict["end_date"].isoformat()
+        serialized_data.append(item_dict)
+    return serialized_data
+
+
 async def create_candidate(
     session: AsyncSession, payload: CandidateCreate
 ) -> Candidate:
@@ -17,14 +35,11 @@ async def create_candidate(
     if "tech" in data and data["tech"] is not None:
         data["tech"] = json.dumps(data["tech"], ensure_ascii=False)
     if "education" in data and data["education"] is not None:
-        try:
-            json.dumps(data["education"])  # ensure serializable
-        except TypeError:
-            pass
-        else:
-            data["education"] = json.dumps(data["education"], ensure_ascii=False)
+        education_data = serialize_datetime_fields(data["education"])
+        data["education"] = json.dumps(education_data, ensure_ascii=False)
     if "experience" in data and data["experience"] is not None:
-        data["experience"] = json.dumps(data["experience"], ensure_ascii=False)
+        experience_data = serialize_datetime_fields(data["experience"])
+        data["experience"] = json.dumps(experience_data, ensure_ascii=False)
 
     candidate = Candidate(**data)
     session.add(candidate)
@@ -59,14 +74,11 @@ async def update_candidate(
     if "tech" in data and data["tech"] is not None:
         data["tech"] = json.dumps(data["tech"], ensure_ascii=False)
     if "education" in data and data["education"] is not None:
-        try:
-            json.dumps(data["education"])  # ensure serializable
-        except TypeError:
-            pass
-        else:
-            data["education"] = json.dumps(data["education"], ensure_ascii=False)
+        education_data = serialize_datetime_fields(data["education"])
+        data["education"] = json.dumps(education_data, ensure_ascii=False)
     if "experience" in data and data["experience"] is not None:
-        data["experience"] = json.dumps(data["experience"], ensure_ascii=False)
+        experience_data = serialize_datetime_fields(data["experience"])
+        data["experience"] = json.dumps(experience_data, ensure_ascii=False)
 
     for key, value in data.items():
         setattr(candidate, key, value)
