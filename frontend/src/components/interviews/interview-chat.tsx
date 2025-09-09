@@ -89,7 +89,10 @@ export function InterviewChat({ interviewId }: Props) {
 
 			{/* Chat Container */}
 			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] p-4">
-				<div className="h-full grid grid-cols-1 md:grid-cols-2 gap-4 data-[finished=true]:grid-cols-1" data-finished={isFinished}>
+				<div
+					className="h-full grid grid-cols-1 md:grid-cols-2 gap-4 data-[finished=true]:grid-cols-1"
+					data-finished={isFinished}
+				>
 					{/* Left: Webcam */}
 					{!isFinished && (
 						<div className="flex flex-col">
