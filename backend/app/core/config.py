@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     yandex_speech_key: str = ""
     use_yandex_speech_synthesis: bool = False
 
+    s3_endpoint_url: str = "https://s3.cloud.ru"
+    s3_region: str = "ru-central1"
+    s3_access_key_id: str = ""
+    s3_secret_access_key: str = ""
+    s3_bucket_name: str = "moretech-dev"
+
     class Config:
         env_file = ".env"
         env_prefix = ""

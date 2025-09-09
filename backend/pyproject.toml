@@ -23,6 +23,7 @@ dependencies = [
   "gigachat>=0.1.36",
   "yandex-speechkit>=1.5.0",
   "audioop-lts>=0.2.2",
+  "boto3>=1.40.26",
 ]
 
 [tool.uv]
@@ -31,6 +32,7 @@ dev-dependencies = [
   "pytest-asyncio>=0.23.6",
   "pytest-cov>=4.1.0",
   "testcontainers[postgres]>=4.7.2",
+  "testcontainers[minio]>=4.7.2",
   "ruff>=0.5.0",
   "black>=24.4.2",
 ]

@@ -105,6 +105,7 @@ class CandidateBase(BaseModel):
     education: list[EducationItem] = []
     geo: str | None = None
     employment_type: EmploymentType | None = None
+    document_s3_key: str | None = None
 
     @field_validator("skills", mode="before")
     @classmethod
@@ -227,6 +228,7 @@ class VacancyBase(BaseModel):
     education: str | None = None
     minor_skills: list[str] = []
     company_info: str | None = None
+    document_s3_key: str | None = None
 
     @field_validator("skills", mode="before")
     @classmethod
