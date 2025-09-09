@@ -149,6 +149,14 @@ export type EducationItem = {
      * Type
      */
     type?: string | null;
+    /**
+     * Start Date
+     */
+    start_date?: string | null;
+    /**
+     * End Date
+     */
+    end_date?: string | null;
 };
 
 /**
@@ -172,6 +180,14 @@ export type ExperienceItem = {
      * Years
      */
     years: number;
+    /**
+     * Start Date
+     */
+    start_date?: string | null;
+    /**
+     * End Date
+     */
+    end_date?: string | null;
 };
 
 /**

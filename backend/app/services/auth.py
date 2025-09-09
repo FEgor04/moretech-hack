@@ -50,7 +50,7 @@ def generate_token(payload: TokenPayload, expires_in_minutes: int = 60) -> str:
             ).timestamp()
         ),
     )
-    token_unsigned = f"{_b64url(json.dumps(header, separators=(',',':')).encode())}.{_b64url(json.dumps(payload, separators=(',',':')).encode())}"
+    token_unsigned = f"{_b64url(json.dumps(header, separators=(',', ':')).encode())}.{_b64url(json.dumps(payload, separators=(',', ':')).encode())}"
     signature = _sign(token_unsigned.encode())
     return f"{token_unsigned}.{signature}"
 
