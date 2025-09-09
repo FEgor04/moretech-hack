@@ -1,4 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
+import logging
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+    UploadFile,
+    File,
+    Query,
+    Response,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
@@ -17,6 +27,8 @@ from app.services.pdf_parser import (
     PDFParsingError,
     PDFParserService,
 )
+from app.clients.s3 import get_s3_client
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -168,3 +180,27 @@ async def upload_vacancy_pdf(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while processing the job description: {str(e)}",
         )
+
+
+@router.get("/{vacancy_id}/document")
+async def download_vacancy_document(
+    vacancy_id: int, session: AsyncSession = Depends(get_session)
+):
+    vacancy = await vacancies_service.get_vacancy(session, vacancy_id)
+    if not vacancy:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+    if not vacancy.document_s3_key:
+        raise HTTPException(status_code=404, detail="Document not found")
+    try:
+        s3 = get_s3_client()
+        obj = s3.get_object(Bucket=settings.s3_bucket_name, Key=vacancy.document_s3_key)
+        content = obj["Body"].read()
+        return Response(content=content, media_type="application/pdf")
+    except Exception as e:
+        logging.error(
+            "[download_vacancy_document] failed | vacancy_id=%s error=%s",
+            vacancy_id,
+            e,
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Failed to download document")

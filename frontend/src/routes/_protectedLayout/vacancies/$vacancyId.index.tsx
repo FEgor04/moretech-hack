@@ -54,7 +54,9 @@ import {
 	ClockIcon,
 	UsersIcon,
 	BarChart3Icon,
+	DownloadIcon,
 } from "lucide-react";
+import { downloadApiFile } from "@/lib/download";
 
 const employmentTypeLocalization = {
 	part_time: "Частичная занятость",
@@ -199,26 +201,28 @@ function VacancyDetail() {
 					.filter((skill) => skill.length > 0)
 			: undefined;
 
-		const vacancyData = {
-			...data,
-			skills: skillsArray || undefined,
-			responsibilities: responsibilitiesArray || undefined,
-			minor_skills: minorSkillsArray || undefined,
-		};
-
-		mutation.mutate(vacancyData, {
-			onSuccess: () => {
-				toast.success("Вакансия обновлена", {
-					description: "Изменения успешно сохранены.",
-				});
-				navigate({ to: "/vacancies" });
+		mutation.mutate(
+			{
+				...data,
+				skills: skillsArray,
+				responsibilities: responsibilitiesArray,
+				minor_skills: minorSkillsArray,
 			},
-			onError: (error) => {
-				toast.error("Ошибка при обновлении вакансии", {
-					description: error.message,
-				});
+			{
+				onSuccess: () => {
+					toast.success("Вакансия обновлена");
+					navigate({
+						to: "/vacancies/$vacancyId",
+						params: { vacancyId: params.vacancyId },
+					});
+				},
+				onError: (err) => {
+					toast.error("Не удалось обновить вакансию", {
+						description: err.message,
+					});
+				},
 			},
-		});
+		);
 	};
 
 	const onNoteSubmit = (data: NoteFormData) => {
@@ -292,6 +296,20 @@ function VacancyDetail() {
 									Назад
 								</Link>
 							</Button>
+							{v.document_s3_key && (
+								<Button
+									variant="outline"
+									onClick={() =>
+										downloadApiFile(
+											`/vacancies/${params.vacancyId}/document`,
+											`${v.title || "vacancy"}.pdf`,
+										)
+									}
+								>
+									<DownloadIcon className="w-4 h-4 mr-1" />
+									Скачать документ
+								</Button>
+							)}
 							<Button variant="default" asChild>
 								<Link
 									to="/vacancies/$vacancyId/stats"

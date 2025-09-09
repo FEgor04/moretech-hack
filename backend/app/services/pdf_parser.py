@@ -12,6 +12,8 @@ from app.schemas.common import (
 )
 from app.schemas.parsing import CVParsingSchema, VacancyParsingSchema
 from app.clients.gigachat import get_gigachat_client
+from app.clients.s3 import get_s3_client
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,12 @@ class PDFParserService:
 
     def __init__(self):
         self.gigachat_client = get_gigachat_client()
+        # Initialize S3 client (best effort)
+        try:
+            self.s3_client = get_s3_client()
+        except Exception as e:
+            logger.warning(f"Failed to initialize S3 client: {e}")
+            self.s3_client = None
 
     def _normalize_blank_fields(self, data: dict) -> dict:
         """Normalize blank/empty fields to None values"""
@@ -94,6 +102,34 @@ class PDFParserService:
         schema = VacancyParsingSchema.model_json_schema()
         return json.dumps(schema, ensure_ascii=False, indent=2)
 
+    def _upload_pdf_to_s3(
+        self, content: bytes, filename: str, folder: str
+    ) -> str | None:
+        """Upload PDF bytes to S3; return object key or None on failure.
+
+        The object name is a UUID with .pdf extension, stored under the provided folder.
+        """
+        if not self.s3_client:
+            return None
+        try:
+            import uuid
+
+            # Always use a UUID-based filename to avoid PII and ensure uniqueness
+            object_key = f"{folder}/{uuid.uuid4()}.pdf"
+            self.s3_client.put_object(
+                Bucket=settings.s3_bucket_name,
+                Key=object_key,
+                Body=content,
+                ContentType="application/pdf",
+            )
+            logger.info(
+                f"Uploaded PDF to S3 bucket '{settings.s3_bucket_name}' with key '{object_key}'"
+            )
+            return object_key
+        except Exception as e:
+            logger.warning(f"Failed to upload PDF to S3: {e}")
+            return None
+
     async def parse_cv(
         self, pdf_file: BinaryIO, filename: str = "resume.pdf"
     ) -> tuple[CandidateCreate, str]:
@@ -107,6 +143,8 @@ class PDFParserService:
             import io
 
             file_content = pdf_file.read()
+            # Upload to S3 and capture object key (best-effort)
+            s3_key = self._upload_pdf_to_s3(file_content, filename, folder="cv")
             file_obj = io.BytesIO(file_content)
             file_obj.name = filename  # Set filename for proper MIME type detection
 
@@ -252,6 +290,7 @@ JSON схема с подробными инструкциями:
                 experience=experience,
                 status="pending",
                 gigachat_file_id=file_id,
+                document_s3_key=s3_key,
                 skills=parsed_data.get("skills"),
                 tech=parsed_data.get("tech"),
                 education=education,
@@ -285,6 +324,8 @@ JSON схема с подробными инструкциями:
             import io
 
             file_content = pdf_file.read()
+            # Upload to S3 and capture object key (best-effort)
+            s3_key = self._upload_pdf_to_s3(file_content, filename, folder="vacancies")
             file_obj = io.BytesIO(file_content)
             file_obj.name = filename  # Set filename for proper MIME type detection
 
@@ -386,6 +427,7 @@ JSON схема с подробными инструкциями:
                 description=parsed_data.get("description") or "Не указано",
                 status="open",
                 gigachat_file_id=file_id,
+                document_s3_key=s3_key,
                 company=parsed_data.get("company"),
                 location=parsed_data.get("location"),
                 salary_min=parsed_data.get("salary_min"),

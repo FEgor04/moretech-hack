@@ -35,6 +35,8 @@ import {
 	ActivityIcon,
 	MapPinIcon,
 } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
+import { downloadApiFile } from "@/lib/download";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId/",
@@ -613,6 +615,19 @@ function CandidateDetail() {
 							<CardTitle className="text-lg">Дополнительно</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
+							{c.document_s3_key && (
+								<Button
+									variant="outline"
+									onClick={() =>
+										downloadApiFile(
+											`/candidates/${params.candidateId}/document`,
+											`${c.name || "resume"}.pdf`,
+										)
+									}
+								>
+									<DownloadIcon className="h-4 w-4 mr-2" /> Скачать резюме
+								</Button>
+							)}
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">В системе</span>
 								<Badge variant="outline">{daysInSystem} дней</Badge>

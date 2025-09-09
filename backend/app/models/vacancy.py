@@ -16,6 +16,7 @@ class Vacancy(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(64), default="open")  # open | closed
     gigachat_file_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    document_s3_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # Legacy/previous fields (retain)
     company: Mapped[str | None] = mapped_column(String(255), nullable=True)

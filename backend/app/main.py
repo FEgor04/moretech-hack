@@ -54,12 +54,12 @@ _configure_logging()
 app = FastAPI(title="AI HR Backend")
 
 # Emit a startup log to verify logging pipeline
-logging.getLogger("app").info("Application logging configured and FastAPI initialized")
+logging.info("Application logging configured and FastAPI initialized")
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    logging.getLogger("app").info("Health check OK")
+    logging.info("Health check OK")
     return {"status": "ok"}
 
 
