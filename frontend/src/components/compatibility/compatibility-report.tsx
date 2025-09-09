@@ -398,11 +398,11 @@ export function CompatibilityReport({
 function CompatibilityReportSkeleton() {
 	return (
 		<div className="space-y-6">
-				{Array.from({ length: 6 }, (_, i) => (
-					<Card 
-						// biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton components
-						key={`skeleton-${i}`}
-					>
+			{Array.from({ length: 6 }, (_, i) => (
+				<Card
+					// biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton components
+					key={`skeleton-${i}`}
+				>
 					<CardHeader>
 						<Skeleton className="h-6 w-48" />
 						<Skeleton className="h-4 w-32" />

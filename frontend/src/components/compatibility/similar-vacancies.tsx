@@ -128,18 +128,17 @@ export function SimilarVacancies({
 									</div>
 
 									<div className="flex flex-col items-end gap-2">
-									{(() => {
-										const value =
-											vacancy.overall_score ??
-											vacancy.similarity_score;
-										return (
-											<div
-												className={`text-2xl font-bold ${getScoreColor(value)}`}
-											>
-												{value.toFixed(2)}%
-											</div>
-										);
-									})()}
+										{(() => {
+											const value =
+												vacancy.overall_score ?? vacancy.similarity_score;
+											return (
+												<div
+													className={`text-2xl font-bold ${getScoreColor(value)}`}
+												>
+													{value.toFixed(2)}%
+												</div>
+											);
+										})()}
 										<div className="flex gap-2">
 											<Button asChild size="sm">
 												<Link

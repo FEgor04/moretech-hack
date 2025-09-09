@@ -23,7 +23,7 @@ def upgrade() -> None:
     result = connection.execute(
         text("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
     ).fetchone()
-    
+
     if result:
         # Vector extension is available, use vector columns
         use_vector = True
