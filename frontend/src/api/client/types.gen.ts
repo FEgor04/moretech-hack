@@ -39,7 +39,7 @@ export type CandidateCreate = {
     /**
      * Experience
      */
-    experience?: Array<ExperienceItem> | null;
+    experience?: Array<ExperienceItem>;
     status?: CandidateStatus;
     /**
      * Gigachat File Id
@@ -48,20 +48,24 @@ export type CandidateCreate = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Tech
      */
-    tech?: Array<string> | null;
+    tech?: Array<string>;
     /**
      * Education
      */
-    education?: Array<EducationItem> | null;
+    education?: Array<EducationItem>;
     /**
      * Geo
      */
     geo?: string | null;
     employment_type?: EmploymentType | null;
+    /**
+     * Document S3 Key
+     */
+    document_s3_key?: string | null;
 };
 
 /**
@@ -91,7 +95,7 @@ export type CandidateRead = {
     /**
      * Experience
      */
-    experience?: Array<ExperienceItem> | null;
+    experience?: Array<ExperienceItem>;
     status?: CandidateStatus;
     /**
      * Gigachat File Id
@@ -100,20 +104,24 @@ export type CandidateRead = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Tech
      */
-    tech?: Array<string> | null;
+    tech?: Array<string>;
     /**
      * Education
      */
-    education?: Array<EducationItem> | null;
+    education?: Array<EducationItem>;
     /**
      * Geo
      */
     geo?: string | null;
     employment_type?: EmploymentType | null;
+    /**
+     * Document S3 Key
+     */
+    document_s3_key?: string | null;
     /**
      * Id
      */
@@ -516,11 +524,11 @@ export type VacancyCreate = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | null;
+    responsibilities?: Array<string>;
     /**
      * Domain
      */
@@ -532,11 +540,15 @@ export type VacancyCreate = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | null;
+    minor_skills?: Array<string>;
     /**
      * Company Info
      */
     company_info?: string | null;
+    /**
+     * Document S3 Key
+     */
+    document_s3_key?: string | null;
 };
 
 /**
@@ -596,11 +608,11 @@ export type VacancyRead = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | null;
+    responsibilities?: Array<string>;
     /**
      * Domain
      */
@@ -612,11 +624,15 @@ export type VacancyRead = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | null;
+    minor_skills?: Array<string>;
     /**
      * Company Info
      */
     company_info?: string | null;
+    /**
+     * Document S3 Key
+     */
+    document_s3_key?: string | null;
     /**
      * Id
      */
@@ -672,11 +688,11 @@ export type VacancyUpdate = {
     /**
      * Skills
      */
-    skills?: Array<string> | null;
+    skills?: Array<string>;
     /**
      * Responsibilities
      */
-    responsibilities?: Array<string> | null;
+    responsibilities?: Array<string>;
     /**
      * Domain
      */
@@ -688,7 +704,7 @@ export type VacancyUpdate = {
     /**
      * Minor Skills
      */
-    minor_skills?: Array<string> | null;
+    minor_skills?: Array<string>;
     /**
      * Company Info
      */
@@ -1005,6 +1021,34 @@ export type UploadCvCandidatesUploadCvPostResponses = {
 
 export type UploadCvCandidatesUploadCvPostResponse = UploadCvCandidatesUploadCvPostResponses[keyof UploadCvCandidatesUploadCvPostResponses];
 
+export type DownloadCandidateDocumentCandidatesCandidateIdDocumentGetData = {
+    body?: never;
+    path: {
+        /**
+         * Candidate Id
+         */
+        candidate_id: string;
+    };
+    query?: never;
+    url: '/candidates/{candidate_id}/document';
+};
+
+export type DownloadCandidateDocumentCandidatesCandidateIdDocumentGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadCandidateDocumentCandidatesCandidateIdDocumentGetError = DownloadCandidateDocumentCandidatesCandidateIdDocumentGetErrors[keyof DownloadCandidateDocumentCandidatesCandidateIdDocumentGetErrors];
+
+export type DownloadCandidateDocumentCandidatesCandidateIdDocumentGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type ListVacanciesVacanciesGetData = {
     body?: never;
     path?: never;
@@ -1299,6 +1343,34 @@ export type UploadVacancyPdfVacanciesUploadPdfPostResponses = {
 };
 
 export type UploadVacancyPdfVacanciesUploadPdfPostResponse = UploadVacancyPdfVacanciesUploadPdfPostResponses[keyof UploadVacancyPdfVacanciesUploadPdfPostResponses];
+
+export type DownloadVacancyDocumentVacanciesVacancyIdDocumentGetData = {
+    body?: never;
+    path: {
+        /**
+         * Vacancy Id
+         */
+        vacancy_id: number;
+    };
+    query?: never;
+    url: '/vacancies/{vacancy_id}/document';
+};
+
+export type DownloadVacancyDocumentVacanciesVacancyIdDocumentGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadVacancyDocumentVacanciesVacancyIdDocumentGetError = DownloadVacancyDocumentVacanciesVacancyIdDocumentGetErrors[keyof DownloadVacancyDocumentVacanciesVacancyIdDocumentGetErrors];
+
+export type DownloadVacancyDocumentVacanciesVacancyIdDocumentGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ListInterviewsInterviewsGetData = {
     body?: never;

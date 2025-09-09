@@ -1,5 +1,13 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+    UploadFile,
+    File,
+    Response,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
@@ -11,6 +19,8 @@ from app.services.pdf_parser import (
     PDFParsingError,
     PDFParserService,
 )
+from app.clients.s3 import get_s3_client
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -151,3 +161,29 @@ async def upload_cv(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while processing the CV: {str(e)}",
         )
+
+
+@router.get("/{candidate_id}/document")
+async def download_candidate_document(
+    candidate_id: str, session: AsyncSession = Depends(get_session)
+):
+    candidate = await candidates_service.get_candidate(session, candidate_id)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    if not candidate.document_s3_key:
+        raise HTTPException(status_code=404, detail="Document not found")
+    try:
+        s3 = get_s3_client()
+        obj = s3.get_object(
+            Bucket=settings.s3_bucket_name, Key=candidate.document_s3_key
+        )
+        content = obj["Body"].read()
+        return Response(content=content, media_type="application/pdf")
+    except Exception as e:
+        logger.error(
+            "[download_candidate_document] failed | candidate_id=%s error=%s",
+            candidate_id,
+            e,
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Failed to download document")
