@@ -32,10 +32,12 @@ export function InterviewChat({ interviewId }: Props) {
 		refetchInterval: 1000,
 	});
 	const isFinished = interview.data.state === "done";
-	const { webcamRef, sendAudioReadyMarker, socketState } =
-		useWebcamStreaming(interviewId, {
+	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(
+		interviewId,
+		{
 			disabled: isFinished,
-		});
+		},
+	);
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
 	);
