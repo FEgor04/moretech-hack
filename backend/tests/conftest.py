@@ -7,6 +7,7 @@ from app.core.config import settings
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from testcontainers.postgres import PostgresContainer
+from testcontainers.minio import MinioContainer
 
 # Set default environment variables
 os.environ.setdefault("DEFAULT_USER_EMAIL", "admin@example.com")
@@ -45,6 +46,47 @@ def postgres_container():
 
 
 @pytest.fixture(scope="session")
+def minio_container():
+    """Start MinIO container and configure S3 env for the entire test session."""
+    # Configure creds and bucket
+    access_key = "minioadmin"
+    secret_key = "minioadmin"
+    bucket_name = "test-bucket"
+
+    with MinioContainer() as container:
+        host = container.get_container_host_ip()
+        port = container.get_exposed_port(9000)
+        endpoint = f"http://{host}:{port}"
+
+        # Set S3 env vars for app settings
+        os.environ["S3_ENDPOINT_URL"] = endpoint
+        os.environ["S3_REGION"] = "us-east-1"
+        os.environ["S3_ACCESS_KEY_ID"] = access_key
+        os.environ["S3_SECRET_ACCESS_KEY"] = secret_key
+        os.environ["S3_BUCKET_NAME"] = bucket_name
+
+        # Reload pydantic settings to pick up S3 env
+        settings.__init__()
+
+        # Create bucket
+        from app.clients.s3 import get_s3_client
+
+        s3 = get_s3_client()
+        try:
+            s3.create_bucket(Bucket=bucket_name)
+        except Exception:
+            # Bucket may already exist in rare cases
+            pass
+
+        yield {
+            "endpoint": endpoint,
+            "bucket": bucket_name,
+            "access_key": access_key,
+            "secret_key": secret_key,
+        }
+
+
+@pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for the test session."""
     loop = asyncio.new_event_loop()
@@ -54,7 +96,9 @@ def event_loop():
 
 
 @pytest.fixture()
-async def db_session(postgres_container) -> AsyncGenerator[AsyncSession, None]:
+async def db_session(
+    postgres_container, minio_container
+) -> AsyncGenerator[AsyncSession, None]:
     """Create database session with container."""
     from app.db.session import AsyncSessionLocal
 
@@ -63,7 +107,9 @@ async def db_session(postgres_container) -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest.fixture()
-async def client(postgres_container) -> AsyncGenerator[AsyncClient, None]:
+async def client(
+    postgres_container, minio_container
+) -> AsyncGenerator[AsyncClient, None]:
     """Create test client with database container."""
     from app.main import app
 

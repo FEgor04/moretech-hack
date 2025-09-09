@@ -7,6 +7,7 @@ import { CandidateAvatar } from "@/components/candidates/candidate-avatar";
 import { CandidateStatusBadge } from "@/components/candidates/status-badge";
 import { ScheduleInterviewDialog } from "@/components/interviews/schedule-interview-dialog";
 import { InterviewsList } from "@/components/candidates/interviews-list";
+import { SimilarVacancies } from "@/components/compatibility/similar-vacancies";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -34,6 +35,8 @@ import {
 	ActivityIcon,
 	MapPinIcon,
 } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
+import { downloadApiFile } from "@/lib/download";
 
 export const Route = createFileRoute(
 	"/_protectedLayout/candidates/$candidateId/",
@@ -612,6 +615,19 @@ function CandidateDetail() {
 							<CardTitle className="text-lg">Дополнительно</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
+							{c.document_s3_key && (
+								<Button
+									variant="outline"
+									onClick={() =>
+										downloadApiFile(
+											`/candidates/${params.candidateId}/document`,
+											`${c.name || "resume"}.pdf`,
+										)
+									}
+								>
+									<DownloadIcon className="h-4 w-4 mr-2" /> Скачать резюме
+								</Button>
+							)}
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">В системе</span>
 								<Badge variant="outline">{daysInSystem} дней</Badge>
@@ -634,6 +650,9 @@ function CandidateDetail() {
 					</Card>
 				</div>
 			</div>
+
+			{/* Similar Vacancies */}
+			<SimilarVacancies candidateId={params.candidateId} />
 
 			{/* Список интервью */}
 			<InterviewsList candidateId={params.candidateId} />
