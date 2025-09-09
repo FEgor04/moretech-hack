@@ -19,7 +19,6 @@ import { InterviewStatusBadge } from "../candidates/interview-status-badge";
 import type { InterviewState } from "@/api/client";
 import { CheckIcon, Loader2Icon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useEffect } from "react";
 
 type Props = {
 	interviewId: string;
