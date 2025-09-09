@@ -178,7 +178,7 @@ function CandidateEdit() {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className="max-w-2xl space-y-6"
 				>
-					<div className="rounded-lg border p-6 space-y-6">
+					<div className="rounded-lg border p-6 space-y-4">
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<FormField
 								control={form.control}
@@ -344,7 +344,6 @@ function CandidateEdit() {
 							name="education"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Образование</FormLabel>
 									<FormControl>
 										<EducationForm
 											value={field.value || []}
@@ -362,7 +361,6 @@ function CandidateEdit() {
 							name="experience"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Детальный опыт работы</FormLabel>
 									<FormControl>
 										<ExperienceForm
 											value={field.value || []}
