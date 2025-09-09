@@ -4,7 +4,6 @@ from sqlalchemy import String, Text, func, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.schemas.common import VacancyRead
 
 
 class Vacancy(Base):
@@ -38,29 +37,3 @@ class Vacancy(Base):
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()
     )
-
-    def to_schema(self) -> VacancyRead:
-        """Convert ORM model instance to Pydantic `VacancyRead` schema."""
-        return VacancyRead(
-            id=self.id,
-            title=self.title,
-            description=self.description,
-            status=self.status,
-            gigachat_file_id=self.gigachat_file_id,
-            company=self.company,
-            location=self.location,
-            salary_min=self.salary_min,
-            salary_max=self.salary_max,
-            employment_type=self.employment_type,
-            experience_level=self.experience_level,
-            requirements=self.requirements,
-            benefits=self.benefits,
-            skills=self.skills,
-            responsibilities=self.responsibilities,
-            domain=self.domain,
-            education=self.education,
-            minor_skills=self.minor_skills,
-            company_info=self.company_info,
-            created_at=self.created_at,
-            updated_at=self.updated_at,
-        )

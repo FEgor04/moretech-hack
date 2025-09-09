@@ -5,7 +5,7 @@ from sqlalchemy import String, func, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.schemas.common import CandidateStatus, CandidateRead
+from app.schemas.common import CandidateStatus
 
 
 class Candidate(Base):
@@ -35,22 +35,3 @@ class Candidate(Base):
     updated_at: Mapped[datetime] = mapped_column(
         default=func.now(), onupdate=func.now()
     )
-
-    def to_schema(self) -> CandidateRead:
-        """Convert ORM model instance to Pydantic `CandidateRead` schema."""
-        return CandidateRead(
-            id=self.id,
-            name=self.name,
-            email=self.email,
-            position=self.position,
-            experience=self.experience,
-            status=self.status,
-            gigachat_file_id=self.gigachat_file_id,
-            skills=self.skills,
-            tech=self.tech,
-            education=self.education,
-            geo=self.geo,
-            employment_type=self.employment_type,
-            created_at=self.created_at,
-            updated_at=self.updated_at,
-        )

@@ -396,22 +396,140 @@ class InterviewMessagesService:
     ) -> str:
         """Create system prompt for the interview."""
 
-        # Safely extract candidate fields (do not convert to Pydantic schemas)
+        # Helpers for safe extraction and formatting of fields
+        def to_list(value) -> list:
+            if value is None:
+                return []
+            if isinstance(value, list):
+                return value
+            if isinstance(value, str):
+                try:
+                    import json
+
+                    parsed = json.loads(value)
+                    return parsed if isinstance(parsed, list) else [value]
+                except Exception:
+                    return [item.strip() for item in value.split(",") if item.strip()]
+            return [str(value)]
+
+        def join_list(values: list) -> str:
+            if not values:
+                return "не указано"
+            return ", ".join(str(v) for v in values if v is not None and str(v).strip())
+
+        def format_experience(value) -> str:
+            items = to_list(value)
+            if not items:
+                return "не указано"
+            formatted = []
+            for item in items:
+                if isinstance(item, dict):
+                    company = item.get("company") or "?"
+                    position = item.get("position") or "?"
+                    years = item.get("years")
+                    years_str = f"{years} лет" if years not in (None, "") else "?"
+                    formatted.append(f"• {company}, {position}, {years_str}")
+                else:
+                    formatted.append(f"• {item}")
+            return "\n".join(formatted)
+
+        def format_education(value) -> str:
+            items = to_list(value)
+            if not items:
+                return "не указано"
+            formatted = []
+            for item in items:
+                if isinstance(item, dict):
+                    org = item.get("organization") or "?"
+                    spec = item.get("speciality") or "?"
+                    typ = item.get("type")
+                    if typ:
+                        formatted.append(f"• {org} — {spec} ({typ})")
+                    else:
+                        formatted.append(f"• {org} — {spec}")
+                else:
+                    formatted.append(f"• {item}")
+            return "\n".join(formatted)
+
+        def format_salary(min_val, max_val) -> str:
+            if min_val and max_val:
+                return f"{min_val}–{max_val}"
+            if min_val and not max_val:
+                return f"от {min_val}"
+            if max_val and not min_val:
+                return f"до {max_val}"
+            return "не указано"
+
+        # Candidate fields
         c_name = getattr(candidate, "name", None) or "не указан"
+        c_email = getattr(candidate, "email", None) or "не указан"
         c_position = getattr(candidate, "position", None) or "не указана"
-        c_experience = getattr(candidate, "experience", None)
-        c_experience_str = (
-            str(c_experience) if c_experience is not None else "не указан"
+        c_status = getattr(candidate, "status", None) or "не указан"
+        c_geo = getattr(candidate, "geo", None) or "не указано"
+        c_employment_type = getattr(candidate, "employment_type", None) or "не указан"
+        c_skills = join_list(to_list(getattr(candidate, "skills", None)))
+        c_tech = join_list(to_list(getattr(candidate, "tech", None)))
+        c_experience_block = format_experience(getattr(candidate, "experience", None))
+        c_education_block = format_education(getattr(candidate, "education", None))
+
+        candidate_block = (
+            "Информация о кандидате:\n"
+            f"- Имя: {c_name}\n"
+            f"- Email: {c_email}\n"
+            f"- Позиция: {c_position}\n"
+            f"- Статус: {c_status}\n"
+            f"- Гео: {c_geo}\n"
+            f"- Тип занятости: {c_employment_type}\n"
+            f"- Навыки: {c_skills}\n"
+            f"- Техстек: {c_tech}\n"
+            f"- Опыт:\n{c_experience_block}\n"
+            f"- Образование:\n{c_education_block}\n"
         )
 
-        # Prepare vacancy text block
+        # Vacancy fields
         if vacancy is not None:
             v_title = getattr(vacancy, "title", None) or "не указана"
+            v_company = getattr(vacancy, "company", None) or "не указана"
+            v_location = getattr(vacancy, "location", None) or "не указана"
+            v_status = getattr(vacancy, "status", None) or "не указан"
+            v_employment_type = getattr(vacancy, "employment_type", None) or "не указан"
+            v_experience_level = (
+                getattr(vacancy, "experience_level", None) or "не указан"
+            )
+            v_salary = format_salary(
+                getattr(vacancy, "salary_min", None),
+                getattr(vacancy, "salary_max", None),
+            )
+            v_requirements = getattr(vacancy, "requirements", None) or "не указано"
+            v_benefits = getattr(vacancy, "benefits", None) or "не указано"
             v_description = getattr(vacancy, "description", None) or "не указано"
+            v_domain = getattr(vacancy, "domain", None) or "не указан"
+            v_education = getattr(vacancy, "education", None) or "не указано"
+            v_company_info = getattr(vacancy, "company_info", None) or "не указано"
+            v_skills = join_list(to_list(getattr(vacancy, "skills", None)))
+            v_minor_skills = join_list(to_list(getattr(vacancy, "minor_skills", None)))
+            v_responsibilities = join_list(
+                to_list(getattr(vacancy, "responsibilities", None))
+            )
+
             vacancy_block = (
-                f"Информация о вакансии:\n"
+                "Информация о вакансии:\n"
                 f"- Название: {v_title}\n"
-                f"- Описание: {v_description}"
+                f"- Компания: {v_company}\n"
+                f"- Локация: {v_location}\n"
+                f"- Статус вакансии: {v_status}\n"
+                f"- Уровень: {v_experience_level}\n"
+                f"- Тип занятости: {v_employment_type}\n"
+                f"- Зарплата: {v_salary}\n"
+                f"- Навыки: {v_skills}\n"
+                f"- Доп. навыки: {v_minor_skills}\n"
+                f"- Обязанности: {v_responsibilities}\n"
+                f"- Домен: {v_domain}\n"
+                f"- Требования (текст): {v_requirements}\n"
+                f"- Бенефиты: {v_benefits}\n"
+                f"- Образование: {v_education}\n"
+                f"- Описание: {v_description}\n"
+                f"- Информация о компании: {v_company_info}\n"
             )
         else:
             vacancy_block = "Вакансия не указана"
@@ -441,10 +559,7 @@ class InterviewMessagesService:
 
 Очень важно: не переходи к финальному шагу раньше времени. Сначала проведи полноценное интервью!
 
-Информация о кандидате:
-- Имя: {c_name}
-- Позиция: {c_position}
-- Опыт (годы/описание): {c_experience_str}
+{candidate_block}
 
 {vacancy_block}
 """
