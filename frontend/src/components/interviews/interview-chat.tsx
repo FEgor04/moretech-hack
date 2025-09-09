@@ -19,20 +19,23 @@ import { InterviewStatusBadge } from "../candidates/interview-status-badge";
 import type { InterviewState } from "@/api/client";
 import { CheckIcon, Loader2Icon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useState } from "react";
+import { PromptInputTextarea } from "../ai-elements/prompt-input";
 
 type Props = {
 	interviewId: string;
 };
 
 export function InterviewChat({ interviewId }: Props) {
-	const interview = useSuspenseQuery(interviewQueryOptions(interviewId));
+	const interview = useSuspenseQuery({
+		...interviewQueryOptions(interviewId),
+		refetchInterval: 1000,
+	});
 	const isFinished = interview.data.state === "done";
-	const { webcamRef, sendAudioReadyMarker, socketState } = useWebcamStreaming(
-		interviewId,
-		{
+	const { webcamRef, sendAudioReadyMarker, socketState, sendTextMessage } =
+		useWebcamStreaming(interviewId, {
 			disabled: isFinished,
-		},
-	);
+		});
 	const candidate = useSuspenseQuery(
 		candidateQueryOptions(interview.data.candidate_id),
 	);
@@ -62,12 +65,15 @@ export function InterviewChat({ interviewId }: Props) {
 	const isLLM = socketState === "generating_response";
 	const isTTS = socketState === "speech_synthesis";
 
+	const isDev = import.meta.env.DEV;
+	const [debugPrompt, setDebugPrompt] = useState("");
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			{/* Header */}
 			<div className="bg-white border-b border-gray-200 px-6 py-4">
 				<div className="max-w-4xl mx-auto">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<h1 className="text-2xl font-bold text-gray-900">
 								Собеседование{isFinished ? " (Завершено)" : ""}
@@ -85,91 +91,124 @@ export function InterviewChat({ interviewId }: Props) {
 			</div>
 
 			{/* Chat Container */}
-			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] flex flex-col">
-				{/* Webcam */}
-				{!isFinished && (
-					<div className="w-full p-4">
-						<WebcamComponent
-							ref={webcamRef}
-							audio={true}
-							muted
-							className="w-full rounded-md shadow aspect-video bg-black"
-						/>
-					</div>
-				)}
-				{/* Messages */}
-				<Conversation className="flex-1">
-					<ConversationContent>
-						{messages.data?.map((msg) => (
-							<Message
-								key={`${msg.interview_id}-${msg.index}`}
-								from={msg.type as "user" | "assistant"}
-							>
-								<MessageContent>
-									<Response>{msg.text}</Response>
-								</MessageContent>
-								<MessageAvatar
-									src={msg.type === "user" ? "" : ""}
-									name={msg.type === "user" ? candidate.data.name : "AI"}
-								/>
-							</Message>
-						))}
-						{/* Typing indicator for LLM generation */}
-						{!isFinished && isLLM && (
-							<Message from="assistant">
-								<MessageContent>
-									<div className="flex items-center gap-2 text-muted-foreground">
-										<span className="inline-flex items-center gap-1">
-											<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.3s]" />
-											<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.15s]" />
-											<span className="size-2 rounded-full bg-current animate-bounce" />
-										</span>
-										<span>Печатает...</span>
-									</div>
-								</MessageContent>
-								<MessageAvatar src="" name="AI" />
-							</Message>
-						)}
-						{/* Recording indicator for TTS synthesis */}
-						{!isFinished && isTTS && (
-							<Message from="assistant">
-								<MessageContent>
-									<div className="flex items-center gap-2 text-muted-foreground">
-										<Loader2Icon className="size-4 animate-spin" />
-										<span>Recording audio...</span>
-									</div>
-								</MessageContent>
-								<MessageAvatar src="" name="AI" />
-							</Message>
-						)}
-					</ConversationContent>
-					<ConversationScrollButton />
-				</Conversation>
-				{/* Message Input */}
-				{!isFinished && (
-					<div className="flex justify-center py-4">
-						{isAwaiting ? (
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button
-										onClick={sendAudioReadyMarker}
-										className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
+			<div className="max-w-4xl mx-auto h-[calc(100vh-140px)] p-4">
+				<div
+					className="h-full grid grid-cols-1 md:grid-cols-2 gap-4 data-[finished=true]:grid-cols-1"
+					data-finished={isFinished}
+				>
+					{/* Left: Webcam */}
+					{!isFinished && (
+						<div className="flex flex-col">
+							<WebcamComponent
+								ref={webcamRef}
+								audio={true}
+								muted
+								className="w-full rounded-md shadow aspect-video bg-black"
+							/>
+						</div>
+					)}
+					{/* Right: Chat */}
+					<div className="flex flex-col min-h-0">
+						<Conversation className="flex-1 min-h-0">
+							<ConversationContent>
+								{messages.data?.map((msg) => (
+									<Message
+										key={`${msg.interview_id}-${msg.index}`}
+										from={msg.type as "user" | "assistant"}
 									>
-										<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
-										<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
-											<CheckIcon />
-										</span>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Ответ готов</TooltipContent>
-							</Tooltip>
-						) : isSTT ? (
-							<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">
-								<Loader2Icon className="size-6 animate-spin" />
+										<MessageContent>
+											<Response>{msg.text}</Response>
+										</MessageContent>
+										<MessageAvatar
+											src={msg.type === "user" ? "" : ""}
+											name={msg.type === "user" ? candidate.data.name : "AI"}
+										/>
+									</Message>
+								))}
+								{/* Typing indicator for LLM generation */}
+								{!isFinished && isLLM && (
+									<Message from="assistant">
+										<MessageContent>
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<span className="inline-flex items-center gap-1">
+													<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.3s]" />
+													<span className="size-2 rounded-full bg-current animate-bounce [animation-delay:-0.15s]" />
+													<span className="size-2 rounded-full bg-current animate-bounce" />
+												</span>
+												<span>Печатает...</span>
+											</div>
+										</MessageContent>
+										<MessageAvatar src="" name="AI" />
+									</Message>
+								)}
+								{/* Recording indicator for TTS synthesis */}
+								{!isFinished && isTTS && (
+									<Message from="assistant">
+										<MessageContent>
+											<div className="flex items-center gap-2 text-muted-foreground">
+												<Loader2Icon className="size-4 animate-spin" />
+												<span>Recording audio...</span>
+											</div>
+										</MessageContent>
+										<MessageAvatar src="" name="AI" />
+									</Message>
+								)}
+							</ConversationContent>
+							<ConversationScrollButton />
+						</Conversation>
+						{/* Message Input */}
+						{!isFinished && (
+							<div className="flex justify-center py-4 w-full">
+								{isDev ? (
+									<div className="flex w-full max-w-xl items-center gap-2">
+										<PromptInputTextarea
+											placeholder="Debug prompt..."
+											value={debugPrompt}
+											onChange={(e) => setDebugPrompt(e.target.value)}
+											onKeyDown={(e) => {
+												if (
+													e.key === "Enter" &&
+													debugPrompt.trim().length > 0
+												) {
+													sendTextMessage(debugPrompt.trim());
+													setDebugPrompt("");
+												}
+											}}
+										/>
+										<Button
+											onClick={() => {
+												if (debugPrompt.trim().length === 0) return;
+												sendTextMessage(debugPrompt.trim());
+												setDebugPrompt("");
+											}}
+										>
+											Отправить
+										</Button>
+									</div>
+								) : isAwaiting ? (
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												onClick={sendAudioReadyMarker}
+												className="relative rounded-full size-14 p-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg animate-pulse"
+											>
+												<span className="absolute inset-0 rounded-full bg-[conic-gradient(var(--tw-gradient-stops))] from-indigo-500 via-purple-500 to-pink-500 animate-spin opacity-20" />
+												<span className="relative z-10 flex items-center justify-center rounded-full size-12 bg-background text-foreground">
+													<CheckIcon />
+												</span>
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>Ответ готов</TooltipContent>
+									</Tooltip>
+								) : isSTT ? (
+									<div className="flex items-center justify-center rounded-full size-12 bg-secondary text-secondary-foreground">
+										<Loader2Icon className="size-6 animate-spin" />
+									</div>
+								) : null}
 							</div>
-						) : null}
+						)}
 					</div>
-				)}
+				</div>
 			</div>
 		</div>
 	);

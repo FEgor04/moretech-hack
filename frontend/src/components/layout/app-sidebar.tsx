@@ -17,11 +17,13 @@ import {
 	LogOutIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/components/ui/sidebar";
 import { clearAccessToken } from "@/lib/auth";
 import { toast } from "sonner";
 
 export function AppSidebar() {
 	const navigate = useNavigate();
+	const { setOpenMobile } = useSidebar();
 
 	const handleLogout = () => {
 		clearAccessToken();
@@ -32,7 +34,11 @@ export function AppSidebar() {
 	return (
 		<Sidebar>
 			<SidebarHeader className="h-12 border-b text-2xl font-bold flex flex-row items-center">
-				<Link to="/" className="hover:text-blue-600 transition-colors">
+				<Link
+					to="/"
+					className="hover:text-blue-600 transition-colors"
+					onClick={() => setOpenMobile(false)}
+				>
 					AI HR
 				</Link>
 			</SidebarHeader>
@@ -42,7 +48,7 @@ export function AppSidebar() {
 						<SidebarMenu>
 							<SidebarMenuItem>
 								<SidebarMenuButton asChild>
-									<Link to="/dashboard">
+									<Link to="/dashboard" onClick={() => setOpenMobile(false)}>
 										<BarChart3Icon />
 										Дашборд
 									</Link>
@@ -51,7 +57,7 @@ export function AppSidebar() {
 
 							<SidebarMenuItem>
 								<SidebarMenuButton asChild>
-									<Link to="/vacancies">
+									<Link to="/vacancies" onClick={() => setOpenMobile(false)}>
 										<BriefcaseBusinessIcon />
 										Вакансии
 									</Link>
@@ -60,7 +66,7 @@ export function AppSidebar() {
 
 							<SidebarMenuItem>
 								<SidebarMenuButton asChild>
-									<Link to="/candidates">
+									<Link to="/candidates" onClick={() => setOpenMobile(false)}>
 										<UsersIcon />
 										Кандидаты
 									</Link>

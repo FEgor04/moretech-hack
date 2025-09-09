@@ -3,6 +3,7 @@ import { isAuthenticated, clearAccessToken } from "@/lib/auth";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { meQueryOptions } from "@/api/queries/auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Suspense } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 
 export const Route = createFileRoute("/_protectedLayout")({
@@ -37,7 +38,9 @@ function RouteComponent() {
 					<SidebarTrigger />
 				</header>
 				<div className="p-4">
-					<Outlet />
+					<Suspense fallback={<div className="h-10" />}>
+						<Outlet />
+					</Suspense>
 				</div>
 			</main>
 		</SidebarProvider>

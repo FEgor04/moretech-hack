@@ -53,7 +53,8 @@ export function useVacanciesTable(data: VacancyRead[]) {
 					<Link
 						to="/vacancies/$vacancyId"
 						params={{ vacancyId: row.original.id.toString() }}
-						className="font-medium hover:underline"
+						className="font-medium hover:underline text-sm md:text-base max-w-[220px] md:max-w-[360px] inline-block truncate align-middle"
+						title={row.original.title}
 					>
 						{row.original.title}
 					</Link>

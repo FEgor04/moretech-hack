@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 import time
 from typing import Dict, List
-import httpx
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
@@ -13,8 +12,10 @@ from app.clients.yandex import (
     get_yandex_speech_recognition_model,
     get_yandex_speech_synthesis_client,
 )
-from app.schemas.common import InterviewMessageRead
+from app.schemas.common import InterviewMessageCreateRequest
 from app.core.config import settings
+from app.db.session import AsyncSessionLocal
+from app.services import interviews as interviews_service
 
 
 logger = logging.getLogger("app")
@@ -185,63 +186,17 @@ class InterviewWebsocketService:
         return text
 
     async def submit_user_answer(self, interview_id: str, text: str) -> str | None:
-        """Submit user answer to the interview messages endpoint and return latest message text."""
+        """Create interview message directly and return latest assistant text."""
         logger.debug("Submitting user answer for interview %s: %s", interview_id, text)
 
-        # Prepare the request payload
-        payload = {"text": text}
+        payload = InterviewMessageCreateRequest(text=text)
 
-        # Make POST request to the interview messages endpoint
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"http://localhost:8000/interviews/{interview_id}/messages",
-                json=payload,
-                timeout=30.0,
+        async with AsyncSessionLocal() as session:
+            messages = await interviews_service.create_interview_message(
+                session, interview_id, payload
             )
 
-            if response.status_code == 200:
-                logger.info(
-                    "Successfully submitted user answer for interview %s",
-                    interview_id,
-                )
-
-                # Parse response with Pydantic
-                try:
-                    messages_data = response.json()
-                    messages = [InterviewMessageRead(**msg) for msg in messages_data]
-
-                    # Get the latest message (highest index)
-                    if messages:
-                        latest_message = max(messages, key=lambda msg: msg.index)
-                        logger.debug(
-                            "Latest message for interview %s: index=%d, type=%s, text=%s",
-                            interview_id,
-                            latest_message.index,
-                            latest_message.type,
-                            latest_message.text[:100] if latest_message.text else None,
-                        )
-                        return latest_message.text
-                    else:
-                        logger.warning(
-                            "No messages returned for interview %s", interview_id
-                        )
-                        return None
-
-                except Exception as e:
-                    logger.error(
-                        "Failed to parse response for interview %s: %s",
-                        interview_id,
-                        e,
-                    )
-                    return None
-            else:
-                logger.error(
-                    "Failed to submit user answer for interview %s: status=%d, response=%s",
-                    interview_id,
-                    response.status_code,
-                    response.text,
-                )
-                return None
+            return messages[-1].text
 
     async def handle_audio_marker(self) -> None:
         """Handle audio ready marker by calculating elapsed time and storing it."""
@@ -485,11 +440,35 @@ async def websocket_video_stream(
                     await service.handle_audio_marker()
                     continue
                 if text_data is not None:
-                    logger.warning(
-                        "Ignoring text frame on video WS for interview %s (len=%d)",
+                    # Treat any other text frame as a direct user answer (debug mode support)
+                    logger.info(
+                        "Received direct text on WS for interview %s: %s",
                         interview_id,
-                        len(text_data),
+                        text_data[:200],
                     )
+                    await service.update_state(InterviewSocketState.GENERATING_RESPONSE)
+                    latest_message = await service.submit_user_answer(
+                        interview_id, text_data.strip()
+                    )
+                    if latest_message is None:
+                        logger.warning(
+                            "Failed to submit direct text for interview %s",
+                            interview_id,
+                        )
+                    else:
+                        logger.info(
+                            "Direct text submitted successfully for interview %s",
+                            interview_id,
+                        )
+                        if settings.use_yandex_speech_synthesis:
+                            await service.update_state(
+                                InterviewSocketState.SPEECH_SYNTHESIS
+                            )
+                            await service.send_message_to_user(latest_message)
+                    await service.update_state(
+                        InterviewSocketState.AWAITING_USER_ANSWER
+                    )
+                    continue
 
             if data_bytes and len(data_bytes) > 0:
                 service.add_video_chunk(data_bytes)

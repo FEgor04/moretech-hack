@@ -3,8 +3,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.interview import Interview
-from app.models.candidate import Candidate
-from app.models.vacancy import Vacancy
 from app.models.interview_message import InterviewMessage
 from app.models.interview_note import InterviewNote
 from app.schemas.common import (
@@ -127,7 +125,8 @@ async def list_interview_messages(
     session: AsyncSession, interview_id: str
 ) -> list[InterviewMessage]:
     """List all messages for an interview."""
-    return await interview_messages_service.list_messages(session, interview_id)
+    all_messages = await interview_messages_service.list_messages(session, interview_id)
+    return [message for message in all_messages if message.index > 0]
 
 
 async def create_interview_message(
@@ -171,20 +170,6 @@ async def delete_note(session: AsyncSession, note_id: int) -> None:
         raise NotFoundError("Note not found")
     await session.delete(note)
     await session.commit()
-
-
-def get_system_prompt(candidate: Candidate, vacancy: Vacancy | None) -> str:
-    vacancy_part = (
-        f"Вакансия: {vacancy.title}. Описание: {vacancy.description or 'нет описания.'}"
-        if vacancy
-        else "Вакансия не указана."
-    )
-    return (
-        "Ты ассистент HR, проводишь первичное интервью. "
-        "Собери краткую информацию, будь дружелюбен и говори по-русски. "
-        f"Кандидат: {candidate.name}, позиция: {candidate.position}, опыт: {candidate.experience} лет. "
-        f"{vacancy_part}"
-    )
 
 
 async def initialize_first_message(

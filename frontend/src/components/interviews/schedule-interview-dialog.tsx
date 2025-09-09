@@ -89,15 +89,20 @@ export function ScheduleInterviewDialog({
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[480px] max-w-[95vw] p-4 sm:p-6">
 				<DialogHeader>
 					<DialogTitle>Запланировать интервью</DialogTitle>
 					<DialogDescription>
-						Запланировать интервью с кандидатом {candidate.data.name}
+						<span className="block w-full break-words">
+							Запланировать интервью с кандидатом {candidate.data.name}
+						</span>
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className="space-y-4 sm:space-y-6 overflow-hidden"
+					>
 						<FormField
 							control={form.control}
 							name="candidate_id"
@@ -110,7 +115,7 @@ export function ScheduleInterviewDialog({
 												value={field.value}
 												onValueChange={field.onChange}
 												placeholder="Выберите кандидата"
-												className="w-full"
+												className="w-full truncate"
 											/>
 										</Suspense>
 									</FormControl>
@@ -130,7 +135,7 @@ export function ScheduleInterviewDialog({
 												value={field.value}
 												onValueChange={(v) => field.onChange(v)}
 												placeholder="Выберите вакансию"
-												className="w-full"
+												className="w-full truncate"
 											/>
 										</Suspense>
 									</FormControl>
@@ -138,7 +143,7 @@ export function ScheduleInterviewDialog({
 								</FormItem>
 							)}
 						/>
-						<div className="flex gap-3">
+						<div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
 							<Button
 								type="submit"
 								disabled={createInterviewMutation.isPending}

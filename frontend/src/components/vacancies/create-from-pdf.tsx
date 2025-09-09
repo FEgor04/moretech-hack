@@ -73,7 +73,7 @@ export function CreateFromPDFButton() {
 					Загрузить PDF вакансии
 				</Button>
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent className="max-w-[95vw] sm:max-w-[480px] p-4 sm:p-6">
 				<DialogHeader>
 					<DialogTitle>Загрузить PDF вакансии</DialogTitle>
 				</DialogHeader>
@@ -94,7 +94,7 @@ export function CreateFromPDFButton() {
 						<DropzoneContent>
 							<div className="space-y-2">
 								<UploadIcon className="w-8 h-8 text-muted-foreground mx-auto" />
-								<p className="text-sm font-medium text-muted-foreground">
+								<p className="text-sm font-medium text-muted-foreground text-center text-balance">
 									{selectedFile?.name ||
 										"Перетащите PDF файл сюда или нажмите для выбора"}
 								</p>
@@ -110,10 +110,10 @@ export function CreateFromPDFButton() {
 							<div className="space-y-2">
 								<UploadIcon className="w-8 h-8 text-muted-foreground mx-auto" />
 								<div>
-									<p className="text-sm font-medium text-muted-foreground">
+									<p className="text-sm font-medium text-muted-foreground text-center text-balance">
 										Перетащите PDF файл сюда или нажмите для выбора
 									</p>
-									<p className="text-xs text-muted-foreground">
+									<p className="text-xs text-muted-foreground text-center">
 										Поддерживаются только PDF файлы до 10MB
 									</p>
 								</div>
