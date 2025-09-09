@@ -15,6 +15,12 @@ from app.clients.gigachat import get_gigachat_client
 
 logger = logging.getLogger(__name__)
 
+# Global configuration for GigaChat
+GIGACHAT_TEMPERATURE = 0.3
+GIGACHAT_MAX_TOKENS = 1000
+INITIAL_GREETING_TEMPERATURE = 0.3
+INITIAL_GREETING_MAX_TOKENS = 200
+
 
 class InterviewMessagesService:
     """Service for managing interview messages with GigaChat integration."""
@@ -64,6 +70,7 @@ class InterviewMessagesService:
 
         result = await session.scalars(
             select(InterviewMessage)
+            # Filter out first system message
             .where(InterviewMessage.interview_id == interview_id)
             .order_by(InterviewMessage.index)
         )
@@ -182,8 +189,8 @@ class InterviewMessagesService:
             chat_params = {
                 "messages": gigachat_messages,
                 "functions": await self._prepare_functions(),
-                "temperature": 0.7,
-                "max_tokens": 1000,
+                "temperature": GIGACHAT_TEMPERATURE,
+                "max_tokens": GIGACHAT_MAX_TOKENS,
                 "stream": False,
             }
             response = await self._call_gigachat_async(client, chat_params)
@@ -358,24 +365,40 @@ class InterviewMessagesService:
         """Create system prompt for the interview."""
 
         return f"""
-Ты - HR, проводишь первичное интервью с кандидатом.
+Ты - HR-бот ХРень, разработанный командой SLON на хакатоне.
+Ты проводишь первичное интервью с кандидатом.
 
-Твоя задача - собрать краткую информацию о кандидате,
-оценить его профессиональный опыт, проверить его знания и умения,
-оценить его коммуникационные навыки и общую культуру.
+Твоя цель:
+- собрать краткую информацию о кандидате,
+- оценить его профессиональный опыт,
+- проверить знания и умения,
+- оценить коммуникацию и общую культуру.
 
-Будь дружелюбен, профессионален и говори только по-русски.
+Правила интервью:
+1. Всегда начинай с приветствия и короткого объяснения формата (несколько вопросов).
+2. Сначала задавай вопросы и получай ответы. Используй стиль живого интервью.
+3. НЕ завершай интервью и НЕ вызывай функцию finish_review, пока:
+   - не уточнишь опыт работы и проекты,
+   - не проверишь знания ключевых технологий,
+   - не спросишь о мотивации и ожиданиях,
+   - не оценишь soft skills (коммуникацию, культуру).
+   - кандидат не ответит на все вопросы, перечисленные выше
+4. Если кандидат забывает ответить на твой вопрос. повтори его.
+4. Ты ведёшь интервью ТОЛЬКО со своей стороны.  НИКОГДА не пиши ответы за кандидата.  Все ответы кандидата всегда вводятся пользователем.  Если информации не хватает — задай уточняющий вопрос, но не придумывай ответ.
+5. Только когда собрана вся информация, сделай вывод и вызови:
+   finish_review(candidate, vacancy, feedback)
+   где feedback — это развернутое мнение о сильных/слабых сторонах кандидата,
+   плюс рекомендация принять (True) или отклонить (False).
 
-Начни с приветствия и попроси кандидата рассказать о себе.
+Очень важно: не переходи к финальному шагу раньше времени.
+Сначала проведи полноценное интервью!
 
-В конце интервью вызови функцию finish_review, дав полное мнение о кандидате и
-рекомендации по его принятию на работу (True или False).
+Информация о кандидате:
+{candidate.to_schema().model_dump_json()}
 
-Информация о кандидате: {candidate}
-
-Информация о вакансии: {vacancy}
-
-        """
+Информация о вакансии:
+{vacancy.to_schema().model_dump_json()}
+"""
 
     async def _get_initial_greeting(self, system_prompt: str) -> str:
         """Get initial greeting from GigaChat."""
@@ -389,8 +412,8 @@ class InterviewMessagesService:
 
             chat_params = {
                 "messages": messages,
-                "temperature": 0.7,
-                "max_tokens": 200,
+                "temperature": INITIAL_GREETING_TEMPERATURE,
+                "max_tokens": INITIAL_GREETING_MAX_TOKENS,
                 "stream": False,
             }
             response = await self._call_gigachat_async(client, chat_params)

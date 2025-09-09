@@ -127,7 +127,8 @@ async def list_interview_messages(
     session: AsyncSession, interview_id: str
 ) -> list[InterviewMessage]:
     """List all messages for an interview."""
-    return await interview_messages_service.list_messages(session, interview_id)
+    all_messages = await interview_messages_service.list_messages(session, interview_id)
+    return [message for message in all_messages if message.index > 0]
 
 
 async def create_interview_message(
